@@ -11,7 +11,6 @@ const col1 = ref(null)
 const col2 = ref(null)
 const photoSection = ref(null)
 
-// Parallax funcionando também no mobile
 const handleScroll = () => {
   if (!photoSection.value) return
   
@@ -82,7 +81,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 1450px;
+  max-width: 1480px;
   margin: 0 auto;
   padding: 0 5%;
   min-height: 100vh;

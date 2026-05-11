@@ -69,13 +69,13 @@ onMounted(() => {
   flex: 1;
   border-radius: 24px;
   padding: 24px;
-  display: flex;
+  /* display: flex; */
   flex-direction: column;
   background-size: cover;
   background-position: center;
   color: white;
   box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-  min-height: auto; /* remove altura fixa */
+  min-height: auto;
 }
 
 .card-pink {
@@ -105,17 +105,20 @@ onMounted(() => {
   margin: 10px 0 30px;
 }
 
+.videoverlay{
+  padding: 0 155px;
+  position: relative;
+}
+
 .video-landing {
   width: 100%;
-  padding: 30px;
+  padding: 25px;
   border-radius: 55px;
   justify-self: center;
   object-fit: cover;
   height: 700px;
 }
 
-
-/* Tablet e desktop */
 @media (min-width: 768px) {
   .contentlayercima {
     justify-self: center;
