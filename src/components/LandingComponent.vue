@@ -50,19 +50,24 @@ onMounted(() => {
 
 <style scoped>
 .contentlayer {
-
-  justify-content: center;
+  display: flex;
+  flex-direction: column;
   align-items: center;
   width: 100%;
   padding: 40px 5%;
+  gap: 24px;
+}
+
+.contentlayercima, 
+.videoverlay {
+  width: 100%;
+  max-width: 1300px;
 }
 
 .contentlayercima {
   display: flex;
-  flex-direction: column; /* Mobile: empilha */
+  flex-direction: column;
   gap: 24px;
-  width: 100%;
-  max-width: 1300px;
 }
 
 .card {
@@ -105,15 +110,13 @@ onMounted(() => {
   margin: 10px 0 30px;
 }
 
-.videoverlay{
-  padding: 0 155px;
+.videoverlay {
   position: relative;
 }
 
 .video-landing {
   width: 100%;
-  padding: 25px;
-  border-radius: 55px;
+  border-radius: 25px;
   justify-self: center;
   object-fit: cover;
   height: 700px;
@@ -127,7 +130,7 @@ onMounted(() => {
   }
   
   .card {
-    height: 500px; /* volta a altura fixa só em desktop */
+    height: 500px;
     padding: 20px;
   }
   

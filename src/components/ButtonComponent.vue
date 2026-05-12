@@ -33,7 +33,7 @@ const icons = {
   align-items: center;
   justify-content: center;
   gap: 10px; 
-  padding: 12px 20px; /* um pouco menor no mobile */
+  padding: 12px 20px;
   background-color: #A33DA3;
   color: white;
   border: none;

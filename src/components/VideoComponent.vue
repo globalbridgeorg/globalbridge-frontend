@@ -75,7 +75,7 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-/* ===== ESTILOS BASE (DESKTOP) ===== */
+/* pc */
 .video-container {
   width: 100%;
   position: relative;
@@ -172,7 +172,7 @@ onUnmounted(() => {
   top: 0;
 }
 
-/* ===== MOBILE (≤ 768px) ===== */
+/* mobile */
 @media (max-width: 768px) {
   .video-container {
     padding: 90px 16px 16px 16px;
@@ -184,7 +184,6 @@ onUnmounted(() => {
     min-height: 70vh;
     border-radius: 24px;
     overflow: hidden;
-    /* Força remoção de qualquer sticky/transform */
     position: relative !important;
     top: auto !important;
     transform: none !important;
@@ -230,7 +229,6 @@ onUnmounted(() => {
     font-size: 1rem;
   }
 
-  /* Remove qualquer efeito do scroll-wrapper no mobile */
   .scroll-wrapper {
     margin-bottom: 0;
   }

@@ -182,7 +182,7 @@ import ButtonComponent from './ButtonComponent.vue'
   color: #e35ed8;
 }
 
-/* Responsividade Mobile */
+/* mobile */
 @media (max-width: 768px) {
   .footer-image-container {
     margin-top: 20px;
@@ -190,7 +190,6 @@ import ButtonComponent from './ButtonComponent.vue'
   
   .bg-image {
     border-radius: 24px 24px 0 0;
-    /* Se a imagem ficar muito pequena no mobile, você pode dar um min-height */
     min-height: 250px;
     object-fit: cover;
   }
