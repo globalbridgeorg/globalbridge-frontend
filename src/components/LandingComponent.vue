@@ -119,7 +119,7 @@ onMounted(() => {
   border-radius: 25px;
   justify-self: center;
   object-fit: cover;
-  height: 700px;
+  height: 300px;
 }
 
 @media (min-width: 768px) {
@@ -141,6 +141,9 @@ onMounted(() => {
   
   .title {
     font-size: 2rem;
+  }
+  .video-landing {
+    height: 700px;
   }
 }
 </style>

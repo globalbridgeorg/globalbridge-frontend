@@ -44,7 +44,7 @@ const fotosDireita = [
 <style scoped>
 .content-header {
   width: 100%;
-  overflow-x: hidden;
+ 
 }
 
 .content-layout {
