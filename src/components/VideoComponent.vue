@@ -13,18 +13,15 @@ const props = defineProps({
 
 const { videoSrc, loadVideo } = useVideoLoader()
 
-// Detectar mobile
 const isMobile = ref(false)
 
 const checkMobile = () => {
   isMobile.value = window.innerWidth < 768
 }
 
-// Usar o composable original (funciona no desktop)
 const scrollData = useScrollAnimation(700)
 const videoStyle = scrollData ? scrollData.videoStyle : ref({})
 
-// Só aplica o estilo de animação se NÃO for mobile e se animateOnScroll estiver ativo
 const finalVideoStyle = computed(() => {
   if (isMobile.value) return {}
   return props.animateOnScroll ? videoStyle.value : {}
@@ -78,7 +75,7 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-/* ===== ESTILOS BASE (DESKTOP) ===== */
+/* pc */
 .video-container {
   width: 100%;
   position: relative;
@@ -175,7 +172,7 @@ onUnmounted(() => {
   top: 0;
 }
 
-/* ===== MOBILE (≤ 768px) ===== */
+/* mobile */
 @media (max-width: 768px) {
   .video-container {
     padding: 90px 16px 16px 16px;
@@ -187,7 +184,6 @@ onUnmounted(() => {
     min-height: 70vh;
     border-radius: 24px;
     overflow: hidden;
-    /* Força remoção de qualquer sticky/transform */
     position: relative !important;
     top: auto !important;
     transform: none !important;
@@ -233,7 +229,6 @@ onUnmounted(() => {
     font-size: 1rem;
   }
 
-  /* Remove qualquer efeito do scroll-wrapper no mobile */
   .scroll-wrapper {
     margin-bottom: 0;
   }

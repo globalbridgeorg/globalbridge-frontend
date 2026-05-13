@@ -1,6 +1,20 @@
 <script setup>
-import BadgeComponent from '@/components/BadgeComponent.vue';
-import ButtonComponent from '@/components/ButtonComponent.vue';
+import BadgeComponent from '@/components/BadgeComponent.vue'
+import ButtonComponent from '@/components/ButtonComponent.vue'
+import { onMounted } from 'vue'
+import { useVideoLoader } from "@/composables/useVideoLoader.js"
+
+const props = defineProps({
+  src: String
+})
+
+const { videoSrc, loadVideo } = useVideoLoader()
+
+onMounted(() => {
+  if (props.src) {
+    loadVideo(props.src)
+  }
+})
 </script>
 
 <template>
@@ -23,37 +37,50 @@ import ButtonComponent from '@/components/ButtonComponent.vue';
         <ButtonComponent text="Ver os planos" iconType="secondary" style="background-color: white; color: #42023C;" />
       </div>
     </div>
+    <div class="videoverlay">
+      <video
+      v-if="videoSrc"
+      :src="videoSrc"
+      autoplay muted loop playsinline
+      class="video-landing"
+    />
+    </div>
   </section>
 </template>
 
 <style scoped>
 .contentlayer {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
   width: 100%;
   padding: 40px 5%;
+  gap: 24px;
+}
+
+.contentlayercima, 
+.videoverlay {
+  width: 100%;
+  max-width: 1300px;
 }
 
 .contentlayercima {
   display: flex;
-  flex-direction: column; /* Mobile: empilha */
+  flex-direction: column;
   gap: 24px;
-  width: 100%;
-  max-width: 1300px;
 }
 
 .card {
   flex: 1;
   border-radius: 24px;
   padding: 24px;
-  display: flex;
+  /* display: flex; */
   flex-direction: column;
   background-size: cover;
   background-position: center;
   color: white;
   box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-  min-height: auto; /* remove altura fixa */
+  min-height: auto;
 }
 
 .card-pink {
@@ -83,15 +110,27 @@ import ButtonComponent from '@/components/ButtonComponent.vue';
   margin: 10px 0 30px;
 }
 
-/* Tablet e desktop */
+.videoverlay {
+  position: relative;
+}
+
+.video-landing {
+  width: 100%;
+  border-radius: 25px;
+  justify-self: center;
+  object-fit: cover;
+  height: 700px;
+}
+
 @media (min-width: 768px) {
   .contentlayercima {
+    justify-self: center;
     flex-direction: row;
     gap: 20px;
   }
   
   .card {
-    height: 500px; /* volta a altura fixa só em desktop */
+    height: 500px;
     padding: 20px;
   }
   

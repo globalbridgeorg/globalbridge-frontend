@@ -11,7 +11,6 @@ const col1 = ref(null)
 const col2 = ref(null)
 const photoSection = ref(null)
 
-// Parallax funcionando também no mobile
 const handleScroll = () => {
   if (!photoSection.value) return
   
@@ -69,7 +68,7 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-/* ===== ESTILOS DESKTOP (ORIGINAL) ===== */
+/* pc */
 .roboto-condensed {
   font-family: "Roboto Condensed", sans-serif;
   font-size: 6rem;
@@ -82,7 +81,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 1450px;
+  max-width: 1480px;
   margin: 0 auto;
   padding: 0 5%;
   min-height: 100vh;
@@ -152,7 +151,7 @@ onUnmounted(() => {
 
 @media (max-width: 768px) {
   .main-layout-wrapper {
-    flex-direction: column; /* empilha: info em cima, grid embaixo */
+    flex-direction: column;
     padding: 40px 5%;
     min-height: auto;
     gap: 40px;
@@ -164,17 +163,16 @@ onUnmounted(() => {
   }
 
   .roboto-condensed {
-    font-size: clamp(3rem, 8vw, 3rem); /* título menor no mobile */
+    font-size: clamp(3rem, 8vw, 3rem);
   }
 
   .photo-section {
     min-height: auto;
     width: 100%;
-    /* não desabilita overflow, mantém a máscara funcionando */
   }
 
   .gallery-mask {
-    height: auto;         /* altura automática para caber o conteúdo */
+    height: auto;
     max-width: 100%;
     /* mantém a máscara igual ao desktop */
     mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
@@ -183,15 +181,13 @@ onUnmounted(() => {
 
   .gallery-container {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* mantém 2 colunas */
-    gap: 12px;                     /* gap reduzido para mobile */
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
     height: 50vh;
   }
 
   .column {
-    
-    gap: 12px;                     /* espaçamento menor entre imagens */
-    /* a animação parallax continua, pois não removemos o transform */
+    gap: 12px;
   }
 
   .col-left {
@@ -201,7 +197,7 @@ onUnmounted(() => {
   .column img {
     height: auto;
     width: 100%;
-    aspect-ratio: 2 / 3;           /* imagens mais compactas no mobile */
+    aspect-ratio: 2 / 3;
     border-radius: 16px;
   }
 }

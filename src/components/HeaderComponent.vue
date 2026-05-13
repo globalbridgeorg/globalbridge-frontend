@@ -1,6 +1,9 @@
 <script setup>
 import { ref } from 'vue'
 import ButtonComponent from './ButtonComponent.vue'
+import { usePWA } from '@/composables/usePWA'
+
+const { isInstallable, installPWA } = usePWA()
 
 const mobileMenuOpen = ref(false)
 
@@ -29,6 +32,9 @@ const toggleMenu = () => {
       <router-link to="/">Meu destino</router-link>
       <router-link to="/">Companhias</router-link>
       <router-link to="/test">Contato</router-link>
+      <a v-if="isInstallable" @click.prevent="installPWA" class="install-link">
+        Baixar App
+      </a>
     </nav>
 
     <ButtonComponent 
@@ -43,11 +49,18 @@ const toggleMenu = () => {
         <router-link to="/" @click="toggleMenu">Meu destino</router-link>
         <router-link to="/" @click="toggleMenu">Companhias</router-link>
         <router-link to="/test" @click="toggleMenu">Contato</router-link>
-        <ButtonComponent 
-          text="Cadastre-se" 
-          iconType="primary"
-          @click="toggleMenu"
-        />
+        <div class="buttonsmenu">
+          <ButtonComponent 
+            v-if="isInstallable"
+            text="Instalar App" 
+            @click="installPWA"
+          />
+          <ButtonComponent 
+            text="Cadastre-se" 
+            iconType="primary"
+            @click="toggleMenu"
+          />
+        </div>
       </div>
     </Transition>
   </header>
@@ -139,6 +152,11 @@ const toggleMenu = () => {
   font-size: 18px;
   font-weight: 600; 
   padding: 10px;
+}
+
+.buttonsmenu {
+  display: flex;
+  gap: 10px;
 }
 
 .mobile-menu-enter-active,

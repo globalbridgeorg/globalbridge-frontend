@@ -24,9 +24,9 @@ header {
   justify-self: center;
   top: 0;
   width: 100%;
-  height: 80px; /* Defina uma altura fixa para o seu header */
+  height: 80px;
   background-color: #fff;
-  z-index: 1000; /* Garante que o header fique sempre na frente do vídeo */
+  z-index: 1000; 
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 </style>
