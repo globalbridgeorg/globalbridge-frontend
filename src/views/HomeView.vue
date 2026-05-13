@@ -3,6 +3,7 @@ import VideoComponent from "@/components/VideoComponent.vue";
 import ButtonComponent from "@/components/ButtonComponent.vue";
 import PhotoGrid from '@/components/PhotoGridComponent.vue'
 import Landing from '@/components/LandingComponent.vue';
+import Paises from '@/components/PaisesComponent.vue';
 
 const fotosEsquerda = [
   '/images/imagemgb1.png',
@@ -21,13 +22,9 @@ const fotosDireita = [
 
 <template>
   <section class="content-header">
-    <VideoComponent 
-      src="/videos/overlayglobalbridge.mp4" 
-      animateOnScroll 
-      title="MOLDE SEU PRÓPRIO FUTURO"
+    <VideoComponent src="/videos/overlayglobalbridge.mp4" animateOnScroll title="MOLDE SEU PRÓPRIO FUTURO"
       description="Com uma plataforma acessível e centralizada, o GlobalBridge amplia oportunidades de intercâmbio e conecta usuários a destinos e agências confiáveis."
-      :pills="['Mais de 40 países', 'Use gratuitamente']"
-    />
+      :pills="['Mais de 40 países', 'Use gratuitamente']" />
   </section>
 
   <section class="content-layout">
@@ -35,10 +32,12 @@ const fotosDireita = [
   </section>
 
   <section>
-    <Landing 
-      src="/videos/video-landing.mp4"
-    />
-    
+    <Landing src="/videos/video-landing.mp4" />
+
+  </section>
+
+  <section>
+    <Paises />
   </section>
 </template>
 
