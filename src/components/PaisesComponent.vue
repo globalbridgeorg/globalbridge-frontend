@@ -1,30 +1,30 @@
-        <script setup>
-        import { ref, onMounted } from "vue"
-        import axios from "axios"
+<script setup>
+import { ref, onMounted } from "vue"
+import axios from "axios"
 
-        const paises = ref([])
+const paises = ref([])
 
-        onMounted(async () => {
-            try {
-                const response = await axios.get(
-                    "http://localhost:8000/api/paises/mais-procurados/"
-                )
-                paises.value = response.data
+onMounted(async () => {
+    try {
+        const response = await axios.get(
+            "http://localhost:8000/api/paises/mais-procurados/"
+        )
+        paises.value = response.data
 
-            } catch (error) {
-                console.error("Erro ao buscar países:", error)
-            }
-        })
+    } catch (error) {
+        console.error("Erro ao buscar países:", error)
+    }
+})
 
-        const calcularUniversidades = (valor) => {
-            const max = Math.max(...paises.value.map(p => p.universidades))
-            return (valor / max) * 100
-        }
+const calcularUniversidades = (valor) => {
+    const max = Math.max(...paises.value.map(p => p.universidades))
+    return (valor / max) * 100
+}
 
-        const calcularIntercambistas = (valor) => {
-            const max = Math.max(...paises.value.map(p => p.intercambistas))
-            return (valor / max) * 100
-        }
+const calcularIntercambistas = (valor) => {
+    const max = Math.max(...paises.value.map(p => p.intercambistas))
+    return (valor / max) * 100
+}
 </script>
 
 <template>
