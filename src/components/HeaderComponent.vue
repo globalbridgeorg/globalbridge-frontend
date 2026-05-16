@@ -29,10 +29,10 @@ const toggleMenu = () => {
 
     <!-- nav desktop -->
     <nav class="navbar_links desktop-nav">
-      <router-link to="/">Meu destino</router-link>
+      <router-link to="/mapview">Meu destino</router-link>
       <router-link to="/">Companhias</router-link>
       <router-link to="/test">Contato</router-link>
-      <a v-if="isInstallable" @click.prevent="installPWA" class="install-link">
+      <a @click.prevent="installPWA" class="install-link">
         Baixar App
       </a>
     </nav>
@@ -51,7 +51,6 @@ const toggleMenu = () => {
         <router-link to="/test" @click="toggleMenu">Contato</router-link>
         <div class="buttonsmenu">
           <ButtonComponent 
-            v-if="isInstallable"
             text="Instalar App" 
             @click="installPWA"
           />
