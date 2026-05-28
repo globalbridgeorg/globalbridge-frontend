@@ -61,7 +61,7 @@ onMounted(() => {
 .contentlayercima, 
 .videoverlay {
   width: 100%;
-  max-width: 1300px;
+  max-width: 1440px;
 }
 
 .contentlayercima {
@@ -120,6 +120,7 @@ onMounted(() => {
   justify-self: center;
   object-fit: cover;
   height: 300px;
+  pointer-events: none;
 }
 
 @media (min-width: 768px) {

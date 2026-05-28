@@ -1,11 +1,17 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import ButtonComponent from './ButtonComponent.vue'
 import { usePWA } from '@/composables/usePWA'
+import { useRoute } from 'vue-router'
 
 const { isInstallable, installPWA } = usePWA()
-
 const mobileMenuOpen = ref(false)
+const route = useRoute()
+
+const headerClass = computed(() => {
+  return route.meta?.headerWidth === 'compact' ? 'header-compact' : 'header-full'
+})
+
 
 const toggleMenu = () => {
   mobileMenuOpen.value = !mobileMenuOpen.value
@@ -13,7 +19,7 @@ const toggleMenu = () => {
 </script>
 
 <template>
-  <header class="navbar">
+  <header class="navbar" :class="headerClass">
     <div class="navbar_logo">
       <router-link to="/">
         <img src="/logogb.png" alt="GlobalBridge">
@@ -29,7 +35,7 @@ const toggleMenu = () => {
 
     <!-- nav desktop -->
     <nav class="navbar_links desktop-nav">
-      <router-link to="/">Meu destino</router-link>
+      <router-link to="/mapview">Meu destino</router-link>
       <router-link to="/">Companhias</router-link>
       <router-link to="/test">Contato</router-link>
       <a @click.prevent="installPWA" class="install-link">
@@ -37,11 +43,14 @@ const toggleMenu = () => {
       </a>
     </nav>
 
-    <ButtonComponent 
-      text="Cadastre-se" 
-      iconType="primary" 
-      class="buttonheader desktop-btn"
-    />
+    <router-link to="/login" 
+      class="desktop-btn"
+      >
+      <ButtonComponent 
+        text="Cadastre-se" 
+        iconType="primary"
+      />
+    </router-link>
 
     <!-- menu mobile -->
     <Transition name="mobile-menu">
@@ -78,9 +87,13 @@ const toggleMenu = () => {
   border-radius: 15px;
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
   font-family: 'Montserrat', sans-serif;
-  max-width: 1200px;
+  max-width: 1440px;
   margin: 16px auto;
   position: fixed;
+   transition: max-width 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              margin 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              border-radius 0.4s ease,
+              box-shadow 0.3s ease;
 }
 
 .navbar_logo img {
@@ -156,6 +169,18 @@ const toggleMenu = () => {
 .buttonsmenu {
   display: flex;
   gap: 10px;
+}
+
+.desktop-btn {
+  text-decoration: none;
+}
+
+.header-full {
+  max-width: 1440px;
+}
+
+.header-compact {
+  max-width: 1200px;
 }
 
 .mobile-menu-enter-active,
