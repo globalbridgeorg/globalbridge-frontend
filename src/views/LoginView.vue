@@ -80,11 +80,17 @@
 </template>
 
 <script>
+import axios from 'axios'
+
+const API_URL = 'http://localhost:8000/api'
+
 export default {
   name: 'LoginRegisterView',
   data() {
     return {
       showRegister: false,
+      loading: false,
+      error: '',
       loginForm: {
         email: '',
         password: '',
@@ -101,19 +107,116 @@ export default {
     }
   },
   methods: {
-    handleLogin() {
-      // Apenas simula um alerta – remova e substitua pela sua lógica real
-      alert('Login visual (sem autenticação real). Integre com seu backend.')
+    // ==================== LOGIN ====================
+    async handleLogin() {
+      this.error = ''
+
+      // Validação básica
+      if (!this.loginForm.email || !this.loginForm.password) {
+        this.error = 'Preencha todos os campos'
+        alert(this.error)
+        return
+      }
+
+      this.loading = true
+
+      try {
+        // Faz a requisição para o backend
+        const response = await axios.post(`${API_URL}/token/`, {
+          email: this.loginForm.email,
+          password: this.loginForm.password
+        })
+
+        // Salva os tokens
+        const { access, refresh } = response.data
+
+        if (this.loginForm.keepLogged) {
+          // Mantém mesmo fechando o navegador
+          localStorage.setItem('access_token', access)
+          localStorage.setItem('refresh_token', refresh)
+        } else {
+          // Apaga quando fechar o navegador
+          sessionStorage.setItem('access_token', access)
+          sessionStorage.setItem('refresh_token', refresh)
+        }
+
+        alert('Login realizado com sucesso!')
+
+        // Redireciona para a home
+        this.$router.push({ name: 'test' }) 
+
+      } catch (err) {
+        if (err.response?.status === 401) {
+          this.error = 'Email ou senha inválidos'
+        } else {
+          this.error = 'Erro ao conectar com o servidor'
+        }
+        alert(this.error)
+      } finally {
+        this.loading = false
+      }
     },
-    handleRegister() {
-      alert('Cadastro visual (sem envio real). Integre com sua API.')
+
+    // ==================== REGISTRO ====================
+    async handleRegister() {
+      this.error = ''
+
+      // Validações
+      if (!this.registerData.email || !this.registerData.name || !this.registerData.password) {
+        this.error = 'Preencha todos os campos'
+        alert(this.error)
+        return
+      }
+
+      if (this.registerData.password !== this.registerData.confirmPassword) {
+        this.error = 'As senhas não coincidem'
+        alert(this.error)
+        return
+      }
+
+      if (this.registerData.password.length < 8) {
+        this.error = 'A senha deve ter no mínimo 8 caracteres'
+        alert(this.error)
+        return
+      }
+
+      this.loading = true
+
+      try {
+        // Cadastra o usuário
+        await axios.post(`${API_URL}/registro/`, {
+          email: this.registerData.email,
+          name: this.registerData.name,
+          password: this.registerData.password
+        })
+
+        alert('Conta criada com sucesso! Faça login.')
+
+        // Volta para a tela de login
+        this.backToLogin()
+
+      } catch (err) {
+        if (err.response?.data?.email) {
+          this.error = 'Este email já está em uso'
+        } else if (err.response?.data?.password) {
+          this.error = err.response.data.password[0]
+        } else {
+          this.error = 'Erro ao criar conta'
+        }
+        alert(this.error)
+      } finally {
+        this.loading = false
+      }
     },
+
+    // ==================== OUTROS ====================
     resendCode() {
       alert('Reenvio de código simulado.')
     },
+
     backToLogin() {
       this.showRegister = false
-      // Opcional: limpar dados do cadastro
+      this.error = ''
       this.registerData = {
         email: '',
         verificationCode: '',
