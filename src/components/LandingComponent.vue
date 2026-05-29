@@ -61,7 +61,7 @@ onMounted(() => {
 .contentlayercima, 
 .videoverlay {
   width: 100%;
-  max-width: 1300px;
+  max-width: 1440px;
 }
 
 .contentlayercima {
@@ -119,7 +119,8 @@ onMounted(() => {
   border-radius: 25px;
   justify-self: center;
   object-fit: cover;
-  height: 700px;
+  height: 300px;
+  pointer-events: none;
 }
 
 @media (min-width: 768px) {
@@ -141,6 +142,9 @@ onMounted(() => {
   
   .title {
     font-size: 2rem;
+  }
+  .video-landing {
+    height: 700px;
   }
 }
 </style>

@@ -53,6 +53,8 @@ onUnmounted(() => {
         v-if="videoSrc"
         :src="videoSrc"
         autoplay muted loop playsinline
+        disablePictureInPicture
+        controlsList="nodownload nofullscreen noremoteplayback"
         class="video-bg"
       />
       
@@ -164,7 +166,7 @@ onUnmounted(() => {
 }
 
 .scroll-wrapper {
-  margin-bottom: -25vh;
+  margin-bottom: -40vh;
 }
 
 .scroll-wrapper .video-overlay-content {
