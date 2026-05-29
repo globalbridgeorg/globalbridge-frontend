@@ -71,11 +71,6 @@
       <h1>CRIAR UMA<br>CONTA</h1>
     </div>
 
-    <!-- Rodapé -->
-    <div class="footer-text">
-      É necessário uma conta para realizar doações não anônimas<br>
-      by share-help
-    </div>
   </div>
 </template>
 

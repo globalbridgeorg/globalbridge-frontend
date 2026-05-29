@@ -15,7 +15,7 @@ const routes = [
     path: '/mapview',
     name: 'mapview',
     component: MapView,
-    meta: { headerWidth: 'compact' }
+    meta: { headerWidth: 'compact', keepAlive: true }
   },
   {
     path: '/login',
