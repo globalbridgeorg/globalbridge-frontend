@@ -37,7 +37,7 @@ const toggleMenu = () => {
     <nav class="navbar_links desktop-nav">
       <router-link to="/mapview">Meu destino</router-link>
       <router-link to="/">Companhias</router-link>
-      <router-link to="/test">Contato</router-link>
+      <router-link to="/test">uploadIMG</router-link>
       <a @click.prevent="installPWA" class="install-link">
         Baixar App
       </a>
