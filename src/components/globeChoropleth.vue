@@ -5,17 +5,29 @@ import * as d3 from 'd3'
 import * as topojson from 'topojson-client'
 import universitiesByCountry from '@/stores/universitiesByCountry'
 
+// ─── Cache de módulo: só faz fetch uma vez por sessão ───────────────────────
+let _worldCache = null
+async function getWorldData() {
+  if (_worldCache) return _worldCache
+  _worldCache = await fetch('https://unpkg.com/world-atlas@2/countries-110m.json').then(r => r.json())
+  return _worldCache
+}
+
+// ─── Refs & estado ──────────────────────────────────────────────────────────
 const globeEl = ref(null)
 const panelCollapsed = ref(false)
+const isLoading = ref(true)
 
 let globe = null
 let hoverD = null
-let resizeObserver = null
+let resizeTimer = null
 let animationFrame = null
+let handleResize = null
 
 const openSections = reactive({ emprego: true, universidade: false, idioma: false, cultura: false })
 const activeFilters = reactive({ emprego: [], universidade: [], idioma: [], cultura: [] })
 
+// ─── Dados estáticos ────────────────────────────────────────────────────────
 const filters = [
   { id: 'emprego', icon: '💼', label: 'Emprego', options: [{ value: 'tech', label: 'Tecnologia', count: '4.2k' },{ value: 'saude', label: 'Saúde', count: '1.8k' },{ value: 'engenharia', label: 'Engenharia', count: '2.1k' },{ value: 'financas', label: 'Finanças', count: '900' },{ value: 'educacao', label: 'Educação', count: '3.4k' },{ value: 'artes', label: 'Artes & Design', count: '650' }] },
   { id: 'universidade', icon: '🎓', label: 'Universidade', options: [{ value: 'top100', label: 'Top 100 Mundial' },{ value: 'bolsas', label: 'Oferece Bolsas' },{ value: 'intercambio', label: 'Intercâmbio' },{ value: 'publicas', label: 'Públicas' },{ value: 'privadas', label: 'Privadas' },{ value: 'ead', label: 'EAD / Online' }] },
@@ -64,7 +76,8 @@ const countryMeta = {
 
 let colorScale
 
-const totalActiveFilters = computed(() => 
+// ─── Computed ────────────────────────────────────────────────────────────────
+const totalActiveFilters = computed(() =>
   Object.values(activeFilters).reduce((acc, arr) => acc + arr.length, 0)
 )
 
@@ -80,6 +93,7 @@ const filteredAgencies = computed(() => {
   })
 })
 
+// ─── Lógica de filtros ───────────────────────────────────────────────────────
 function countryMatchesFilters(name) {
   if (totalActiveFilters.value === 0) return true
   const meta = countryMeta[name]
@@ -99,7 +113,6 @@ function getPolygonAltitude(d) {
 
 function refreshGlobe() {
   if (!globe) return
-  // Usar requestAnimationFrame para agrupar atualizações visuais
   if (animationFrame) cancelAnimationFrame(animationFrame)
   animationFrame = requestAnimationFrame(() => {
     if (!globe) return
@@ -125,108 +138,101 @@ function clearFilters() {
   refreshGlobe()
 }
 
-// Inicialização
+// ─── Lifecycle ───────────────────────────────────────────────────────────────
 onMounted(async () => {
-  const world = await fetch('https://unpkg.com/world-atlas@2/countries-110m.json').then(r => r.json())
+  // 1. Busca dados (usa cache se já foi carregado antes)
+  const world = await getWorldData()
   const countries = topojson.feature(world, world.objects.countries)
-  countries.features.forEach(d => { d.properties.universities = universitiesByCountry[d.properties.name] ?? 0 })
-  
+  countries.features.forEach(d => {
+    d.properties.universities = universitiesByCountry[d.properties.name] ?? 0
+  })
+
   const maxUniv = Math.max(...countries.features.map(d => d.properties.universities), 1)
   colorScale = d3.scaleSequentialSqrt(d3.interpolatePurples).domain([0, maxUniv])
 
-  // Se já existir um globo, limpa antes (segurança)
-  if (globe && globeEl.value) {
+  // 2. Limpa instância anterior se existir
+  if (globeEl.value) {
     while (globeEl.value.firstChild) globeEl.value.removeChild(globeEl.value.firstChild)
   }
 
+  // 3. Inicializa o globo SEM polígonos primeiro (WebGL sobe mais rápido)
   globe = Globe()(globeEl.value)
     .width(window.innerWidth)
     .height(window.innerHeight)
     .globeImageUrl('//unpkg.com/three-globe/example/img/earth-dark.jpg')
     .backgroundColor('#3b1060')
-    .polygonsData(countries.features)
-    .polygonAltitude(getPolygonAltitude)
-    .polygonCapColor(d => colorScale(d.properties.universities))
-    .polygonSideColor(() => 'rgba(128,0,128,0.25)')
-    .polygonStrokeColor(() => '#2d004b')
-    .polygonLabel(d => `<b>${d.properties.name}</b><br/>Universidades: ${d.properties.universities}`)
-    .onPolygonHover(d => { hoverD = d; refreshGlobe(); })
-    .onPolygonClick(d => {
-      const [lng, lat] = d3.geoCentroid(d)
-      globe.pointOfView({ lat, lng, altitude: 1.4 }, 1000)
-    })
 
-  // Configura controles
+  // Configura controles imediatamente
   const controls = globe.controls()
   controls.autoRotate = true
   controls.autoRotateSpeed = 0.3
   controls.enableZoom = true
   controls.enablePan = true
+  globe.controls().maxDistance = globe.getGlobeRadius() * 3.5
+  globe.controls().minDistance = globe.getGlobeRadius() * 2.5
+  // 4. Adiciona polígonos em dois frames — deixa o WebGL renderizar o globo
+  //    base antes de computar todos os países (evita o freeze na entrada)
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      if (!globe) return
+      globe
+        .polygonsData(countries.features)
+        .polygonAltitude(getPolygonAltitude)
+        .polygonCapColor(d => colorScale(d.properties.universities))
+        .polygonSideColor(() => 'rgba(128,0,128,0.25)')
+        .polygonStrokeColor(() => '#2d004b')
+        .polygonLabel(d => `<b>${d.properties.name}</b><br/>Universidades: ${d.properties.universities}`)
+        .onPolygonHover(d => { hoverD = d; refreshGlobe() })
+        .onPolygonClick(d => {
+          const [lng, lat] = d3.geoCentroid(d)
+          globe.pointOfView({ lat, lng, altitude: 1.4 }, 1000)
+        })
 
-  // Listener de resize com throttle
-  let resizeTimer
-  const handleResize = () => {
+      // Remove tela de loading após polígonos carregarem
+      setTimeout(() => { isLoading.value = false }, 200)
+    })
+  })
+
+  // 5. Resize com throttle
+  handleResize = () => {
     if (resizeTimer) clearTimeout(resizeTimer)
     resizeTimer = setTimeout(() => {
-      if (globe) {
-        globe.width(window.innerWidth).height(window.innerHeight)
-      }
+      if (globe) globe.width(window.innerWidth).height(window.innerHeight)
     }, 150)
   }
   window.addEventListener('resize', handleResize)
-  
-  // Armazena para remover no unmount
-  resizeObserver = handleResize
 })
 
-// Limpeza completa ao desmontar o componente
 onBeforeUnmount(() => {
-  // Cancela animação pendente
-  if (animationFrame) {
-    cancelAnimationFrame(animationFrame)
-    animationFrame = null
-  }
-  
-  // Remove listener de resize
-  if (resizeObserver) {
-    window.removeEventListener('resize', resizeObserver)
-    resizeObserver = null
-  }
-  
-  // Destrói o globo e seus recursos Three.js
+  if (animationFrame) { cancelAnimationFrame(animationFrame); animationFrame = null }
+  if (resizeTimer) { clearTimeout(resizeTimer); resizeTimer = null }
+  if (handleResize) { window.removeEventListener('resize', handleResize); handleResize = null }
+
   if (globe) {
-    // Para a rotação automática
     if (globe.controls) {
       globe.controls().autoRotate = false
       globe.controls().dispose?.()
     }
-    
-    // Obtém o renderer e a cena para destruir
     const renderer = globe.renderer?.()
-    if (renderer) {
-      renderer.dispose()
-      renderer.domElement?.remove()
-    }
-    
-    // Limpa o elemento DOM
+    if (renderer) { renderer.dispose(); renderer.domElement?.remove() }
     if (globeEl.value) {
-      while (globeEl.value.firstChild) {
-        globeEl.value.removeChild(globeEl.value.firstChild)
-      }
+      while (globeEl.value.firstChild) globeEl.value.removeChild(globeEl.value.firstChild)
     }
-    
-    // Remove referências
     globe._destructor?.()
     globe = null
   }
-  
-  // Força coleta de lixo (sugestão, não obrigatório)
-  if (window.gc) window.gc()
 })
-
 </script>
 
 <template>
+  <!-- Loading overlay -->
+  <Transition name="fade">
+    <div v-if="isLoading" class="globe-loading">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">Carregando mapa...</p>
+    </div>
+  </Transition>
+
   <aside class="filter-panel" :class="{ collapsed: panelCollapsed }">
     <button class="collapse-btn" @click="panelCollapsed = !panelCollapsed">{{ panelCollapsed ? '›' : '‹' }}</button>
     <div class="panel-inner">
@@ -254,7 +260,9 @@ onBeforeUnmount(() => {
       <div v-for="agency in filteredAgencies" :key="agency.id" class="agency-card">
         <div class="agency-header">
           <span class="agency-name">{{ agency.name }}</span>
-          <span class="agency-stars"><span v-for="i in 5" :key="i" class="star" :class="{ filled: i <= agency.stars }">★</span></span>
+          <span class="agency-stars">
+            <span v-for="i in 5" :key="i" class="star" :class="{ filled: i <= agency.stars }">★</span>
+          </span>
         </div>
         <p class="agency-desc">{{ agency.description }}</p>
         <div class="agency-footer">
@@ -271,7 +279,6 @@ onBeforeUnmount(() => {
 </template>
 
 <style>
-
 .globe-wrap {
   position: fixed;
   inset: 0;
@@ -280,6 +287,40 @@ onBeforeUnmount(() => {
 }
 .globe-wrap:active { cursor: grabbing; }
 
+/* ── Loading ─────────────────────────────────────────────────────────── */
+.globe-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: #3b1060;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(123,45,139,0.3);
+  border-top-color: #c084fc;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+.loading-text {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #c084fc;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.fade-enter-active, .fade-leave-active { transition: opacity 0.4s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+
+/* ── Filter panel ────────────────────────────────────────────────────── */
 .filter-panel {
   position: fixed;
   top: 0;
@@ -405,6 +446,7 @@ onBeforeUnmount(() => {
 }
 .clear-btn:hover { background: rgba(123,45,139,0.08); }
 
+/* ── Agencies panel ──────────────────────────────────────────────────── */
 .agencies-panel {
   position: fixed;
   top: 0;
@@ -503,6 +545,6 @@ onBeforeUnmount(() => {
 }
 @keyframes fadeIn {
   from { opacity: 0; transform: translateX(-50%) translateY(6px); }
-  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 </style>

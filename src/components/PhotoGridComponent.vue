@@ -148,6 +148,12 @@ onUnmounted(() => {
   box-shadow: 0 10px 30px rgba(0,0,0,0.05);
 }
 
+@media (max-width: 1600px) {
+  .main-layout-wrapper {
+    max-width: 1225px;
+  }
+}
+
 @media (max-width: 768px) {
   .main-layout-wrapper {
     flex-direction: column;

@@ -147,4 +147,11 @@ onMounted(() => {
     height: 700px;
   }
 }
+
+@media (max-width: 1600px) {
+  .contentlayercima, 
+  .videoverlay {
+  max-width: 1225px;
+}
+}
 </style>
