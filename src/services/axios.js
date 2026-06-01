@@ -1,7 +1,18 @@
 import axios from 'axios'
 import router from '@/router'
 
-axios.defaults.baseURL = import.meta.env.VITE_BASE_URL || 'http://localhost:8000/api'
+const getBaseUrl = () => {
+  if (import.meta.env.PROD) {
+    return import.meta.env.VITE_BASE_URL || 'https://globalbridge-backend.onrender.com'
+  }
+  // Local development
+  return import.meta.env.VITE_BASE_URL || 'http://localhost:8000/api'
+}
+
+axios.defaults.baseURL = getBaseUrl()
+
+console.log('🌍 Ambiente:', import.meta.env.MODE)
+console.log('📍 BaseURL:', axios.defaults.baseURL)
 
 axios.interceptors.request.use(
   (config) => {
