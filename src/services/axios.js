@@ -3,7 +3,7 @@ import router from '@/router'
 
 const getBaseUrl = () => {
   if (import.meta.env.PROD) {
-    return import.meta.env.VITE_BASE_URL || 'https://globalbridge-backend.onrender.com'
+    return import.meta.env.VITE_BASE_URL || 'https://globalbridge-backend-production.up.railway.app'
   }
   // Local development
   return import.meta.env.VITE_BASE_URL || 'http://localhost:8000/api'
