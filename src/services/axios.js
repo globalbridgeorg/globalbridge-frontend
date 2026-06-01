@@ -1,12 +1,19 @@
 import axios from 'axios'
 import router from '@/router'
 
+const normalizeBaseUrl = (url) => {
+  if (!url) return url
+  if (/^https?:\/\//i.test(url)) return url
+  return `https://${url}`
+}
+
 const getBaseUrl = () => {
+  const envUrl = normalizeBaseUrl(import.meta.env.VITE_BASE_URL)
   if (import.meta.env.PROD) {
-    return import.meta.env.VITE_BASE_URL || 'https://globalbridge-backend-production.up.railway.app'
+    return envUrl || 'https://globalbridge-backend-production.up.railway.app'
   }
   // Local development
-  return import.meta.env.VITE_BASE_URL || 'http://localhost:8000/api'
+  return envUrl || 'http://localhost:8000/api'
 }
 
 axios.defaults.baseURL = getBaseUrl()
