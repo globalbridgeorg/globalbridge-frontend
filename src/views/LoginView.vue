@@ -75,9 +75,7 @@
 </template>
 
 <script>
-import axios from 'axios'
-
-const API_URL = 'http://localhost:8000/api'
+import axios from '@/services/axios'
 
 export default {
   name: 'LoginRegisterView',
@@ -117,7 +115,7 @@ export default {
 
       try {
         // Faz a requisição para o backend
-        const response = await axios.post(`${API_URL}/token/`, {
+        const response = await axios.post('/token/', {
           email: this.loginForm.email,
           password: this.loginForm.password
         })
@@ -179,7 +177,7 @@ export default {
 
       try {
         // Cadastra o usuário
-        await axios.post(`${API_URL}/registro/`, {
+        await axios.post('/registro/', {
           email: this.registerData.email,
           name: this.registerData.name,
           password: this.registerData.password
