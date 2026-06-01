@@ -3,14 +3,20 @@ import router from '@/router'
 
 const normalizeBaseUrl = (url) => {
   if (!url) return url
-  if (/^https?:\/\//i.test(url)) return url
-  return `https://${url}`
+  let normalized = url.trim().replace(/\/+$/, '')
+  if (!/^https?:\/\//i.test(normalized)) {
+    normalized = `https://${normalized}`
+  }
+  return normalized
 }
 
 const getBaseUrl = () => {
   const envUrl = normalizeBaseUrl(import.meta.env.VITE_BASE_URL)
   if (import.meta.env.PROD) {
-    return envUrl || 'https://globalbridge-backend-production.up.railway.app'
+    if (envUrl) {
+      return envUrl.endsWith('/api') ? envUrl : `${envUrl}/api`
+    }
+    return 'https://globalbridge-backend-production.up.railway.app/api'
   }
   // Local development
   return envUrl || 'http://localhost:8000/api'
