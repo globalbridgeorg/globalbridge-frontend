@@ -1,8 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
-
-const API_URL = 'http://localhost:8000/api'
+import axios from '@/services/axios'
 
 const fotoPreview = ref(null)
 const loading = ref(false)
@@ -19,7 +17,7 @@ onMounted(async () => {
   if (!token) return
 
   try {
-    const response = await axios.get(`${API_URL}/usuarios/me/`, {
+    const response = await axios.get('/usuarios/me/', {
       headers: {
         'Authorization': `Bearer ${token}`
       }
