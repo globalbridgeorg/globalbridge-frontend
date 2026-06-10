@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue';
 import TestView from '@/views/TestView.vue';
 import MapView from '@/views/MapView.vue';
 import LoginView from '@/views/LoginView.vue';
+import ProfileView from '@/views/ProfileView.vue';
 
 const routes = [
   {
@@ -21,6 +22,12 @@ const routes = [
     path: '/login',
     name: 'login',
     component: LoginView,
+    meta: { headerWidth: 'full' }
+  },
+  {
+    path: '/profile',
+    name: 'profile',
+    component: ProfileView,
     meta: { headerWidth: 'full' }
   },
   {

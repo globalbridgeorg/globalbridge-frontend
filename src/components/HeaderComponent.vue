@@ -41,6 +41,7 @@ const toggleMenu = () => {
       <a @click.prevent="installPWA" class="install-link">
         Baixar App
       </a>
+      <router-link to="/profile">ProfileView</router-link>
     </nav>
 
     <router-link to="/login" 
