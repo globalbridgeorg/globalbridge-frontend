@@ -12,6 +12,14 @@ const headerClass = computed(() => {
   return route.meta?.headerWidth === 'compact' ? 'header-compact' : 'header-full' 
 })
 
+const isLoggedIn = computed(() => {
+  route.fullPath
+  const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
+  return !!token
+})
+
+const buttonText = computed(() => isLoggedIn.value ? 'Perfil' : 'Entrar')
+const buttonLink = computed(() => isLoggedIn.value ? '/profile' : '/login')
 
 const toggleMenu = () => {
   mobileMenuOpen.value = !mobileMenuOpen.value
@@ -41,14 +49,13 @@ const toggleMenu = () => {
       <a @click.prevent="installPWA" class="install-link">
         Baixar App
       </a>
-      <router-link to="/profile">ProfileView</router-link>
     </nav>
 
-    <router-link to="/login" 
+    <router-link :to="buttonLink" 
       class="desktop-btn"
       >
       <ButtonComponent 
-        text="Cadastre-se" 
+        :text="buttonText" 
         iconType="primary"
       />
     </router-link>
@@ -64,11 +71,12 @@ const toggleMenu = () => {
             text="Instalar App" 
             @click="installPWA"
           />
-          <ButtonComponent 
-            text="Cadastre-se" 
-            iconType="primary"
-            @click="toggleMenu"
-          />
+          <router-link :to="buttonLink" @click="toggleMenu">
+            <ButtonComponent 
+              :text="buttonText" 
+              iconType="primary"
+            />
+          </router-link>
         </div>
       </div>
     </Transition>

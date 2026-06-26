@@ -1,79 +1,3 @@
-<template>
-  <div class="page-container">
-    <div class="background-image"></div>
-
-    <!-- Quadrado Principal -->
-    <div
-      class="main-card"
-      :class="{ 'slide-left': showRegister }"
-    >
-      <!-- Tela de Login -->
-      <div v-if="!showRegister" class="card-content">
-        <div class="form-group">
-          <label>E-mail</label>
-          <input type="email" v-model="loginForm.email" placeholder="seu@email.com">
-        </div>
-        <div class="form-group">
-          <label>Senha</label>
-          <input type="password" v-model="loginForm.password" placeholder="••••••••">
-        </div>
-        <div class="checkbox-group">
-          <input type="checkbox" id="keepLogged" v-model="loginForm.keepLogged">
-          <label for="keepLogged">Manter conectado</label>
-        </div>
-        <button class="btn-primary" @click="handleLogin">Entrar</button>
-        <div class="create-account-link">
-          <span>Não possui uma conta?</span>
-          <button class="link-button" @click="showRegister = true">Criar conta</button>
-        </div>
-      </div>
-
-      <!-- Tela de Cadastro -->
-      <div v-else class="card-content">
-        <div class="form-group">
-          <label>E-mail</label>
-          <input type="email" v-model="registerData.email" placeholder="exemplo@dominio.com">
-        </div>
-        <div class="form-group">
-          <label>Código de verificação</label>
-          <input type="text" v-model="registerData.verificationCode" placeholder="000000">
-        </div>
-        <div class="resend-code">
-          <button class="resend-link" @click="resendCode">Reenviar código</button>
-        </div>
-        <div class="form-group">
-          <label>Nome completo</label>
-          <input type="text" v-model="registerData.name" placeholder="Seu nome">
-        </div>
-        <div class="form-group">
-          <label>Nome de usuário</label>
-          <input type="text" v-model="registerData.username" placeholder="@username">
-        </div>
-        <div class="form-group">
-          <label>Senha</label>
-          <input type="password" v-model="registerData.password" placeholder="Crie uma senha">
-        </div>
-        <div class="form-group">
-          <label>Confirmar senha</label>
-          <input type="password" v-model="registerData.confirmPassword" placeholder="Digite novamente">
-        </div>
-        <button class="btn-primary" @click="handleRegister">Criar conta</button>
-
-        <div class="back-to-login">
-          <span>Já possui uma conta?</span>
-          <button class="back-login-link" @click="backToLogin">Fazer Login</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Texto lateral -->
-    <div class="side-text" :class="{ show: showRegister }">
-      <h1>CRIAR UMA<br>CONTA</h1>
-    </div>
-
-  </div>
-</template>
-
 <script>
 import axios from '@/services/axios'
 
@@ -84,6 +8,18 @@ export default {
       showRegister: false,
       loading: false,
       error: '',
+      successMessage: '',
+      errorField: '',
+      errorMessage: '',
+      step: 1,
+      stepDirection: '',
+      stepAnimationTimer: null,
+      steps: [
+        { fields: ['email'], labels: ['E-mail'], placeholders: ['exemplo@dominio.com'], types: ['email'], label: 'E-mail' },
+        { fields: ['verificationCode'], labels: ['Código de verificação'], placeholders: ['000000'], types: ['text'], label: 'Código de verificação' },
+        { fields: ['name'], labels: ['Nome completo'], placeholders: ['Seu nome'], types: ['text'], label: 'Dados pessoais' },
+        { fields: ['password', 'confirmPassword'], labels: ['Senha', 'Confirmar senha'], placeholders: ['Crie uma senha', 'Digite novamente'], types: ['password', 'password'], label: 'Senha' }
+      ],
       loginForm: {
         email: '',
         password: '',
@@ -93,128 +29,253 @@ export default {
         email: '',
         verificationCode: '',
         name: '',
-        username: '',
         password: '',
         confirmPassword: ''
       }
     }
   },
+  computed: {
+    currentStep() {
+      return this.steps[this.step - 1] || this.steps[0]
+    }
+  },
+  beforeUnmount() {
+    if (this.stepAnimationTimer) {
+      clearTimeout(this.stepAnimationTimer)
+    }
+  },
   methods: {
-    // ==================== LOGIN ====================
-    async handleLogin() {
+    clearError() {
       this.error = ''
+      this.errorField = ''
+      this.errorMessage = ''
+    },
 
-      // Validação básica
-      if (!this.loginForm.email || !this.loginForm.password) {
-        this.error = 'Preencha todos os campos'
-        alert(this.error)
+    clearErrorForField(field) {
+      if (this.errorField === field) {
+        this.errorField = ''
+        this.errorMessage = ''
+      }
+    },
+
+    setError(field, message) {
+      this.errorField = field
+      this.errorMessage = message
+      this.successMessage = ''
+    },
+
+    animateStep(direction) {
+      this.stepDirection = direction
+      if (this.stepAnimationTimer) {
+        clearTimeout(this.stepAnimationTimer)
+      }
+      this.stepAnimationTimer = setTimeout(() => {
+        this.stepDirection = ''
+      }, 240)
+    },
+
+    goToRegister() {
+      this.showRegister = true
+      this.step = 1
+      this.clearError()
+      this.successMessage = ''
+      this.registerData = {
+        email: '',
+        verificationCode: '',
+        name: '',
+        password: '',
+        confirmPassword: ''
+      }
+    },
+
+    goToStep(targetStep) {
+      if (targetStep < 1 || targetStep >= this.step) return
+      this.step = targetStep
+      this.animateStep('back')
+      this.clearError()
+    },
+
+    nextStep() {
+      const currentStep = this.currentStep
+      this.clearError()
+
+      if (currentStep.fields[0] === 'verificationCode') {
+        if (this.step < this.steps.length) {
+          this.step++
+          this.animateStep('forward')
+        }
+        return
+      }
+
+      for (const field of currentStep.fields) {
+        if (!this.registerData[field]) {
+          const label = currentStep.labels[currentStep.fields.indexOf(field)]
+          this.setError(`register.${field}`, `Preencha ${label.toLowerCase()}`)
+          return
+        }
+      }
+
+      if (this.step < this.steps.length) {
+        this.step++
+        this.animateStep('forward')
+      }
+    },
+
+    prevStep() {
+      if (this.step > 1) {
+        this.step--
+        this.animateStep('back')
+        this.clearError()
+      }
+    },
+
+    skipVerification() {
+      this.registerData.verificationCode = '000000'
+      if (this.step < this.steps.length) {
+        this.step++
+        this.animateStep('forward')
+      }
+    },
+
+    handleStepEnter() {
+      if (this.step < this.steps.length) {
+        this.nextStep()
+      } else {
+        this.handleRegister()
+      }
+    },
+
+    async handleLogin() {
+      this.clearError()
+
+      if (!this.loginForm.email) {
+        this.setError('login.email', 'Informe seu e-mail')
+        return
+      }
+
+      if (!this.loginForm.password) {
+        this.setError('login.password', 'Informe sua senha')
         return
       }
 
       this.loading = true
 
       try {
-        // Faz a requisição para o backend
         const response = await axios.post('/token/', {
           email: this.loginForm.email,
           password: this.loginForm.password
         })
 
-        // Salva os tokens
         const { access, refresh } = response.data
 
         if (this.loginForm.keepLogged) {
-          // Mantém mesmo fechando o navegador
           localStorage.setItem('access_token', access)
           localStorage.setItem('refresh_token', refresh)
         } else {
-          // Apaga quando fechar o navegador
           sessionStorage.setItem('access_token', access)
           sessionStorage.setItem('refresh_token', refresh)
         }
 
-        alert('Login realizado com sucesso!')
-
-        // Redireciona para a home
-        this.$router.push({ name: 'test' }) 
-
+        this.successMessage = 'Login realizado com sucesso!'
+        this.$router.push({ name: 'profile' })
       } catch (err) {
         if (err.response?.status === 401) {
-          this.error = 'Email ou senha inválidos'
+          this.setError('login.email', 'E-mail ou senha inválidos')
         } else {
-          this.error = 'Erro ao conectar com o servidor'
+          this.setError('login.email', 'Erro ao conectar com o servidor')
         }
-        alert(this.error)
       } finally {
         this.loading = false
       }
     },
 
-    // ==================== REGISTRO ====================
     async handleRegister() {
-      this.error = ''
+      this.clearError()
 
-      // Validações
-      if (!this.registerData.email || !this.registerData.name || !this.registerData.password) {
-        this.error = 'Preencha todos os campos'
-        alert(this.error)
+      if (!this.registerData.email) {
+        this.setError('register.email', 'Informe seu e-mail')
+        return
+      }
+
+      if (!this.registerData.name) {
+        this.setError('register.name', 'Informe seu nome completo')
+        return
+      }
+
+      if (!this.registerData.password) {
+        this.setError('register.password', 'Crie uma senha')
+        return
+      }
+
+      if (!this.registerData.confirmPassword) {
+        this.setError('register.confirmPassword', 'Confirme sua senha')
         return
       }
 
       if (this.registerData.password !== this.registerData.confirmPassword) {
-        this.error = 'As senhas não coincidem'
-        alert(this.error)
+        this.setError('register.confirmPassword', 'As senhas não coincidem')
         return
       }
 
       if (this.registerData.password.length < 8) {
-        this.error = 'A senha deve ter no mínimo 8 caracteres'
-        alert(this.error)
+        this.setError('register.password', 'A senha deve ter no mínimo 8 caracteres')
         return
       }
 
       this.loading = true
 
       try {
-        // Cadastra o usuário
-        await axios.post('/registro/', {
+        const response = await axios.post('/registro/', {
           email: this.registerData.email,
           name: this.registerData.name,
+
           password: this.registerData.password
         })
 
-        alert('Conta criada com sucesso! Faça login.')
+        const { access, refresh } = response.data
+        if (access && refresh) {
+          localStorage.setItem('access_token', access)
+          localStorage.setItem('refresh_token', refresh)
+          this.$router.push({ name: 'profile' })
+          return
+        }
 
-        // Volta para a tela de login
-        this.backToLogin()
+        const loginResponse = await axios.post('/token/', {
+          email: this.registerData.email,
+          password: this.registerData.password
+        })
 
+        const { access: loginAccess, refresh: loginRefresh } = loginResponse.data
+        localStorage.setItem('access_token', loginAccess)
+        localStorage.setItem('refresh_token', loginRefresh)
+        this.$router.push({ name: 'profile' })
       } catch (err) {
         if (err.response?.data?.email) {
-          this.error = 'Este email já está em uso'
+          this.setError('register.email', 'Este e-mail já está em uso')
         } else if (err.response?.data?.password) {
-          this.error = err.response.data.password[0]
+          this.setError('register.password', err.response.data.password[0])
         } else {
-          this.error = 'Erro ao criar conta'
+          this.setError('register.email', 'Erro ao criar conta')
         }
-        alert(this.error)
       } finally {
         this.loading = false
       }
     },
 
-    // ==================== OUTROS ====================
     resendCode() {
-      alert('Reenvio de código simulado.')
+      this.clearError()
+      this.successMessage = 'Código reenviado com sucesso.'
     },
 
     backToLogin() {
       this.showRegister = false
-      this.error = ''
+      this.step = 1
+      this.clearError()
+      this.successMessage = ''
       this.registerData = {
         email: '',
         verificationCode: '',
         name: '',
-        username: '',
         password: '',
         confirmPassword: ''
       }
@@ -222,6 +283,98 @@ export default {
   }
 }
 </script>
+
+<template>
+  <div class="page-container">
+    <div class="background-image"></div>
+
+    <div
+      class="main-card"
+      :class="{ 'slide-left': showRegister, 'step-forward': stepDirection === 'forward', 'step-back': stepDirection === 'back' }"
+    >
+      <div v-if="!showRegister" class="card-content">
+        <div v-if="successMessage" class="field-success">{{ successMessage }}</div>
+
+        <div class="form-group">
+          <label>E-mail</label>
+          <div v-if="errorField === 'login.email'" class="field-error">{{ errorMessage }}</div>
+          <input type="email" v-model="loginForm.email" placeholder="seu@email.com" @input="clearErrorForField('login.email')">
+        </div>
+        <div class="form-group">
+          <label>Senha</label>
+          <div v-if="errorField === 'login.password'" class="field-error">{{ errorMessage }}</div>
+          <input type="password" v-model="loginForm.password" placeholder="••••••••" @input="clearErrorForField('login.password')">
+        </div>
+        <div class="checkbox-group">
+          <input type="checkbox" id="keepLogged" v-model="loginForm.keepLogged">
+          <label for="keepLogged">Manter conectado</label>
+        </div>
+        <button class="btn-primary" @click="handleLogin">Entrar</button>
+        <div class="create-account-link">
+          <span>Não possui uma conta?</span>
+          <button class="link-button" @click="goToRegister">Criar conta</button>
+        </div>
+      </div>
+
+      <div v-else class="card-content">
+        <div class="stepper">
+          <div class="step-dots">
+            <button
+              v-for="(s, i) in steps"
+              :key="i"
+              type="button"
+              class="dot"
+              :class="{ active: step === i + 1, completed: step > i + 1 }"
+              @click="goToStep(i + 1)"
+            ></button>
+          </div>
+          <div class="step-info">
+            <span class="step-label">{{ currentStep.label }}</span>
+            <span class="step-count">Etapa {{ step }} de {{ steps.length }}</span>
+          </div>
+        </div>
+
+        <div v-if="successMessage" class="field-success">{{ successMessage }}</div>
+
+        <div
+          v-for="(field, index) in currentStep.fields"
+          :key="field"
+          class="form-group"
+        >
+          <label>{{ currentStep.labels[index] }}</label>
+          <div v-if="errorField === `register.${field}`" class="field-error">{{ errorMessage }}</div>
+          <input
+            :type="currentStep.types[index]"
+            v-model="registerData[field]"
+            :placeholder="currentStep.placeholders[index]"
+            @keyup.enter="handleStepEnter"
+            @input="clearErrorForField(`register.${field}`)"
+          >
+        </div>
+
+        <div v-if="step === 2" class="verification-actions">
+          <button class="resend-link" @click="resendCode">Reenviar código</button>
+          <button class="debug-link" @click="skipVerification">Pular verificação (debug)</button>
+        </div>
+
+        <div class="step-buttons">
+          <button v-if="step > 1" class="btn-secondary" @click="prevStep">Voltar</button>
+          <button v-if="step < steps.length" class="btn-primary" @click="nextStep">Próximo</button>
+          <button v-if="step === steps.length" class="btn-primary" @click="handleRegister">Criar conta</button>
+        </div>
+
+        <div class="back-to-login">
+          <span>Já possui uma conta?</span>
+          <button class="back-login-link" @click="backToLogin">Fazer Login</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-text" :class="{ show: showRegister }">
+      <h1>CRIAR UMA<br>CONTA</h1>
+    </div>
+  </div>
+</template>
 
 <style scoped>
 html, body {
@@ -265,13 +418,29 @@ html, body {
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 550px;
-  min-height: 500px;
-  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  transform: translateX(0);
+  min-height: 400px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transform: translateX(0) scale(1);
   z-index: 1;
 }
 
 .main-card.slide-left {
+  transform: translateX(25vw);
+}
+
+.main-card.step-forward {
+  transform: translateX(25vw);
+}
+
+.main-card.slide-left.step-forward {
+  transform: translateX(25vw);
+}
+
+.main-card.step-back {
+  transform: translateX(25vw);
+}
+
+.main-card.slide-left.step-back {
   transform: translateX(25vw);
 }
 
@@ -285,6 +454,7 @@ html, body {
 .form-group {
   margin-bottom: 20px;
 }
+
 .form-group label {
   display: block;
   margin-bottom: 8px;
@@ -292,6 +462,7 @@ html, body {
   font-weight: 500;
   color: #1f2937;
 }
+
 .form-group input {
   width: 100%;
   padding: 12px 16px;
@@ -301,28 +472,33 @@ html, body {
   transition: all 0.2s;
   background: white;
 }
+
 .form-group input:focus {
   outline: none;
   border-color: #4F46E5;
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
 }
+
 .checkbox-group {
   display: flex;
   align-items: center;
   gap: 10px;
   margin-bottom: 25px;
 }
+
 .checkbox-group input {
   width: 18px;
   height: 18px;
   cursor: pointer;
 }
+
 .checkbox-group label {
   margin-bottom: 0;
   font-size: 14px;
   color: #4b5563;
   cursor: pointer;
 }
+
 .btn-primary {
   width: 100%;
   background: url('/images/backgroundlogin.png');
@@ -335,18 +511,22 @@ html, body {
   cursor: pointer;
   transition: opacity 0.2s, transform 0.1s;
 }
+
 .btn-primary:hover {
   opacity: 0.9;
   transform: scale(0.98);
 }
+
 .create-account-link {
   text-align: center;
   margin-top: 20px;
 }
+
 .create-account-link span {
   color: #6b7280;
   font-size: 14px;
 }
+
 .link-button {
   background: none;
   border: none;
@@ -357,14 +537,17 @@ html, body {
   text-decoration: underline;
   margin-left: 5px;
 }
+
 .link-button:hover {
   color: #06B6D4;
 }
+
 .resend-code {
   text-align: right;
   margin-top: -12px;
   margin-bottom: 20px;
 }
+
 .resend-link {
   background: none;
   border: none;
@@ -373,16 +556,19 @@ html, body {
   cursor: pointer;
   text-decoration: underline;
 }
+
 .back-to-login {
   text-align: center;
   margin-top: 20px;
 }
+
 .back-to-login span {
   color: #6b7280;
   font-size: 14px;
   display: block;
   margin-bottom: 8px;
 }
+
 .back-login-link {
   background: none;
   border: none;
@@ -392,9 +578,11 @@ html, body {
   cursor: pointer;
   text-decoration: underline;
 }
+
 .back-login-link:hover {
   color: #06B6D4;
 }
+
 .side-text {
   position: absolute;
   left: 8%;
@@ -404,10 +592,12 @@ html, body {
   transition: opacity 0.6s ease 0.3s;
   pointer-events: none;
 }
+
 .side-text.show {
   opacity: 1;
   pointer-events: auto;
 }
+
 .side-text h1 {
   color: white;
   font-size: 5rem;
@@ -416,6 +606,7 @@ html, body {
   margin: 0;
   text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
 }
+
 .footer-text {
   padding: 0 0 0 15px;
   opacity: 40%;
@@ -425,5 +616,129 @@ html, body {
   text-align: left;
   color: #ffffff;
   font-size: 12px;
+}
+
+.stepper {
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.step-dots {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: #e5e7eb;
+  transition: all 0.3s;
+  cursor: pointer;
+  padding: 0;
+}
+
+.dot.active {
+  background: #1F1235;
+  transform: scale(1.3);
+}
+
+.dot.completed {
+  background: #514762;
+}
+
+.step-info {
+  color: #4b5563;
+  font-size: 14px;
+}
+
+.step-label {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 14px;
+}
+
+.step-count {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.step-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.step-buttons .btn-primary,
+.step-buttons .btn-secondary {
+  flex: 1;
+}
+
+.btn-secondary {
+  background: #e5e7eb;
+  color: #1f2937;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-secondary:hover {
+  background: #d1d5db;
+}
+
+.verification-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: -10px 0 20px;
+}
+
+.resend-link {
+  background: none;
+  border: none;
+  color: #4F46E5;
+  font-size: 12px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.debug-link {
+  background: none;
+  border: none;
+  color: #f59e0b;
+  font-size: 12px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.field-error {
+  display: block;
+  margin-bottom: 8px;
+  color: #dc2626;
+  font-size: 13px;
+  font-weight: 700;
+  animation: errorShake 0.25s ease-in-out;
+}
+
+.field-success {
+  display: block;
+  margin-bottom: 16px;
+  color: #15803d;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+@keyframes errorShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  50% { transform: translateX(3px); }
+  75% { transform: translateX(-2px); }
 }
 </style>

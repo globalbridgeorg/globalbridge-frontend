@@ -53,7 +53,7 @@ const icons = {
 
 .icon-wrapper {
   position: relative;
-  width: 20px; 
+  width: 20px;
   height: 20px;
   display: flex;
   align-items: center;
@@ -64,7 +64,9 @@ const icons = {
   position: absolute;
   width: 100%;
   height: auto;
-  transition: transform 0.4s cubic-bezier(0.6, 0.01, 0, 1), opacity 0.2s;
+  left: 0;
+  top: 0;
+  transition: opacity 0.2s ease, transform 0.25s ease;
 }
 
 .icon-original {
@@ -73,20 +75,20 @@ const icons = {
 }
 
 .icon-copy {
-  transform: translateX(-100px); 
+  transform: translateX(-120%);
   opacity: 0;
 }
 
 @media (hover: hover) and (min-width: 769px) {
   .custom-btn:hover .btn-text {
-    transform: translateX(30px); 
+    transform: translateX(1.55rem);
   }
   .custom-btn:hover .icon-original {
-    transform: translateX(40px);
+    transform: translateX(120%);
     opacity: 0;
   }
   .custom-btn:hover .icon-copy {
-    transform: translateX(30);
+    transform: translateX(-280%);
     opacity: 1;
   }
 }
