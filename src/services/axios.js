@@ -18,8 +18,12 @@ const getBaseUrl = () => {
     }
     return 'https://globalbridge-backend-production.up.railway.app/api'
   }
-  // Local development
-  return envUrl || 'http://localhost:8000/api'
+
+  // Local development uses relative API path so Vite proxy can forward to the local backend.
+  if (envUrl) {
+    return envUrl.endsWith('/api') ? envUrl : `${envUrl}/api`
+  }
+  return '/api'
 }
 
 axios.defaults.baseURL = getBaseUrl()
