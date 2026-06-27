@@ -1,7 +1,35 @@
 import axios from 'axios'
 import router from '@/router'
 
-axios.defaults.baseURL = import.meta.env.VITE_BASE_URL || 'http://localhost:8000/api'
+const normalizeBaseUrl = (url) => {
+  if (!url) return url
+  let normalized = url.trim().replace(/\/+$/, '')
+  if (!/^https?:\/\//i.test(normalized)) {
+    normalized = `https://${normalized}`
+  }
+  return normalized
+}
+
+const getBaseUrl = () => {
+  const envUrl = normalizeBaseUrl(import.meta.env.VITE_BASE_URL)
+  if (import.meta.env.PROD) {
+    if (envUrl) {
+      return envUrl.endsWith('/api') ? envUrl : `${envUrl}/api`
+    }
+    return 'https://globalbridge-backend-production.up.railway.app/api'
+  }
+
+  // Local development uses relative API path so Vite proxy can forward to the local backend.
+  if (envUrl) {
+    return envUrl.endsWith('/api') ? envUrl : `${envUrl}/api`
+  }
+  return '/api'
+}
+
+axios.defaults.baseURL = getBaseUrl()
+
+console.log('🌍 Ambiente:', import.meta.env.MODE)
+console.log('📍 BaseURL:', axios.defaults.baseURL)
 
 axios.interceptors.request.use(
   (config) => {

@@ -1,13 +1,13 @@
 <script setup>
 import { ref, onMounted } from "vue"
-import axios from "axios"
+import axios from '@/services/axios'
 
 const paises = ref([])
 
 onMounted(async () => {
     try {
         const response = await axios.get(
-            "http://localhost:8000/api/paises/mais-procurados/"
+            "/paises/mais-procurados/"
         )
         paises.value = response.data
 

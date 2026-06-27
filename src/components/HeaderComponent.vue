@@ -9,7 +9,7 @@ const mobileMenuOpen = ref(false)
 const route = useRoute()
 
 const headerClass = computed(() => {
-  return route.meta?.headerWidth === 'compact' ? 'header-compact' : 'header-full'
+  return route.meta?.headerWidth === 'compact' ? 'header-compact' : 'header-full' 
 })
 
 
@@ -37,10 +37,11 @@ const toggleMenu = () => {
     <nav class="navbar_links desktop-nav">
       <router-link to="/mapview">Meu destino</router-link>
       <router-link to="/">Companhias</router-link>
-      <router-link to="/test">Contato</router-link>
+      <router-link to="/test">uploadIMG</router-link>
       <a @click.prevent="installPWA" class="install-link">
         Baixar App
       </a>
+      <router-link to="/profile">ProfileView</router-link>
     </nav>
 
     <router-link to="/login" 
@@ -183,6 +184,8 @@ const toggleMenu = () => {
   max-width: 1200px;
 }
 
+.header- 
+
 .mobile-menu-enter-active,
 .mobile-menu-leave-active {
   transition: opacity 0.3s ease, transform 0.3s ease;
@@ -191,6 +194,15 @@ const toggleMenu = () => {
 .mobile-menu-leave-to {
   opacity: 0;
   transform: translateY(-20px);
+}
+
+@media (max-width: 1600px) {
+  .navbar {
+    max-width: 1227px;
+  }
+  .header-compact {
+    max-width: 1100px;
+  }
 }
 
 @media (max-width: 768px) {
