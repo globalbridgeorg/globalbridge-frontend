@@ -1,15 +1,12 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import axios from '@/services/axios'
+import { openCloudinaryWidget } from '@/services/cloudinary'
 
 const props = defineProps({
   initialPreview: {
     type: String,
     default: ''
-  },
-  uploadUrl: {
-    type: String,
-    default: '/perfil/foto/'
   },
   fetchUrl: {
     type: String,
@@ -21,7 +18,6 @@ const emit = defineEmits(['avatar-updated'])
 
 const fotoPreview = ref(props.initialPreview || null)
 const loading = ref(false)
-const mensagem = ref('')
 const imageError = ref(false)
 const temporaryPreview = ref(null)
 
@@ -63,54 +59,22 @@ async function loadCurrentPhoto() {
   }
 }
 
-async function uploadFoto(event) {
-  const file = event.target.files?.[0]
-  if (!file) return
-
+async function saveAvatarToBackend(imageUrl) {
   const token = getToken()
-  if (!token) {
-    mensagem.value = 'Você precisa estar logado!'
-    return
-  }
-
-  revokeTemporaryPreview()
-  temporaryPreview.value = URL.createObjectURL(file)
-  fotoPreview.value = temporaryPreview.value
-  imageError.value = false
-
-  loading.value = true
-  mensagem.value = ''
-
-  const formData = new FormData()
-  formData.append('foto', file)
-  formData.append('avatar', file)
-
-  const endpoints = [props.uploadUrl, '/usuarios/me/', '/api/usuarios/me/']
+  if (!token) return
 
   try {
-    let response = null
-    let lastError = null
-
-    for (const endpoint of endpoints) {
-      try {
-        response = await axios.patch(endpoint, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            Authorization: `Bearer ${token}`
-          }
-        })
-        break
-      } catch (err) {
-        lastError = err
-        if (err.response?.status !== 404 && err.response?.status !== 405) {
-          throw err
+    loading.value = true
+    const response = await axios.patch(
+      '/usuarios/me/avatar/',
+      { avatar_url: imageUrl },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
         }
       }
-    }
-
-    if (!response) {
-      throw lastError || new Error('Nenhum endpoint de upload respondeu')
-    }
+    )
 
     const avatarUrl = normalizeAvatarUrl(response.data)
     if (avatarUrl) {
@@ -118,13 +82,9 @@ async function uploadFoto(event) {
       revokeTemporaryPreview()
       fotoPreview.value = avatarUrl
       emit('avatar-updated', avatarUrl)
-      mensagem.value = '✅ Foto enviada com sucesso!'
-    } else {
-      mensagem.value = '✅ Foto selecionada com sucesso!'
     }
   } catch (err) {
-    mensagem.value = '❌ Erro ao enviar foto. Verifique o endpoint do backend.'
-    console.error(err)
+    console.error('Erro ao salvar foto no backend:', err)
   } finally {
     loading.value = false
   }
@@ -132,6 +92,22 @@ async function uploadFoto(event) {
 
 function handleImageError() {
   imageError.value = true
+}
+
+function openPhotoUpload() {
+  loading.value = true
+  openCloudinaryWidget(
+    (imageUrl) => {
+      loading.value = false
+      revokeTemporaryPreview()
+      fotoPreview.value = imageUrl
+      saveAvatarToBackend(imageUrl)
+    },
+    (error) => {
+      loading.value = false
+      console.error('Erro no upload:', error)
+    }
+  )
 }
 
 watch(() => props.initialPreview, (value) => {
@@ -152,11 +128,11 @@ onMounted(() => {
 
 <template>
   <div class="photo-card">
-    <label class="foto-container" :class="{ loading: loading }">
+    <button @click="openPhotoUpload" class="foto-container" :class="{ loading: loading }" type="button">
       <img
         v-if="fotoPreview && !imageError"
         :src="fotoPreview"
-        alt=""
+        alt="Avatar do usuário"
         class="foto-preview"
         @error="handleImageError"
       />
@@ -168,17 +144,7 @@ onMounted(() => {
       <div class="overlay">
         <span>{{ loading ? 'Enviando...' : 'Editar' }}</span>
       </div>
-
-      <input
-        type="file"
-        accept="image/*"
-        @change="uploadFoto"
-        :disabled="loading"
-        hidden
-      />
-    </label>
-
-    <p v-if="mensagem" class="mensagem">{{ mensagem }}</p>
+    </button>
   </div>
 </template>
 
@@ -196,12 +162,19 @@ onMounted(() => {
   height: 110px;
   border-radius: 50%;
   overflow: hidden;
-  border: 1px solid #444                    ;
+  border: 1px solid #444;
   background: #f3f4f6;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
+  margin: 0;
+  transition: opacity 0.2s ease;
+}
+
+.foto-container:hover {
+  opacity: 0.9;
 }
 
 .foto-container .overlay {
@@ -242,11 +215,5 @@ onMounted(() => {
   font-size: 40px;
   color: #6b7280;
 }
-
-.mensagem {
-  margin: 0;
-  font-size: 12px;
-  color: #374151;
-  text-align: center;
-}
 </style>
+
