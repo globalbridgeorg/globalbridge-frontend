@@ -12,6 +12,7 @@
   "dependencies": {
     "@studio-freight/lenis": "^1.0.42",
     "axios": "^1.16.0",
+    "cloudinary": "^2.10.0",
     "d3": "^7.9.0",
     "globe.gl": "^2.46.0",
     "pinia": "^3.0.4",
