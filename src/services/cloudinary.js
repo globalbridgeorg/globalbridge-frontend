@@ -42,7 +42,7 @@ async function ensureCloudinaryLoaded() {
     }
 
     const script = document.createElement('script')
-    script.src = 'https://upload-widget.cloudinary.com/latest/index.js'
+    script.src = "https://upload-widget.cloudinary.com/global/all.js"
     script.async = true
 
     let done = false
@@ -74,18 +74,15 @@ async function ensureCloudinaryLoaded() {
  * @param {Function} onError - Callback quando houver erro
  */
 export function openCloudinaryWidget(onSuccess, onError) {
-  if (!CLOUDINARY_CONFIG.cloudName || CLOUDINARY_CONFIG.cloudName === 'YOUR_CLOUD_NAME') {
-    console.error('❌ Cloudinary não está configurado')
-    console.log('Configure em: src/services/cloudinary.js')
-    onError?.('Cloudinary não configurado')
-    return
+  if (!CLOUDINARY_CONFIG.cloudName) {
+    onError?.("Cloudinary não configurado");
+    return;
   }
 
   ensureCloudinaryLoaded().then((loaded) => {
     if (!loaded || !window.cloudinary) {
-      console.log('⚠️  Widget Cloudinary não disponível. Usando upload tradicional.')
-      fallbackToFileInput(onSuccess, onError)
-      return
+      fallbackToFileInput(onSuccess, onError);
+      return;
     }
 
     try {
@@ -93,7 +90,7 @@ export function openCloudinaryWidget(onSuccess, onError) {
         {
           cloudName: CLOUDINARY_CONFIG.cloudName,
           uploadPreset: CLOUDINARY_CONFIG.uploadPreset,
-          sources: ['local', 'url', 'camera'],
+          sources: ['local', 'url'],
           maxFileSize: 10000000,
           clientAllowedFormats: ['image'],
           folder: 'avatars',
@@ -105,6 +102,31 @@ export function openCloudinaryWidget(onSuccess, onError) {
           multiple: false,
           defaultSource: 'local',
           showPoweredBy: false,
+
+          styles: {
+            palette: {
+              window: "#43256f",
+              windowBorder: "#313244",
+              tabIcon: "#89b4fa",
+              menuIcons: "#cdd6f4",
+              textDark: "#f5f5f5",
+              textLight: "#ffffff",
+              link: "#43256f",
+              action: "#43256f",
+              inactiveTabIcon: "#7f849c",
+              error: "#f38ba8",
+              inProgress: "#f9e2af",
+              complete: "#a6e3a1",
+              sourceBg: "#181825"
+            },
+            fonts: {
+              default: null,
+              "'Inter', sans-serif": {
+                url: "https://fonts.googleapis.com/css?family=Inter",
+                active: true
+              }
+            }
+          }
         },
         (error, result) => {
           if (error) {
@@ -115,7 +137,6 @@ export function openCloudinaryWidget(onSuccess, onError) {
 
           if (result.event === 'success') {
             const imageUrl = result.info.secure_url
-            console.log('✅ Upload Cloudinary bem-sucedido')
             onSuccess?.(imageUrl)
           }
         }
@@ -170,7 +191,6 @@ export async function uploadFileToBackend(file, onSuccess, onError) {
 
     const avatarUrl = response.data?.avatar_url || response.data?.avatar || ''
     if (avatarUrl) {
-      console.log('✅ Upload via backend bem-sucedido')
       onSuccess?.(avatarUrl)
     } else {
       onError?.('URL não retornada pelo backend')
@@ -180,6 +200,8 @@ export async function uploadFileToBackend(file, onSuccess, onError) {
     onError?.(err.message || 'Erro ao fazer upload')
   }
 }
+
+
 
 export default {
   openCloudinaryWidget,

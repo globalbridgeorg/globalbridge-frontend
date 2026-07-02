@@ -32,9 +32,6 @@ const getBaseUrl = () => {
 
 axios.defaults.baseURL = getBaseUrl()
 
-console.log('🌍 Ambiente:', import.meta.env.MODE)
-console.log('📍 BaseURL:', axios.defaults.baseURL)
-
 axios.interceptors.request.use(
   (config) => {
     const token = getStoredValue('access_token')

@@ -65,6 +65,7 @@ async function saveAvatarToBackend(imageUrl) {
 
   try {
     loading.value = true
+
     const response = await axios.patch(
       '/usuarios/me/avatar/',
       { avatar_url: imageUrl },
@@ -77,6 +78,7 @@ async function saveAvatarToBackend(imageUrl) {
     )
 
     const avatarUrl = normalizeAvatarUrl(response.data)
+
     if (avatarUrl) {
       imageError.value = false
       revokeTemporaryPreview()
@@ -96,16 +98,18 @@ function handleImageError() {
 
 function openPhotoUpload() {
   loading.value = true
+
   openCloudinaryWidget(
     (imageUrl) => {
       loading.value = false
       revokeTemporaryPreview()
+
       fotoPreview.value = imageUrl
       saveAvatarToBackend(imageUrl)
     },
     (error) => {
       loading.value = false
-      console.error('Erro no upload:', error)
+      console.error("Erro no upload:", error)
     }
   )
 }
