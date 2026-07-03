@@ -4,7 +4,11 @@
       
       <div class="footer-cta">
         <div class="cta-inner">
-          <span class="cta-badge">Como podemos ajudar?</span>
+          <BadgeComponent 
+          style="background-color: #A33DA3;
+          color: white;">
+            Como podemos ajudar?
+          </BadgeComponent>
           <h2 class="cta-title">SEU FUTURO NÃO SE MOLDA SOZINHO.</h2>
           <p class="cta-subtitle">Quer escolher o destino perfeito pro seu futuro?</p>
           <div class="cta-buttons">
@@ -25,11 +29,7 @@
             </div>
             
             <div class="footer-contact">
-              <div class="contact-pill">
-                <span class="contact-label">Entrar em contato</span>
-                <span class="contact-arrow">↗</span>
-              </div>
-              <div class="contact-dots">:::</div>
+              <ButtonComponent text="Entrar em contato" iconType="primary" />
             </div>
           </div>
         </div>
@@ -41,6 +41,7 @@
 
 <script setup>
 import ButtonComponent from './ButtonComponent.vue'
+import BadgeComponent from './BadgeComponent.vue'
 </script>
 
 <style scoped>
@@ -71,36 +72,13 @@ import ButtonComponent from './ButtonComponent.vue'
   margin: 0 auto;
 }
 
-.cta-badge {
-  display: inline-block;
-  background-color: rgba(227, 94, 216, 0.4);
-  color: white;
-  padding: 8px 16px;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  margin-bottom: 24px;
-  letter-spacing: 0.5px;
-}
-
-.cta-title {
-  font-size: 3.7rem;
-  font-weight: 800;
-  color: white;
-  margin-bottom: 16px;
-  line-height: 1.1;
-  text-transform: uppercase;
-  max-width: 900px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
 .cta-subtitle {
   font-size: 1.2rem;
   color: rgba(255, 255, 255, 0.9);
   margin-bottom: 40px;
   opacity: 0.8;
 }
+
 
 .cta-buttons {
   display: flex;
@@ -164,25 +142,10 @@ import ButtonComponent from './ButtonComponent.vue'
   gap: 16px;
 }
 
-.contact-pill {
-  background-color: white;
-  color: black;
-  padding: 10px 20px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 0.9rem;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+.contact-dots {
+  color: white;
+  font-size: 1.5rem;
 }
-
-.contact-arrow {
-  color: #e35ed8;
-}
-
-/* mobile */
 @media (max-width: 768px) {
   .footer-image-container {
     margin-top: 20px;
