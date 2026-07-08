@@ -1,5 +1,77 @@
 <script setup>
-// Apenas visualização
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import axios from '@/services/axios'
+import PhotoComponent from '@/components/PhotoComponent.vue'
+
+const router = useRouter()
+const loading = ref(true)
+const error = ref('')
+const profile = ref({
+  name: '',
+  email: '',
+  username: '',
+  avatar_url: '',
+  bio: ''
+})
+
+const profileCards = ref([
+  { title: 'informações do seu perfil', subtitle: 'dados pessoais da sua conta' },
+  { title: 'segurança', subtitle: 'senha, autenticação e acesso' },
+  { title: 'favoritos', subtitle: 'salve seus destinos preferidos' },
+  { title: 'minhas avaliações', subtitle: 'conte suas experiências' },
+  { title: 'preferências de intercâmbio', subtitle: 'configure seu perfil de estudo' }
+])
+
+const getAuthToken = () => {
+  return localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
+}
+
+const fetchProfile = async () => {
+  const token = getAuthToken()
+  if (!token) {
+    router.push({ name: 'login' })
+    return
+  }
+
+  const profileEndpoints = ['/usuarios/me/', '/api/usuarios/me/', '/me/', '/profile/']
+  let response = null
+
+  try {
+    for (const endpoint of profileEndpoints) {
+      try {
+        response = await axios.get(endpoint)
+        break
+      } catch (err) {
+        if (err.response?.status !== 404) {
+          throw err
+        }
+      }
+    }
+
+    if (!response) {
+      throw new Error('Profile endpoint not found')
+    }
+
+    const data = response.data || {}
+    profile.value.name = data.name || data.full_name || ''
+    profile.value.email = data.email || ''
+    profile.value.username = data.username || data.user_name || ''
+    profile.value.avatar_url = data.avatar_url || data.avatar || data.photo_url || ''
+    profile.value.bio = data.bio || data.description || ''
+  } catch (err) {
+    if (err.response?.status === 401) {
+      router.push({ name: 'login' })
+      return
+    }
+    error.value = 'Não foi possível carregar seu perfil. Tente novamente mais tarde.'
+    console.error('Profile fetch error:', err)
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(fetchProfile)
 </script>
 
 <template>
@@ -7,70 +79,39 @@
     <div class="top-banner"></div>
 
     <div class="content">
-      <div class="user-info">
-        <div class="avatar-placeholder"></div>
+      <div v-if="loading" class="loading-state">Carregando perfil...</div>
+      <div v-else>
+        <div v-if="error" class="profile-error">{{ error }}</div>
 
-        <div class="user-text">
-          <h2>Miguelito Tufferson</h2>
-          <p>miguelreidelas2002@gmail.com</p>
-        </div>
-      </div>
+        <div class="user-info">
+          <PhotoComponent
+            :initial-preview="profile.avatar_url"
+            @avatar-updated="(url) => profile.avatar_url = url"
+          />
 
-      <div class="notification-banner">
-        <div class="notification-indicator"></div>
-
-        <div class="notification-content">
-          <!-- Área para avisos -->
-        </div>
-
-        <div class="close-placeholder">
-          ✕
-        </div>
-      </div>
-
-      <div class="cards-grid">
-        <div class="card">
-          <div class="icon-placeholder"></div>
-
-          <div class="card-text">
-            <h3>informações do seu perfil</h3>
-            <p>dados pessoais da sua conta</p>
+          <div class="user-text">
+            <h2>{{ profile.name || 'Usuário' }}</h2>
+            <p>{{ profile.email || 'email@exemplo.com' }}</p>
+            <p v-if="profile.username" class="user-handle">@{{ profile.username }}</p>
+            <p v-if="profile.bio" class="user-bio">{{ profile.bio }}</p>
           </div>
         </div>
 
-        <div class="card">
-          <div class="icon-placeholder"></div>
-
-          <div class="card-text">
-            <h3>segurança</h3>
-            <p>dados pessoais da sua conta</p>
+        <div class="notification-banner">
+          <div class="notification-indicator"></div>
+          <div class="notification-content">
+            <p>Bem-vindo ao seu painel de perfil.</p>
           </div>
+          <div class="close-placeholder">✕</div>
         </div>
 
-        <div class="card">
-          <div class="icon-placeholder"></div>
-
-          <div class="card-text">
-            <h3>favoritos</h3>
-            <p>dados pessoais da sua conta</p>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="icon-placeholder"></div>
-
-          <div class="card-text">
-            <h3>minhas avaliações</h3>
-            <p>dados pessoais da sua conta</p>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="icon-placeholder"></div>
-
-          <div class="card-text">
-            <h3>preferências de intercâmbio</h3>
-            <p>dados pessoais da sua conta</p>
+        <div class="cards-grid">
+          <div v-for="card in profileCards" :key="card.title" class="card">
+            <div class="icon-placeholder"></div>
+            <div class="card-text">
+              <h3>{{ card.title }}</h3>
+              <p>{{ card.subtitle }}</p>
+            </div>
           </div>
         </div>
       </div>
@@ -96,19 +137,21 @@
   padding: 30px 20px;
 }
 
+.loading-state,
+.profile-error {
+  margin-bottom: 24px;
+  padding: 16px;
+  border-radius: 10px;
+  background: #fff4f4;
+  color: #7f1d1d;
+  font-weight: 600;
+}
+
 .user-info {
   display: flex;
   align-items: center;
   gap: 16px;
   margin-bottom: 40px;
-}
-
-.avatar-placeholder {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: #d8d8d8;
-  border: 2px solid #c4c4c4;
 }
 
 .user-text h2 {
@@ -122,6 +165,14 @@
   margin: 4px 0 0;
   font-size: 18px;
   color: #777;
+}
+
+.user-handle {
+  color: #6b7280;
+}
+
+.user-bio {
+  max-width: 560px;
 }
 
 .notification-banner {
@@ -144,6 +195,9 @@
 .notification-content {
   flex: 1;
   min-height: 50px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
 }
 
 .close-placeholder {
@@ -189,4 +243,20 @@
   color: #888;
 }
 
+@media (max-width: 900px) {
+  .cards-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .user-info {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
 </style>

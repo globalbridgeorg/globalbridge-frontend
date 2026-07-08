@@ -10,6 +10,10 @@ const normalizeBaseUrl = (url) => {
   return normalized
 }
 
+const getStoredValue = (key) => {
+  return localStorage.getItem(key) || sessionStorage.getItem(key)
+}
+
 const getBaseUrl = () => {
   const envUrl = normalizeBaseUrl(import.meta.env.VITE_BASE_URL)
   if (import.meta.env.PROD) {
@@ -28,12 +32,9 @@ const getBaseUrl = () => {
 
 axios.defaults.baseURL = getBaseUrl()
 
-console.log('🌍 Ambiente:', import.meta.env.MODE)
-console.log('📍 BaseURL:', axios.defaults.baseURL)
-
 axios.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('access_token')
+    const token = getStoredValue('access_token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -80,25 +81,31 @@ axios.interceptors.response.use(
       originalRequest._retry = true
       isRefreshing = true
 
-      const refreshToken = localStorage.getItem('refresh_token')
+      const refreshToken = getStoredValue('refresh_token')
       if (!refreshToken) {
         isRefreshing = false
         localStorage.removeItem('access_token')
         localStorage.removeItem('refresh_token')
+        sessionStorage.removeItem('access_token')
+        sessionStorage.removeItem('refresh_token')
         router.push({ name: 'login' })
         return Promise.reject(error)
       }
 
       try {
         const { data } = await axios.post('/token/refresh/', { refresh: refreshToken })
-        localStorage.setItem('access_token', data.access)
-        processQueue(null, data.access)
-        originalRequest.headers.Authorization = `Bearer ${data.access}`
+        const newAccessToken = data.access
+        localStorage.setItem('access_token', newAccessToken)
+        sessionStorage.setItem('access_token', newAccessToken)
+        processQueue(null, newAccessToken)
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`
         return axios(originalRequest)
       } catch (refreshError) {
         processQueue(refreshError, null)
         localStorage.removeItem('access_token')
         localStorage.removeItem('refresh_token')
+        sessionStorage.removeItem('access_token')
+        sessionStorage.removeItem('refresh_token')
         router.push({ name: 'login' })
         return Promise.reject(refreshError)
       } finally {
