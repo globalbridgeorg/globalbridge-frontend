@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from "vue";
+import { ref, nextTick, onMounted, onBeforeUnmount, watch } from "vue";
 import gsap from "gsap";
 
 const props = defineProps({
@@ -11,6 +11,22 @@ const props = defineProps({
     type: String,
     default: "primary",
   },
+  iconSize: {
+    type: Number,
+    default: 20,
+  },
+  gap: {
+    type: Number,
+    default: 10,
+  },
+  duration: {
+    type: Number,
+    default: 0.45,
+  },
+  ease: {
+    type: String,
+    default: "power4.out",
+  },
 });
 
 const icons = {
@@ -18,134 +34,288 @@ const icons = {
   secondary: "/icons/icon_button2.png",
 };
 
-const btnRef = ref(null);
-const contentRef = ref(null);
-const iconCurrentRef = ref(null);
-const iconNextRef = ref(null);
+const stageRef = ref(null);
+const textRef = ref(null);
+const iconRightRef = ref(null); // ícone visível no estado normal
+const iconLeftRef = ref(null);  // ícone que entra no hover
 
-const DURATION = 0.45;
-const EASE = "power4.out"; 
-const SLIDE = 10; 
+let tl = null;
+let resizeObserver = null;
+let isHovered = false;
 
-let hoverTween;
+const metrics = {
+  textIdleX: 0,
+  textHoverX: 0,
+  rightIconX: 0,
+  leftIconX: 0,
+  offRightX: 0,
+  offLeftX: 0,
+};
+
+function updateMetrics() {
+  if (!textRef.value || !iconRightRef.value) return;
+
+  const textWidth = textRef.value.offsetWidth;
+  const iconWidth = iconRightRef.value.offsetWidth || props.iconSize;
+
+  // quanto o texto precisa andar para abrir espaço para o ícone à esquerda
+  const slot = iconWidth + props.gap;
+
+  // quanto o ícone vai “viajar” para fora
+  const travel = Math.max(slot + 8, iconWidth * 1.4);
+
+  metrics.textIdleX = 0;
+  metrics.textHoverX = slot;
+
+  // ícone da esquerda sempre para na posição 0
+  metrics.leftIconX = 0;
+
+  // ícone da direita fica depois do texto
+  metrics.rightIconX = textWidth + props.gap;
+
+  // posições fora da área visível
+  metrics.offLeftX = -travel;
+  metrics.offRightX = metrics.rightIconX + travel;
+}
+
+function applyStaticState() {
+  if (!textRef.value || !iconRightRef.value || !iconLeftRef.value) return;
+
+  tl?.kill();
+
+  if (isHovered) {
+    gsap.set(textRef.value, { x: metrics.textHoverX });
+    gsap.set(iconRightRef.value, {
+      x: metrics.offRightX,
+      opacity: 0,
+    });
+    gsap.set(iconLeftRef.value, {
+      x: metrics.leftIconX,
+      opacity: 1,
+    });
+  } else {
+    gsap.set(textRef.value, { x: metrics.textIdleX });
+    gsap.set(iconRightRef.value, {
+      x: metrics.rightIconX,
+      opacity: 1,
+    });
+    gsap.set(iconLeftRef.value, {
+      x: metrics.offLeftX,
+      opacity: 0,
+    });
+  }
+}
 
 function playEnter() {
-  hoverTween?.kill();
-  hoverTween = gsap.timeline();
-  
-  hoverTween
-    // Move o texto ligeiramente para a direita
-    .to(contentRef.value, { x: SLIDE, duration: DURATION, ease: EASE }, 0)
-    // O ícone atual voa para a direita (40px o joga para fora do texto) e some
-    .to(iconCurrentRef.value, { x: 40, opacity: 0, duration: DURATION, ease: EASE }, 0)
-    // O novo ícone vem da esquerda (estava escondido na opacidade) para o centro
-    .to(iconNextRef.value, { x: 0, opacity: 1, duration: DURATION, ease: EASE }, 0);
+  if (isHovered) return;
+  if (!window.matchMedia("(hover: hover)").matches) return;
+
+  isHovered = true;
+  updateMetrics();
+  tl?.kill();
+
+  tl = gsap.timeline({
+    defaults: {
+      duration: props.duration,
+      ease: props.ease,
+    },
+  });
+
+  tl.to(
+    textRef.value,
+    {
+      x: metrics.textHoverX,
+    },
+    0
+  )
+    .to(
+      iconRightRef.value,
+      {
+        x: metrics.offRightX,
+        opacity: 0,
+      },
+      0
+    )
+    .to(
+      iconLeftRef.value,
+      {
+        x: metrics.leftIconX,
+        opacity: 1,
+      },
+      0
+    );
 }
 
 function playLeave() {
-  hoverTween?.kill();
-  hoverTween = gsap.timeline();
-  
-  hoverTween
-    // Retorna o texto para o lugar original
-    .to(contentRef.value, { x: 0, duration: DURATION, ease: EASE }, 0)
-    // Traz o ícone principal de volta
-    .to(iconCurrentRef.value, { x: 0, opacity: 1, duration: DURATION, ease: EASE }, 0)
-    // Joga o ícone substituto de volta para a esquerda, sumindo
-    .to(iconNextRef.value, { x: -40, opacity: 0, duration: DURATION, ease: EASE }, 0);
+  if (!isHovered) return;
+  if (!window.matchMedia("(hover: hover)").matches) return;
+
+  isHovered = false;
+  updateMetrics();
+  tl?.kill();
+
+  tl = gsap.timeline({
+    defaults: {
+      duration: props.duration,
+      ease: props.ease,
+    },
+  });
+
+  tl.to(
+    textRef.value,
+    {
+      x: metrics.textIdleX,
+    },
+    0
+  )
+    .to(
+      iconRightRef.value,
+      {
+        x: metrics.rightIconX,
+        opacity: 1,
+      },
+      0
+    )
+    .to(
+      iconLeftRef.value,
+      {
+        x: metrics.offLeftX,
+        opacity: 0,
+      },
+      0
+    );
 }
 
-onMounted(() => {
-  // Garantimos as posições e transparências iniciais usando GSAP para evitar bugs visuais
-  gsap.set(iconCurrentRef.value, { x: 0, opacity: 1 });
-  gsap.set(iconNextRef.value, { x: -40, opacity: 0 });
+async function syncLayout() {
+  await nextTick();
+  updateMetrics();
 
-  if (window.matchMedia("(hover: hover)").matches) {
-    btnRef.value.addEventListener("mouseenter", playEnter);
-    btnRef.value.addEventListener("mouseleave", playLeave);
+  if (!tl || !tl.isActive()) {
+    applyStaticState();
+  }
+}
+
+onMounted(async () => {
+  await syncLayout();
+
+  resizeObserver = new ResizeObserver(() => {
+    updateMetrics();
+
+    if (!tl || !tl.isActive()) {
+      applyStaticState();
+    }
+  });
+
+  if (stageRef.value) resizeObserver.observe(stageRef.value);
+  if (textRef.value) resizeObserver.observe(textRef.value);
+
+  if (document.fonts?.ready) {
+    document.fonts.ready.then(() => {
+      updateMetrics();
+      if (!tl || !tl.isActive()) {
+        applyStaticState();
+      }
+    });
   }
 });
 
+watch(
+  () => [props.text, props.iconSize, props.gap],
+  async () => {
+    await syncLayout();
+  }
+);
+
 onBeforeUnmount(() => {
-  btnRef.value?.removeEventListener("mouseenter", playEnter);
-  btnRef.value?.removeEventListener("mouseleave", playLeave);
-  hoverTween?.kill();
+  tl?.kill();
+  resizeObserver?.disconnect();
 });
 </script>
 
 <template>
-  <button ref="btnRef" class="custom-btn">
-    <span ref="contentRef" class="btn-content">
-      <span class="btn-text">
-        {{ text }}
+  <button
+    class="swap-btn"
+    :style="{
+      '--icon-size': `${iconSize}px`,
+      '--gap': `${gap}px`,
+    }"
+    @mouseenter="playEnter"
+    @mouseleave="playLeave"
+  >
+    <span ref="stageRef" class="btn-stage">
+      <span ref="textRef" class="btn-text">
+        <slot>{{ text }}</slot>
       </span>
-      <!-- Mudamos o nome para icon-container, pois não é mais uma máscara -->
-      <span class="icon-container">
-        <img
-          ref="iconCurrentRef"
-          :src="icons[iconType]"
-          class="btn-icon"
-          alt=""
-        />
-        <img
-          ref="iconNextRef"
-          :src="icons[iconType]"
-          class="btn-icon"
-          alt=""
-        />
-      </span>
+
+      <img
+        ref="iconRightRef"
+        :src="icons[iconType]"
+        class="btn-icon"
+        alt=""
+        aria-hidden="true"
+      />
+
+      <img
+        ref="iconLeftRef"
+        :src="icons[iconType]"
+        class="btn-icon"
+        alt=""
+        aria-hidden="true"
+      />
     </span>
   </button>
 </template>
 
 <style scoped>
-.custom-btn {
-  --icon-size: 20px;
+.swap-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 12px 20px;
   border: none;
   border-radius: 12px;
-  background: #A33DA3;
+  background: #a33da3;
   color: #fff;
   font-family: Montserrat, sans-serif;
+  font-size: 16px;
   font-weight: 600;
+  line-height: 1.2;
   cursor: pointer;
-  /* O overflow: hidden fica APENAS AQUI. O ícone vai sumir apenas se cruzar a borda do botão */
-  overflow: hidden; 
+  overflow: hidden;
+  appearance: none;
 }
 
-.btn-content {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.btn-stage {
+  position: relative;
+  display: inline-block;
+
+  /* reserva espaço do ícone da direita no estado normal */
+  padding-right: calc(var(--icon-size) + var(--gap));
+  min-height: var(--icon-size);
 }
 
 .btn-text {
+  display: inline-block;
   white-space: nowrap;
-}
-
-.icon-container {
-  position: relative;
-  width: var(--icon-size);
-  height: var(--icon-size);
-  flex-shrink: 0;
-  /* REMOVIDO: overflow: hidden; -> É isso que libertou o ícone da caixinha! */
+  will-change: transform;
 }
 
 .btn-icon {
   position: absolute;
-  top: 0;
+  top: 50%;
   left: 0;
   width: var(--icon-size);
   height: var(--icon-size);
   display: block;
+  object-fit: contain;
+  transform: translateY(-50%);
+  will-change: transform, opacity;
+  pointer-events: none;
 }
 
 @media (hover: none) {
-  .custom-btn:active {
-    transform: scale(.97);
+  .swap-btn:active {
+    transform: scale(0.97);
   }
 }
 </style>

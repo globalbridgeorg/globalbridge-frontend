@@ -56,7 +56,7 @@ const toggleMenu = () => {
       >
       <ButtonComponent 
         :text="buttonText" 
-        iconType="primary"
+        icon-position="right"
       />
     </router-link>
 
