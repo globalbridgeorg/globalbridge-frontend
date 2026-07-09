@@ -91,7 +91,7 @@ const toggleMenu = () => {
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
-  height: 72px;
+  height: 75 px;
   background: #ffffff;
   border-radius: 15px;
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);

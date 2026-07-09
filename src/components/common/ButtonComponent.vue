@@ -2,6 +2,7 @@
 import { ref, nextTick, onMounted, onBeforeUnmount, watch } from "vue";
 import gsap from "gsap";
 
+
 const props = defineProps({
   text: {
     type: String,
@@ -32,6 +33,7 @@ const props = defineProps({
 const icons = {
   primary: "/icons/icon_button.png",
   secondary: "/icons/icon_button2.png",
+  tertiary: "/icons/icon_button3.png",
 };
 
 const stageRef = ref(null);

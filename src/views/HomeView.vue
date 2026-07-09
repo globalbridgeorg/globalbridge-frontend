@@ -4,6 +4,7 @@ import ButtonComponent from "@/components/common/ButtonComponent.vue";
 import PhotoGrid from '@/components/home/PhotoGridComponent.vue'
 import Landing from '@/components/home/LandingComponent.vue';
 import Paises from '@/components/home/PaisesComponent.vue';
+import FaqComponent from "@/components/home/FaqComponent.vue";
 
 const fotosEsquerda = [
   '/images/imagemgb1.png',
@@ -36,6 +37,10 @@ const fotosDireita = [
 
   </section>
 
+  <section> 
+    <FaqComponent />
+  </section>
+  
   <section>
     <Paises />
   </section>
