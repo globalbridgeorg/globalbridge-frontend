@@ -105,6 +105,12 @@ const toggleMenu = () => {
               box-shadow 0.3s ease;
 }
 
+.navbar {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+
 .navbar_logo img {
   height: 40px;
   transition: transform 0.2s ease;

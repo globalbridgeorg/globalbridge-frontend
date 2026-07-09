@@ -19,6 +19,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
+
 header {
   position: fixed;
   justify-self: center;

@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from '@/services/axios'
 import PhotoComponent from '@/components/PhotoComponent.vue'
+import NotificationBanner from '@/components/NotificationBanner.vue'
 
 const router = useRouter()
 const loading = ref(true)
@@ -36,6 +37,12 @@ const profileCards = ref([
 
 const selectSection = (key) => {
   activeSection.value = key
+}
+
+const showWelcome = ref(false)
+
+function closeWelcome() {
+  showWelcome.value = false
 }
 
 const getAuthToken = () => {
@@ -86,7 +93,18 @@ const fetchProfile = async () => {
   }
 }
 
-onMounted(fetchProfile)
+onMounted(() => {
+  fetchProfile()
+  // Mostrar banner de boas-vindas apenas na primeira visita desta sessão
+  try {
+    if (!sessionStorage.getItem('seenProfileWelcome')) {
+      showWelcome.value = true
+      sessionStorage.setItem('seenProfileWelcome', '1')
+    }
+  } catch (e) {
+    // sessionStorage pode falhar em alguns ambientes; falhar silenciosamente
+  }
+})
 </script>
 
 <template>
@@ -137,13 +155,11 @@ onMounted(fetchProfile)
             </div>
           </div>
 
-          <div class="notification-banner">
-            <div class="notification-indicator"></div>
-            <div class="notification-content">
-              <p>Bem-vindo ao seu painel de perfil.</p>
-            </div>
-            <div class="close-placeholder">✕</div>
-          </div>
+          <NotificationBanner
+            v-if="showWelcome"
+            message="Bem-vindo ao seu painel de perfil."
+            @close="closeWelcome"
+          />
 
           <div class="cards-grid">
             <div
@@ -302,38 +318,7 @@ onMounted(fetchProfile)
   max-width: 560px;
 }
 
-.notification-banner {
-  display: flex;
-  align-items: center;
-  min-height: 46px;
-  margin-bottom: 30px;
-  background: #f7f4ee;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-}
-
-.notification-indicator {
-  width: 5px;
-  align-self: stretch;
-  background: #e34b57;
-}
-
-.notification-content {
-  flex: 1;
-  min-height: 46px;
-  padding: 0 16px;
-  display: flex;
-  align-items: center;
-}
-
-.close-placeholder {
-  padding: 0 16px;
-  font-size: 16px;
-  color: #b0b0b0;
-  cursor: pointer;
-  user-select: none;
-}
+/* notification banner moved to reusable component NotificationBanner.vue */
 
 .cards-grid {
   display: grid;
@@ -356,7 +341,7 @@ onMounted(fetchProfile)
 }
 
 .card.active {
-  outline: 2px solid #43256f;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
 }
 
 .icon-placeholder {
