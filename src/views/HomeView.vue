@@ -5,6 +5,7 @@ import PhotoGrid from '@/components/home/PhotoGridComponent.vue'
 import Landing from '@/components/home/LandingComponent.vue';
 import Paises from '@/components/home/PaisesComponent.vue';
 import FaqComponent from "@/components/home/FaqComponent.vue";
+import MotorComponent from "@/components/home/MotorComponent.vue";
 
 const fotosEsquerda = [
   '/images/imagemgb1.png',
@@ -35,6 +36,10 @@ const fotosDireita = [
   <section>
     <Landing src="/videos/video-landing.mp4" />
 
+  </section>
+
+  <section>
+    <MotorComponent />
   </section>
 
   <section> 
