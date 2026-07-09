@@ -1,8 +1,13 @@
 <script setup>
-import HeaderComponent from "@/components/HeaderComponent.vue";
-import FooterComponent from "@/components/FooterComponent.vue";
-import { onMounted } from 'vue'
+import HeaderComponent from "@/components/layout/HeaderComponent.vue";
+import FooterComponent from "@/components/layout/FooterComponent.vue";
+import { computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { initSmoothScroll } from '@/utils/lenis'
+
+const route = useRoute()
+
+const shouldShowFooter = computed(() => !['mapview', 'profile', 'login'].includes(route.name))
 
 onMounted(() => {
   initSmoothScroll()
@@ -15,6 +20,7 @@ onMounted(() => {
     class="header"
     />
     <router-view />
+    <FooterComponent v-if="shouldShowFooter" />
   </main>
 </template>
 

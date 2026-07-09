@@ -1,9 +1,9 @@
 <script setup>
-import VideoComponent from "@/components/VideoComponent.vue";
-import ButtonComponent from "@/components/ButtonComponent.vue";
-import PhotoGrid from '@/components/PhotoGridComponent.vue'
-import Landing from '@/components/LandingComponent.vue';
-import Paises from '@/components/PaisesComponent.vue';
+import VideoComponent from "@/components/home/VideoComponent.vue";
+import ButtonComponent from "@/components/common/ButtonComponent.vue";
+import PhotoGrid from '@/components/home/PhotoGridComponent.vue'
+import Landing from '@/components/home/LandingComponent.vue';
+import Paises from '@/components/home/PaisesComponent.vue';
 
 const fotosEsquerda = [
   '/images/imagemgb1.png',

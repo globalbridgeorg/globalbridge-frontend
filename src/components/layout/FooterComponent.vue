@@ -1,3 +1,22 @@
+<script setup>
+import ButtonComponent from '@/components/common/ButtonComponent.vue'
+import BadgeComponent from '@/components/common/BadgeComponent.vue'
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+
+const isLoggedIn = computed(() => {
+  route.fullPath
+  const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
+  return !!token
+})
+
+const buttonText = computed(() => isLoggedIn.value ? 'Perfil' : 'Entrar')
+const buttonLink = computed(() => isLoggedIn.value ? '/profile' : '/login')
+const buttonmapview = computed(() => isLoggedIn.value ? '/mapview' : '/login')
+</script>
+
 <template>
   <footer class="footer">
     <div class="footer-content">
@@ -12,8 +31,16 @@
           <h2 class="cta-title">SEU FUTURO NÃO SE MOLDA SOZINHO.</h2>
           <p class="cta-subtitle">Quer escolher o destino perfeito pro seu futuro?</p>
           <div class="cta-buttons">
-            <ButtonComponent text="Visite o mundo" iconType="primary" />
-            <ButtonComponent text="Cadastrar-se" iconType="secondary" />
+
+            <router-link :to="buttonmapview">
+              <ButtonComponent text="Visite o mundo" iconType="primary" />
+            </router-link>
+            
+             <router-link :to="buttonLink">
+                <ButtonComponent 
+                  :text="buttonText" 
+                />
+              </router-link>
           </div>
         </div>
       </div>
@@ -39,10 +66,7 @@
   </footer>
 </template>
 
-<script setup>
-import ButtonComponent from './ButtonComponent.vue'
-import BadgeComponent from './BadgeComponent.vue'
-</script>
+
 
 <style scoped>
 

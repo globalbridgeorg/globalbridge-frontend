@@ -2,8 +2,8 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from '@/services/axios'
-import PhotoComponent from '@/components/PhotoComponent.vue'
-import NotificationBanner from '@/components/NotificationBanner.vue'
+import PhotoComponent from '@/components/profile/PhotoComponent.vue'
+import NotificationBanner from '@/components/profile/NotificationBanner.vue'
 
 const router = useRouter()
 const loading = ref(true)
@@ -18,11 +18,11 @@ const profile = ref({
 
 // Itens da sidebar "Meu perfil"
 const sidebarItems = ref([
-  { key: 'perfil', label: 'Perfil', icon: 'user' },
-  { key: 'seguranca', label: 'Segurança', icon: 'shield' },
-  { key: 'favoritos', label: 'Favoritos', icon: 'bookmark' },
-  { key: 'avaliacoes', label: 'Avaliações', icon: 'star' },
-  { key: 'preferencias', label: 'Preferências', icon: 'settings' }
+  { key: 'perfil', label: 'Perfil', icon: '/images/profile_perfil.png' },
+  { key: 'seguranca', label: 'Segurança', icon: '/images/profile_secure.png' },
+  { key: 'favoritos', label: 'Favoritos', icon: '/images/profile_favorite.png' },
+  { key: 'avaliacoes', label: 'Avaliações', icon: '/images/profile_saved.png' },
+  { key: 'preferencias', label: 'Preferências', icon: '/images/profile_settings.png' }
 ])
 
 const activeSection = ref('perfil')
@@ -37,6 +37,18 @@ const profileCards = ref([
 
 const selectSection = (key) => {
   activeSection.value = key
+}
+
+const getCardIcon = (key) => {
+  const icons = {
+    perfil: '/images/profile_perfil.png',
+    seguranca: '/images/profile_secure.png',
+    favoritos: '/images/profile_favorite.png',
+    avaliacoes: '/images/profile_saved.png',
+    preferencias: '/images/profile_settings.png'
+  }
+
+  return icons[key] || '/images/profile_perfil.png'
 }
 
 const showWelcome = ref(false)
@@ -128,7 +140,7 @@ onMounted(() => {
             :class="{ active: activeSection === item.key }"
             @click="selectSection(item.key)"
           >
-            <span class="sidebar-icon-placeholder"></span>
+            <img v-if="item.icon" :src="item.icon" alt="" class="sidebar-icon" />
             <span class="sidebar-label">{{ item.label }}</span>
             <span class="sidebar-chevron">›</span>
           </button>
@@ -169,7 +181,7 @@ onMounted(() => {
               :class="{ active: activeSection === card.key }"
               @click="selectSection(card.key)"
             >
-              <div class="icon-placeholder"></div>
+              <img :src="getCardIcon(card.key)" alt="" class="card-icon" />
               <div class="card-text">
                 <h3>{{ card.title }}</h3>
                 <p>{{ card.subtitle }}</p>
@@ -255,12 +267,11 @@ onMounted(() => {
   font-weight: 600;
 }
 
-.sidebar-icon-placeholder {
+.sidebar-icon {
   width: 18px;
   height: 18px;
   flex-shrink: 0;
-  border-radius: 4px;
-  background: #bdbdbd;
+  object-fit: contain;
 }
 
 .sidebar-label {
@@ -275,7 +286,7 @@ onMounted(() => {
 /* Conteúdo */
 .content-area {
   flex: 1;
-  max-width: 900px;
+  max-width: 1300px;
   margin: 0 auto;
   padding: 40px 24px;
 }
@@ -338,18 +349,18 @@ onMounted(() => {
 
 .card:hover {
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+  background: #e3e3e3;
 }
 
 .card.active {
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
 }
 
-.icon-placeholder {
-  width: 22px;
-  height: 22px;
+.card-icon {
+  width: 30px;
+  height: 30px;
   margin-bottom: 14px;
-  border-radius: 4px;
-  background: #bdbdbd;
+  object-fit: contain;
 }
 
 .card-text h3 {

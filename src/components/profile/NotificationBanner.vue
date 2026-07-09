@@ -33,6 +33,7 @@ function handleClose() {
   box-shadow: 0 2px 10px rgba(0,0,0,0.08);
   font-size: 14px;
   color: #333;
+  margin: 16px 0;
 }
 .notification-banner-component .indicator {
   width: 6px;
