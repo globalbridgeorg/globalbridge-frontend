@@ -94,7 +94,7 @@ span.best {
 
 h2 {
     margin-top: 12px;
-    font-size: 24px;
+    font-size: 2.2vw;
     margin-bottom: 40px;
 }
 
@@ -227,7 +227,7 @@ h2 {
 /* Desktop */
 @media (min-width: 1024px) {
     .container {
-        padding: 40px 80px;
+        padding: 40px 145px;
     }
 
     span.best {
