@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, onBeforeUpdate, onBeforeUnmount, nextTick } from 'vue'
-import BadgeComponent from '@/components/BadgeComponent.vue';
+import BadgeComponent from '@/components/common/BadgeComponent.vue'
 import gsap from 'gsap'
 
 const items = [
@@ -126,7 +126,10 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .container {
-  padding: 40px 146px;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  box-sizing: border-box;
 
   & h2 {
     font-size: 2.2vw;
@@ -148,7 +151,6 @@ BadgeComponent {
   display: flex;
   gap: 20px;
   width: 100%;
-  max-width: 1300px;
   height: 500px;
   margin: 0 auto;
 }

@@ -22,7 +22,10 @@ let globe = null
 let hoverD = null
 let resizeTimer = null
 let animationFrame = null
+let initFrame = null
+let initFrame2 = null
 let handleResize = null
+let countriesFeatures = []
 
 const openSections = reactive({ emprego: true, universidade: false, idioma: false, cultura: false })
 const activeFilters = reactive({ emprego: [], universidade: [], idioma: [], cultura: [] })
@@ -106,20 +109,26 @@ function countryMatchesFilters(name) {
   return true
 }
 
+function updateCountryMatches() {
+  const hasFilters = totalActiveFilters.value > 0
+  countriesFeatures.forEach(d => {
+    d.properties.matchesFilter = hasFilters ? countryMatchesFilters(d.properties.name) : true
+  })
+}
+
 function getPolygonAltitude(d) {
-  if (!countryMatchesFilters(d.properties.name)) return 0.005
+  if (!d.properties.matchesFilter) return 0.005
   return d === hoverD ? 0.06 : 0.02
 }
 
 function refreshGlobe() {
-  if (!globe) return
+  if (!globe || !countriesFeatures.length) return
   if (animationFrame) cancelAnimationFrame(animationFrame)
   animationFrame = requestAnimationFrame(() => {
     if (!globe) return
     globe
-      .polygonCapColor(d => countryMatchesFilters(d.properties.name) ? colorScale(d.properties.universities) : 'rgba(20,5,30,0.35)')
+      .polygonCapColor(d => d.properties.matchesFilter ? colorScale(d.properties.universities) : 'rgba(20,5,30,0.35)')
       .polygonAltitude(getPolygonAltitude)
-      .polygonSideColor(() => 'rgba(128,0,128,0.25)')
     animationFrame = null
   })
 }
@@ -130,11 +139,13 @@ function toggleFilter(sectionId, value) {
   const arr = activeFilters[sectionId]
   const idx = arr.indexOf(value)
   idx === -1 ? arr.push(value) : arr.splice(idx, 1)
+  updateCountryMatches()
   refreshGlobe()
 }
 
 function clearFilters() {
   Object.keys(activeFilters).forEach(k => (activeFilters[k] = []))
+  updateCountryMatches()
   refreshGlobe()
 }
 
@@ -146,6 +157,7 @@ onMounted(async () => {
   countries.features.forEach(d => {
     d.properties.universities = universitiesByCountry[d.properties.name] ?? 0
   })
+  countriesFeatures = countries.features
 
   const maxUniv = Math.max(...countries.features.map(d => d.properties.universities), 1)
   colorScale = d3.scaleSequentialSqrt(d3.interpolatePurples).domain([0, maxUniv])
@@ -162,23 +174,30 @@ onMounted(async () => {
     .globeImageUrl('//unpkg.com/three-globe/example/img/earth-dark.jpg')
     .backgroundColor('#3b1060')
 
+  const renderer = globe.renderer?.()
+  if (renderer) renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5))
+
   // Configura controles imediatamente
   const controls = globe.controls()
   controls.autoRotate = true
   controls.autoRotateSpeed = 0.3
   controls.enableZoom = true
   controls.enablePan = true
-  globe.controls().maxDistance = globe.getGlobeRadius() * 3.5
-  globe.controls().minDistance = globe.getGlobeRadius() * 2.5
+  controls.maxDistance = globe.getGlobeRadius() * 3.5
+  controls.minDistance = globe.getGlobeRadius() * 2.5
+
+  updateCountryMatches()
+
   // 4. Adiciona polígonos em dois frames — deixa o WebGL renderizar o globo
   //    base antes de computar todos os países (evita o freeze na entrada)
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
+  initFrame = requestAnimationFrame(() => {
+    initFrame2 = requestAnimationFrame(() => {
+      initFrame2 = null
       if (!globe) return
       globe
         .polygonsData(countries.features)
         .polygonAltitude(getPolygonAltitude)
-        .polygonCapColor(d => colorScale(d.properties.universities))
+        .polygonCapColor(d => d.properties.matchesFilter ? colorScale(d.properties.universities) : 'rgba(20,5,30,0.35)')
         .polygonSideColor(() => 'rgba(128,0,128,0.25)')
         .polygonStrokeColor(() => '#2d004b')
         .polygonLabel(d => `<b>${d.properties.name}</b><br/>Universidades: ${d.properties.universities}`)
@@ -189,8 +208,9 @@ onMounted(async () => {
         })
 
       // Remove tela de loading após polígonos carregarem
-      setTimeout(() => { isLoading.value = false }, 200)
+      isLoading.value = false
     })
+    initFrame = null
   })
 
   // 5. Resize com throttle
@@ -204,17 +224,23 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  if (initFrame) { cancelAnimationFrame(initFrame); initFrame = null }
+  if (initFrame2) { cancelAnimationFrame(initFrame2); initFrame2 = null }
   if (animationFrame) { cancelAnimationFrame(animationFrame); animationFrame = null }
   if (resizeTimer) { clearTimeout(resizeTimer); resizeTimer = null }
   if (handleResize) { window.removeEventListener('resize', handleResize); handleResize = null }
 
   if (globe) {
     if (globe.controls) {
-      globe.controls().autoRotate = false
-      globe.controls().dispose?.()
+      const controls = globe.controls()
+      controls.autoRotate = false
+      controls.dispose?.()
     }
     const renderer = globe.renderer?.()
-    if (renderer) { renderer.dispose(); renderer.domElement?.remove() }
+    if (renderer) {
+      renderer.dispose()
+      renderer.domElement?.remove()
+    }
     if (globeEl.value) {
       while (globeEl.value.firstChild) globeEl.value.removeChild(globeEl.value.firstChild)
     }

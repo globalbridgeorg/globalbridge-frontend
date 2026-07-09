@@ -90,7 +90,7 @@ export function openCloudinaryWidget(onSuccess, onError) {
         {
           cloudName: CLOUDINARY_CONFIG.cloudName,
           uploadPreset: CLOUDINARY_CONFIG.uploadPreset,
-          sources: ['local', 'url'],
+          sources: ['local', 'url', 'camera'],
           maxFileSize: 10000000,
           clientAllowedFormats: ['image'],
           folder: 'avatars',

@@ -1,5 +1,5 @@
 <script setup>
-import GlobeChoropleth from '@/components/globeChoropleth.vue'
+import GlobeChoropleth from '@/components/map/globeChoropleth.vue'
 </script>
 
 <template>

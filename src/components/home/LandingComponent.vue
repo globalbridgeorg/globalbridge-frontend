@@ -1,6 +1,6 @@
 <script setup>
-import BadgeComponent from '@/components/BadgeComponent.vue'
-import ButtonComponent from '@/components/ButtonComponent.vue'
+import BadgeComponent from '@/components/common/BadgeComponent.vue'
+import ButtonComponent from '@/components/common/ButtonComponent.vue'
 import { onMounted } from 'vue'
 import { useVideoLoader } from "@/composables/useVideoLoader.js"
 
@@ -37,13 +37,39 @@ onMounted(() => {
         <ButtonComponent text="Ver os planos" iconType="secondary" style="background-color: white; color: #42023C;" />
       </div>
     </div>
+
     <div class="videoverlay">
       <video
-      v-if="videoSrc"
-      :src="videoSrc"
-      autoplay muted loop playsinline
-      class="video-landing"
-    />
+        v-if="videoSrc"
+        :src="videoSrc"
+        autoplay muted loop playsinline
+        class="video-landing"
+      />
+
+      <div class="card card-options">
+        <BadgeComponent style="background-color: #F4A97E; color: #7A2E10;">
+          +40 países
+        </BadgeComponent>
+        <h2 class="title-options">NOSSAS OPÇÕES</h2>
+        <p class="description-options">
+          Explore nossa seleção com mais de 40 países ao redor do mundo. Compare destinos e descubra qual combina com seu perfil, planeje sua experiência internacional com mais segurança e confiança com base em:
+        </p>
+        <ul class="options-list">
+          <li>custo de vida</li>
+          <li>recepção local</li>
+          <li>cultura interna</li>
+          <li>nível de idioma</li>
+        </ul>
+        <p class="update-text">Seleção atualizada 2026</p>
+        <p class="brand-text">GlobalBridge®</p>
+      </div>
+
+      <ButtonComponent
+        text="Veja todos"
+        iconType="tertiary"
+        class="btn-veja-todos"
+        style="background-color: white; color: #49130C;"
+      />
     </div>
   </section>
 </template>
@@ -74,7 +100,6 @@ onMounted(() => {
   flex: 1;
   border-radius: 24px;
   padding: 24px;
-  /* display: flex; */
   flex-direction: column;
   background-size: cover;
   background-position: center;
@@ -123,6 +148,69 @@ onMounted(() => {
   pointer-events: none;
 }
 
+/* --- Card "Nossas Opções" --- */
+.card-options {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  left: 20px;
+  background-color: #FBE9DE;
+  color: #B1512E;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+
+.title-options {
+  font-size: clamp(1.3rem, 4vw, 1.8rem);
+  font-weight: 800;
+  color: #C0431F;
+  margin: 12px 0 10px;
+}
+
+.description-options {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 14px;
+  color: #A85A38;
+}
+
+.options-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+  font-size: 0.9rem;
+  color: #A85A38;
+}
+
+.options-list li {
+  padding: 3px 0;
+}
+
+.options-list li::before {
+  content: "• ";
+  color: #C0431F;
+}
+
+.update-text {
+  font-weight: 700;
+  color: #C0431F;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.brand-text {
+  color: #C9A08D;
+  font-size: 0.85rem;
+  margin: 2px 0 0;
+}
+
+.btn-veja-todos {
+  position: absolute;
+  left: 20px;
+  bottom: 20px;
+}
+
 @media (min-width: 768px) {
   .contentlayercima {
     justify-self: center;
@@ -146,12 +234,25 @@ onMounted(() => {
   .video-landing {
     height: 700px;
   }
+
+  .card-options {
+    top: 40px;
+    right: 40px;
+    left: auto;
+    width: 380px;
+    padding: 32px;
+  }
+
+  .btn-veja-todos {
+    left: 40px;
+    bottom: 40px;
+  }
 }
 
 @media (max-width: 1600px) {
   .contentlayercima, 
   .videoverlay {
-  max-width: 1225px;
-}
+    max-width: 1225px;
+  }
 }
 </style>

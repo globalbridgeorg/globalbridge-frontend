@@ -1,10 +1,11 @@
 <script setup>
-import VideoComponent from "@/components/VideoComponent.vue";
-import ButtonComponent from "@/components/ButtonComponent.vue";
-import PhotoGrid from '@/components/PhotoGridComponent.vue'
-import Landing from '@/components/LandingComponent.vue';
-import Paises from '@/components/PaisesComponent.vue';
-import Motores from '@/components/MotorComponent.vue';
+import VideoComponent from "@/components/home/VideoComponent.vue";
+import ButtonComponent from "@/components/common/ButtonComponent.vue";
+import PhotoGrid from '@/components/home/PhotoGridComponent.vue'
+import Landing from '@/components/home/LandingComponent.vue';
+import Paises from '@/components/home/PaisesComponent.vue';
+import FaqComponent from "@/components/home/FaqComponent.vue";
+import MotorComponent from "@/components/home/MotorComponent.vue";
 
 
 const fotosEsquerda = [
@@ -37,6 +38,15 @@ const fotosDireita = [
     <Landing src="/videos/video-landing.mp4" />
 
   </section>
+
+  <section>
+    <MotorComponent />
+  </section>
+
+  <section> 
+    <FaqComponent />
+  </section>
+  
 
   <section>
   <Motores/>

@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
-import ButtonComponent from './ButtonComponent.vue'
+import ButtonComponent from '@/components/common/ButtonComponent.vue'
 import { usePWA } from '@/composables/usePWA'
 import { useRoute } from 'vue-router'
 
@@ -45,7 +45,7 @@ const toggleMenu = () => {
     <nav class="navbar_links desktop-nav">
       <router-link to="/mapview">Meu destino</router-link>
       <router-link to="/">Companhias</router-link>
-      <router-link to="/test">uploadIMG</router-link>
+      <router-link to="/test">Contato</router-link>
       <a @click.prevent="installPWA" class="install-link">
         Baixar App
       </a>
@@ -56,7 +56,7 @@ const toggleMenu = () => {
       >
       <ButtonComponent 
         :text="buttonText" 
-        iconType="primary"
+        icon-position="right"
       />
     </router-link>
 
@@ -91,7 +91,7 @@ const toggleMenu = () => {
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
-  height: 72px;
+  height: 75 px;
   background: #ffffff;
   border-radius: 15px;
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
@@ -104,6 +104,12 @@ const toggleMenu = () => {
               border-radius 0.4s ease,
               box-shadow 0.3s ease;
 }
+
+.navbar {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
 
 .navbar_logo img {
   height: 40px;

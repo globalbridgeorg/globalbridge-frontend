@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import BadgeComponent from './BadgeComponent.vue'
+import BadgeComponent from '@/components/common/BadgeComponent.vue'
 
 defineProps({
   imagesCol1: Array,

@@ -2,7 +2,8 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from '@/services/axios'
-import PhotoComponent from '@/components/PhotoComponent.vue'
+import PhotoComponent from '@/components/profile/PhotoComponent.vue'
+import NotificationBanner from '@/components/profile/NotificationBanner.vue'
 
 const router = useRouter()
 const loading = ref(true)
@@ -15,13 +16,46 @@ const profile = ref({
   bio: ''
 })
 
-const profileCards = ref([
-  { title: 'informações do seu perfil', subtitle: 'dados pessoais da sua conta' },
-  { title: 'segurança', subtitle: 'senha, autenticação e acesso' },
-  { title: 'favoritos', subtitle: 'salve seus destinos preferidos' },
-  { title: 'minhas avaliações', subtitle: 'conte suas experiências' },
-  { title: 'preferências de intercâmbio', subtitle: 'configure seu perfil de estudo' }
+// Itens da sidebar "Meu perfil"
+const sidebarItems = ref([
+  { key: 'perfil', label: 'Perfil', icon: '/images/profile_perfil.png' },
+  { key: 'seguranca', label: 'Segurança', icon: '/images/profile_secure.png' },
+  { key: 'favoritos', label: 'Favoritos', icon: '/images/profile_favorite.png' },
+  { key: 'avaliacoes', label: 'Avaliações', icon: '/images/profile_saved.png' },
+  { key: 'preferencias', label: 'Preferências', icon: '/images/profile_settings.png' }
 ])
+
+const activeSection = ref('perfil')
+
+const profileCards = ref([
+  { key: 'perfil', title: 'informações do seu perfil', subtitle: 'dados pessoais da sua conta' },
+  { key: 'seguranca', title: 'segurança', subtitle: 'senha, autenticação e acesso' },
+  { key: 'favoritos', title: 'favoritos', subtitle: 'salve seus destinos preferidos' },
+  { key: 'avaliacoes', title: 'minhas avaliações', subtitle: 'conte suas experiências' },
+  { key: 'preferencias', title: 'preferências de intercâmbio', subtitle: 'configure seu perfil de estudo' }
+])
+
+const selectSection = (key) => {
+  activeSection.value = key
+}
+
+const getCardIcon = (key) => {
+  const icons = {
+    perfil: '/images/profile_perfil.png',
+    seguranca: '/images/profile_secure.png',
+    favoritos: '/images/profile_favorite.png',
+    avaliacoes: '/images/profile_saved.png',
+    preferencias: '/images/profile_settings.png'
+  }
+
+  return icons[key] || '/images/profile_perfil.png'
+}
+
+const showWelcome = ref(false)
+
+function closeWelcome() {
+  showWelcome.value = false
+}
 
 const getAuthToken = () => {
   return localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
@@ -71,46 +105,87 @@ const fetchProfile = async () => {
   }
 }
 
-onMounted(fetchProfile)
+onMounted(() => {
+  fetchProfile()
+  // Mostrar banner de boas-vindas apenas na primeira visita desta sessão
+  try {
+    if (!sessionStorage.getItem('seenProfileWelcome')) {
+      showWelcome.value = true
+      sessionStorage.setItem('seenProfileWelcome', '1')
+    }
+  } catch (e) {
+    // sessionStorage pode falhar em alguns ambientes; falhar silenciosamente
+  }
+})
 </script>
 
 <template>
   <div class="profile-page">
+    <!-- Banner roxo no topo -->
     <div class="top-banner"></div>
 
-    <div class="content">
-      <div v-if="loading" class="loading-state">Carregando perfil...</div>
-      <div v-else>
-        <div v-if="error" class="profile-error">{{ error }}</div>
+    <div class="page-body">
+      <!-- Sidebar "Meu perfil" -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <span class="hamburger">☰</span>
+          <span>Meu perfil</span>
+        </div>
 
-        <div class="user-info">
-          <PhotoComponent
-            :initial-preview="profile.avatar_url"
-            @avatar-updated="(url) => profile.avatar_url = url"
+        <nav class="sidebar-nav">
+          <button
+            v-for="item in sidebarItems"
+            :key="item.key"
+            class="sidebar-item"
+            :class="{ active: activeSection === item.key }"
+            @click="selectSection(item.key)"
+          >
+            <img v-if="item.icon" :src="item.icon" alt="" class="sidebar-icon" />
+            <span class="sidebar-label">{{ item.label }}</span>
+            <span class="sidebar-chevron">›</span>
+          </button>
+        </nav>
+      </aside>
+
+      <!-- Conteúdo principal -->
+      <div class="content-area">
+        <div v-if="loading" class="loading-state">Carregando perfil...</div>
+        <div v-else>
+          <div v-if="error" class="profile-error">{{ error }}</div>
+
+          <div class="user-info">
+            <PhotoComponent
+              :initial-preview="profile.avatar_url"
+              @avatar-updated="(url) => profile.avatar_url = url"
+            />
+
+            <div class="user-text">
+              <h2>{{ profile.name || 'Usuário' }}</h2>
+              <p>{{ profile.email || 'email@exemplo.com' }}</p>
+              <p v-if="profile.username" class="user-handle">@{{ profile.username }}</p>
+              <p v-if="profile.bio" class="user-bio">{{ profile.bio }}</p>
+            </div>
+          </div>
+
+          <NotificationBanner
+            v-if="showWelcome"
+            message="Bem-vindo ao seu painel de perfil."
+            @close="closeWelcome"
           />
 
-          <div class="user-text">
-            <h2>{{ profile.name || 'Usuário' }}</h2>
-            <p>{{ profile.email || 'email@exemplo.com' }}</p>
-            <p v-if="profile.username" class="user-handle">@{{ profile.username }}</p>
-            <p v-if="profile.bio" class="user-bio">{{ profile.bio }}</p>
-          </div>
-        </div>
-
-        <div class="notification-banner">
-          <div class="notification-indicator"></div>
-          <div class="notification-content">
-            <p>Bem-vindo ao seu painel de perfil.</p>
-          </div>
-          <div class="close-placeholder">✕</div>
-        </div>
-
-        <div class="cards-grid">
-          <div v-for="card in profileCards" :key="card.title" class="card">
-            <div class="icon-placeholder"></div>
-            <div class="card-text">
-              <h3>{{ card.title }}</h3>
-              <p>{{ card.subtitle }}</p>
+          <div class="cards-grid">
+            <div
+              v-for="card in profileCards"
+              :key="card.title"
+              class="card"
+              :class="{ active: activeSection === card.key }"
+              @click="selectSection(card.key)"
+            >
+              <img :src="getCardIcon(card.key)" alt="" class="card-icon" />
+              <div class="card-text">
+                <h3>{{ card.title }}</h3>
+                <p>{{ card.subtitle }}</p>
+              </div>
             </div>
           </div>
         </div>
@@ -131,10 +206,89 @@ onMounted(fetchProfile)
   background: #43256f;
 }
 
-.content {
-  max-width: 900px;
+.page-body {
+  display: flex;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background: #f4f1eb;
+  padding: 24px 12px;
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 17px;
+  font-weight: 600;
+  color: #333;
+  padding: 8px 10px 20px;
+}
+
+.hamburger {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 10px 10px;
+  border-radius: 8px;
+  font-size: 15px;
+  color: #444;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.sidebar-item:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.sidebar-item.active {
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  color: #43256f;
+  font-weight: 600;
+}
+
+.sidebar-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.sidebar-label {
+  flex: 1;
+}
+
+.sidebar-chevron {
+  color: #999;
+  font-size: 16px;
+}
+
+/* Conteúdo */
+.content-area {
+  flex: 1;
+  max-width: 1300px;
   margin: 0 auto;
-  padding: 30px 20px;
+  padding: 40px 24px;
 }
 
 .loading-state,
@@ -156,14 +310,14 @@ onMounted(fetchProfile)
 
 .user-text h2 {
   margin: 0;
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 600;
   color: #444;
 }
 
 .user-text p {
   margin: 4px 0 0;
-  font-size: 18px;
+  font-size: 15px;
   color: #777;
 }
 
@@ -175,38 +329,7 @@ onMounted(fetchProfile)
   max-width: 560px;
 }
 
-.notification-banner {
-  display: flex;
-  align-items: center;
-  min-height: 50px;
-  margin-bottom: 30px;
-  background: #f7f4ee;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-}
-
-.notification-indicator {
-  width: 5px;
-  align-self: stretch;
-  background: #e34b57;
-}
-
-.notification-content {
-  flex: 1;
-  min-height: 50px;
-  padding: 0 16px;
-  display: flex;
-  align-items: center;
-}
-
-.close-placeholder {
-  padding: 0 16px;
-  font-size: 18px;
-  color: #b0b0b0;
-  cursor: pointer;
-  user-select: none;
-}
+/* notification banner moved to reusable component NotificationBanner.vue */
 
 .cards-grid {
   display: grid;
@@ -220,14 +343,24 @@ onMounted(fetchProfile)
   background: #f7f4ee;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: box-shadow 0.15s ease;
 }
 
-.icon-placeholder {
-  width: 22px;
-  height: 22px;
+.card:hover {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+  background: #e3e3e3;
+}
+
+.card.active {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+}
+
+.card-icon {
+  width: 30px;
+  height: 30px;
   margin-bottom: 14px;
-  border-radius: 4px;
-  background: #bdbdbd;
+  object-fit: contain;
 }
 
 .card-text h3 {
@@ -246,6 +379,32 @@ onMounted(fetchProfile)
 @media (max-width: 900px) {
   .cards-grid {
     grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-body {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  .sidebar-nav {
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 6px;
+  }
+
+  .sidebar-item {
+    white-space: nowrap;
+  }
+
+  .sidebar-chevron {
+    display: none;
   }
 }
 
