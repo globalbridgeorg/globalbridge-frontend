@@ -492,7 +492,7 @@ onBeforeUnmount(() => {
   color: #2a002a;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  padding: 80px 16px 12px;
+  padding: 30px 17px 12px;
   border-bottom: 1px solid #e0d0e8;
 }
 .agencies-list {
