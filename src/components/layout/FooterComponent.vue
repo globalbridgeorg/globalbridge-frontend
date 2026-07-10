@@ -14,7 +14,7 @@ const isLoggedIn = computed(() => {
 
 const buttonText = computed(() => isLoggedIn.value ? 'Perfil' : 'Entrar')
 const buttonLink = computed(() => isLoggedIn.value ? '/profile' : '/login')
-const buttonmapview = computed(() => isLoggedIn.value ? '/mapview' : '/login')
+const buttonmapview = computed(() => isLoggedIn.value ? '/mapview' : '/mapview')
 </script>
 
 <template>
@@ -51,8 +51,8 @@ const buttonmapview = computed(() => isLoggedIn.value ? '/mapview' : '/login')
         <div class="interactive-overlay">
           <div class="main-text-header">
             <div class="footer-social">
-              <div class="social-icon">G</div>
-              <div class="social-icon">X</div>
+              <div class="social-icon"><img src="/images/github.png" alt=""></div>
+              <div class="social-icon"><img  src="/images/twitter.png" alt=""></div>
             </div>
             
             <div class="footer-contact">
@@ -151,6 +151,7 @@ const buttonmapview = computed(() => isLoggedIn.value ? '/mapview' : '/login')
   height: 45px;
   background-color: rgba(0, 0, 0, 0.1);
   border-radius: 50%;
+  padding: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
