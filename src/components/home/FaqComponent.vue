@@ -183,8 +183,9 @@ const toggleFaq = (id) => {
     }
 }
 
-/* Desktop Grande */
-@media (min-width: 1440px) {
-
+@media (max-width: 1600px) {
+  .faq-section {
+    max-width: 1225px;
+  }
 }
 </style>

@@ -394,4 +394,10 @@ h2 {
         gap: 50px;
     }
 }
+
+@media (max-width: 1600px) {
+  .container {
+    max-width: 1225px;
+  }
+}
 </style>
