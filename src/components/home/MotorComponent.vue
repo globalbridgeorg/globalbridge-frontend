@@ -8,28 +8,28 @@ const items = [
     label: 'Cultura',
     color: '#9C2C8C',
     text: 'Descubra como é o estilo de vida em cada país, seus costumes, tradições e a forma como estrangeiros são recebidos pela população local.',
-    image: '@/images/motoresCultura.png',
+    image: '/images/motoresCultura.png',
     tag: 'Perto de o dia a dia'
   },
   {
     label: 'Idioma',
     color: '#3B6EF5',
     text: 'Conheça os idiomas falados, o nível de proficiência necessário e as oportunidades para aprender ou aprimorar uma nova língua durante o intercâmbio.',
-    image: '@/images/MotoresIdiomas.png',
+    image: '/images/MotoresIdiomas.png',
     tag: 'Fala do idioma'
   },
   {
     label: 'Ensino',
     color: '#F5822D',
     text: 'Explore a qualidade das instituições, os tipos de cursos disponíveis e as opções de programas acadêmicos para estudantes internacionais.',
-    image: '@/images/motoresEnsino.png',
+    image: '/images/motoresEnsino.png',
     tag: 'Filas de ensino'
   },
   {
     label: 'Oportunidade',
     color: '#4CA855',
     text: 'Veja as possibilidades de trabalho, estágios e outros programas que você pode estudar e trabalhar enquanto vive a experiência internacional.',
-    image: '@/images/motoresOportunidades.png',
+    image: '/images/motoresOportunidades.png',
     tag: 'Filas de oportunidade'
   }
 ]
