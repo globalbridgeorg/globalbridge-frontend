@@ -8,28 +8,28 @@ const items = [
     label: 'Cultura',
     color: '#9C2C8C',
     text: 'Descubra como é o estilo de vida em cada país, seus costumes, tradições e a forma como estrangeiros são recebidos pela população local.',
-    image: 'https://images.unsplash.com/photo-1533900298318-6b8da08a523e?w=600&q=80',
+    image: 'public/images/motoresCultura.png',
     tag: 'Perto de o dia a dia'
   },
   {
     label: 'Idioma',
     color: '#3B6EF5',
     text: 'Conheça os idiomas falados, o nível de proficiência necessário e as oportunidades para aprender ou aprimorar uma nova língua durante o intercâmbio.',
-    image: 'https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=600&q=80',
+    image: 'public/images/MotoresIdiomas.png',
     tag: 'Fala do idioma'
   },
   {
     label: 'Ensino',
     color: '#F5822D',
     text: 'Explore a qualidade das instituições, os tipos de cursos disponíveis e as opções de programas acadêmicos para estudantes internacionais.',
-    image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=600&q=80',
+    image: 'public/images/motoresEnsino.png',
     tag: 'Filas de ensino'
   },
   {
     label: 'Oportunidade',
     color: '#4CA855',
     text: 'Veja as possibilidades de trabalho, estágios e outros programas que você pode estudar e trabalhar enquanto vive a experiência internacional.',
-    image: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=600&q=80',
+    image: 'public/images/motoresOportunidades.png',
     tag: 'Filas de oportunidade'
   }
 ]
@@ -151,7 +151,7 @@ BadgeComponent {
   display: flex;
   gap: 20px;
   width: 100%;
-  height: 500px;
+  height: 600px;
   margin: 0 auto;
 }
 
@@ -159,7 +159,6 @@ BadgeComponent {
   position: relative;
   flex: 1 1 0;
   min-width: 160px;
-  /* garante espaço mínimo pro label não cortar, mesmo fechado */
   border-radius: 20px;
   overflow: hidden;
   cursor: pointer;
@@ -208,7 +207,7 @@ BadgeComponent {
   flex: 1 1 55%;
   border-radius: 14px;
   background-size: cover;
-  background-position: center;
+  background-position: start;
   min-height: 0;
 }
 
