@@ -1,21 +1,15 @@
 import { ref } from "vue"
 
+// Deixa o <video> usar o src diretamente: o navegador faz streaming
+// com range requests em vez de baixar o arquivo inteiro como blob antes de tocar.
 export function useVideoLoader() {
 
   const videoSrc = ref(null)
   const loading = ref(true)
 
-  const loadVideo = async (src) => {
-    try {
-      const res = await fetch(src)
-      const blob = await res.blob()
-
-      videoSrc.value = URL.createObjectURL(blob)
-    } catch (err) {
-      console.error("Erro carregando vídeo", err)
-    } finally {
-      loading.value = false
-    }
+  const loadVideo = (src) => {
+    videoSrc.value = src
+    loading.value = false
   }
 
   return {

@@ -7,7 +7,7 @@ import { initSmoothScroll } from '@/utils/lenis'
 
 const route = useRoute()
 
-const shouldShowFooter = computed(() => !['mapview', 'profile', 'login', 'test'].includes(route.name))
+const shouldShowFooter = computed(() => !['mapview', 'profile', 'login'].includes(route.name))
 
 onMounted(() => {
   initSmoothScroll()

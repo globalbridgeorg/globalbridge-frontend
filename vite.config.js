@@ -129,7 +129,7 @@ export default defineConfig(({ command, mode }) => {
       rollupOptions: {
         output: {
           manualChunks: {
-            'globe': ['globe.gl', 'd3', 'topojson-client'],
+            'globe': ['globe.gl', 'd3-scale', 'd3-scale-chromatic', 'd3-geo', 'topojson-client'],
             'vendor': ['vue', 'vue-router', 'pinia', 'axios'],
           },
         },

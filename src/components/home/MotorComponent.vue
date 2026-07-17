@@ -109,7 +109,8 @@ onBeforeUnmount(() => {
 
     <div class="cards-wrap" ref="cardsWrap" @mouseleave="activate(cardRefs[0])">
       <div v-for="(item, index) in items" :key="item.label" class="card" :style="{ background: item.color }"
-        ref="cardRefs" @mouseenter="activate(cardRefs[index])">
+        ref="cardRefs" tabindex="0" role="button" :aria-label="`Ver detalhes de ${item.label}`"
+        @mouseenter="activate(cardRefs[index])" @focus="activate(cardRefs[index])">
         <div class="card-label">{{ item.label }}</div>
         <div class="card-body">
           <div class="card-content">
@@ -168,6 +169,11 @@ BadgeComponent {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+}
+
+.card:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: -3px;
 }
 
 .card-label {

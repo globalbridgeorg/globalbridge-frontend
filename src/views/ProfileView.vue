@@ -2,10 +2,12 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from '@/services/axios'
+import { useAuth } from '@/composables/useAuth'
 import PhotoComponent from '@/components/profile/PhotoComponent.vue'
 import NotificationBanner from '@/components/profile/NotificationBanner.vue'
 
 const router = useRouter()
+const { getAccessToken } = useAuth()
 const loading = ref(true)
 const error = ref('')
 const profile = ref({
@@ -57,42 +59,18 @@ function closeWelcome() {
   showWelcome.value = false
 }
 
-const getAuthToken = () => {
-  return localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
-}
-
 const fetchProfile = async () => {
-  const token = getAuthToken()
-  if (!token) {
+  if (!getAccessToken()) {
     router.push({ name: 'login' })
     return
   }
 
-  const profileEndpoints = ['/usuarios/me/', '/api/usuarios/me/', '/me/', '/profile/']
-  let response = null
-
   try {
-    for (const endpoint of profileEndpoints) {
-      try {
-        response = await axios.get(endpoint)
-        break
-      } catch (err) {
-        if (err.response?.status !== 404) {
-          throw err
-        }
-      }
-    }
-
-    if (!response) {
-      throw new Error('Profile endpoint not found')
-    }
-
+    const response = await axios.get('/usuarios/me/')
     const data = response.data || {}
-    profile.value.name = data.name || data.full_name || ''
+    profile.value.name = data.name || ''
     profile.value.email = data.email || ''
-    profile.value.username = data.username || data.user_name || ''
-    profile.value.avatar_url = data.avatar_url || data.avatar || data.photo_url || ''
-    profile.value.bio = data.bio || data.description || ''
+    profile.value.avatar_url = data.avatar_url || ''
   } catch (err) {
     if (err.response?.status === 401) {
       router.push({ name: 'login' })

@@ -1,5 +1,8 @@
 import axios from 'axios'
 import router from '@/router'
+import { useAuth } from '@/composables/useAuth'
+
+const { getAccessToken, getRefreshToken, setTokens, clearTokens } = useAuth()
 
 const normalizeBaseUrl = (url) => {
   if (!url) return url
@@ -8,10 +11,6 @@ const normalizeBaseUrl = (url) => {
     normalized = `https://${normalized}`
   }
   return normalized
-}
-
-const getStoredValue = (key) => {
-  return localStorage.getItem(key) || sessionStorage.getItem(key)
 }
 
 const getBaseUrl = () => {
@@ -34,7 +33,7 @@ axios.defaults.baseURL = getBaseUrl()
 
 axios.interceptors.request.use(
   (config) => {
-    const token = getStoredValue('access_token')
+    const token = getAccessToken()
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -81,13 +80,10 @@ axios.interceptors.response.use(
       originalRequest._retry = true
       isRefreshing = true
 
-      const refreshToken = getStoredValue('refresh_token')
+      const refreshToken = getRefreshToken()
       if (!refreshToken) {
         isRefreshing = false
-        localStorage.removeItem('access_token')
-        localStorage.removeItem('refresh_token')
-        sessionStorage.removeItem('access_token')
-        sessionStorage.removeItem('refresh_token')
+        clearTokens()
         router.push({ name: 'login' })
         return Promise.reject(error)
       }
@@ -95,17 +91,14 @@ axios.interceptors.response.use(
       try {
         const { data } = await axios.post('/token/refresh/', { refresh: refreshToken })
         const newAccessToken = data.access
-        localStorage.setItem('access_token', newAccessToken)
-        sessionStorage.setItem('access_token', newAccessToken)
+        // Mantém o token na mesma storage onde já estava (persiste se estava em localStorage)
+        setTokens({ access: newAccessToken, refresh: refreshToken }, !!localStorage.getItem('access_token'))
         processQueue(null, newAccessToken)
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`
         return axios(originalRequest)
       } catch (refreshError) {
         processQueue(refreshError, null)
-        localStorage.removeItem('access_token')
-        localStorage.removeItem('refresh_token')
-        sessionStorage.removeItem('access_token')
-        sessionStorage.removeItem('refresh_token')
+        clearTokens()
         router.push({ name: 'login' })
         return Promise.reject(refreshError)
       } finally {

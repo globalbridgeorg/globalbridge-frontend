@@ -2,20 +2,16 @@
 import { ref, computed } from 'vue'
 import ButtonComponent from '@/components/common/ButtonComponent.vue'
 import { usePWA } from '@/composables/usePWA'
+import { useAuth } from '@/composables/useAuth'
 import { useRoute } from 'vue-router'
 
 const { isInstallable, installPWA } = usePWA()
+const { isLoggedIn } = useAuth()
 const mobileMenuOpen = ref(false)
 const route = useRoute()
 
 const headerClass = computed(() => {
-  return route.meta?.headerWidth === 'compact' ? 'header-compact' : 'header-full' 
-})
-
-const isLoggedIn = computed(() => {
-  route.fullPath
-  const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
-  return !!token
+  return route.meta?.headerWidth === 'compact' ? 'header-compact' : 'header-full'
 })
 
 const buttonText = computed(() => isLoggedIn.value ? 'Perfil' : 'Entrar')
@@ -45,7 +41,6 @@ const toggleMenu = () => {
     <nav class="navbar_links desktop-nav">
       <router-link to="/mapview">Meu destino</router-link>
       <router-link to="/">Companhias</router-link>
-      <router-link to="/test">Contato</router-link>
       <a @click.prevent="installPWA" class="install-link">
         Baixar App
       </a>
@@ -63,9 +58,8 @@ const toggleMenu = () => {
     <!-- menu mobile -->
     <Transition name="mobile-menu">
       <div v-if="mobileMenuOpen" class="mobile-nav">
-        <router-link to="/" @click="toggleMenu">Meu destino</router-link>
+        <router-link to="/mapview" @click="toggleMenu">Meu destino</router-link>
         <router-link to="/" @click="toggleMenu">Companhias</router-link>
-        <router-link to="/test" @click="toggleMenu">Contato</router-link>
         <div class="buttonsmenu">
           <ButtonComponent 
             text="Instalar App" 
@@ -84,14 +78,12 @@ const toggleMenu = () => {
 </template>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
-
 .navbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
-  height: 75 px;
+  height: 75px;
   background: #ffffff;
   border-radius: 15px;
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
@@ -197,8 +189,6 @@ const toggleMenu = () => {
 .header-compact {
   max-width: 1200px;
 }
-
-.header- 
 
 .mobile-menu-enter-active,
 .mobile-menu-leave-active {

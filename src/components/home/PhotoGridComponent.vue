@@ -10,14 +10,15 @@ defineProps({
 const col1 = ref(null)
 const col2 = ref(null)
 const photoSection = ref(null)
+let ticking = false
 
-const handleScroll = () => {
+const applyParallax = () => {
   if (!photoSection.value) return
-  
+
   const sectionTop = photoSection.value.offsetTop
   const scroll = window.scrollY - sectionTop
-  const speed = 0.15 
-  const startOffset = 50 
+  const speed = 0.15
+  const startOffset = 50
 
   if (col1.value && col2.value) {
     col1.value.style.transform = `translateY(${startOffset - (scroll * speed)}px)`
@@ -25,8 +26,17 @@ const handleScroll = () => {
   }
 }
 
+const handleScroll = () => {
+  if (ticking) return
+  ticking = true
+  requestAnimationFrame(() => {
+    applyParallax()
+    ticking = false
+  })
+}
+
 onMounted(() => {
-  window.addEventListener('scroll', handleScroll)
+  window.addEventListener('scroll', handleScroll, { passive: true })
 })
 
 onUnmounted(() => {

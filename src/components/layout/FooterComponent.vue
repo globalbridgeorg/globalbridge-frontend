@@ -2,19 +2,16 @@
 import ButtonComponent from '@/components/common/ButtonComponent.vue'
 import BadgeComponent from '@/components/common/BadgeComponent.vue'
 import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useAuth } from '@/composables/useAuth'
 
-const route = useRoute()
-
-const isLoggedIn = computed(() => {
-  route.fullPath
-  const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
-  return !!token
-})
+const { isLoggedIn } = useAuth()
 
 const buttonText = computed(() => isLoggedIn.value ? 'Perfil' : 'Entrar')
 const buttonLink = computed(() => isLoggedIn.value ? '/profile' : '/login')
+<<<<<<< Updated upstream
 const buttonmapview = computed(() => isLoggedIn.value ? '/mapview' : '/login')
+=======
+>>>>>>> Stashed changes
 </script>
 
 <template>
@@ -32,7 +29,7 @@ const buttonmapview = computed(() => isLoggedIn.value ? '/mapview' : '/login')
           <p class="cta-subtitle">Quer escolher o destino perfeito pro seu futuro?</p>
           <div class="cta-buttons">
 
-            <router-link :to="buttonmapview">
+            <router-link to="/mapview">
               <ButtonComponent text="Visite o mundo" iconType="primary" />
             </router-link>
             

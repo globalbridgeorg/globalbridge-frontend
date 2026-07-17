@@ -1,9 +1,11 @@
 <script setup>
-import { ref, reactive, computed, onBeforeUnmount } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from '@/services/axios'
+import { useAuth } from '@/composables/useAuth'
 
 const router = useRouter()
+const { setTokens } = useAuth()
 
 const showRegister = ref(false)
 const loading = ref(false)
@@ -11,18 +13,17 @@ const errorField = ref('')
 const errorMessage = ref('')
 const successMessage = ref('')
 const step = ref(1)
-const stepDirection = ref('')
-const stepAnimationTimer = ref(null)
 
+// Nota: o backend ainda não tem endpoint de verificação de e-mail,
+// então essa etapa não existe aqui até que exista suporte real.
 const steps = [
   { fields: ['email'], labels: ['E-mail'], placeholders: ['exemplo@dominio.com'], types: ['email'], label: 'E-mail' },
-  { fields: ['verificationCode'], labels: ['Código de verificação'], placeholders: ['000000'], types: ['text'], label: 'Código de verificação' },
   { fields: ['name'], labels: ['Nome completo'], placeholders: ['Seu nome'], types: ['text'], label: 'Dados pessoais' },
   { fields: ['password', 'confirmPassword'], labels: ['Senha', 'Confirmar senha'], placeholders: ['Crie uma senha', 'Digite novamente'], types: ['password', 'password'], label: 'Senha' }
 ]
 
 const loginForm = reactive({ email: '', password: '', keepLogged: false })
-const registerData = reactive({ email: '', verificationCode: '', name: '', password: '', confirmPassword: '' })
+const registerData = reactive({ email: '', name: '', password: '', confirmPassword: '' })
 
 const currentStep = computed(() => steps[step.value - 1] || steps[0])
 
@@ -30,15 +31,8 @@ function clearError() { errorField.value = ''; errorMessage.value = '' }
 function clearErrorForField(field) { if (errorField.value === field) clearError() }
 function setError(field, message) { errorField.value = field; errorMessage.value = message; successMessage.value = '' }
 
-function animateStep(direction) {
-  stepDirection.value = direction
-  if (stepAnimationTimer.value) clearTimeout(stepAnimationTimer.value)
-  stepAnimationTimer.value = setTimeout(() => { stepDirection.value = '' }, 240)
-}
-
 function resetRegisterData() {
   registerData.email = ''
-  registerData.verificationCode = ''
   registerData.name = ''
   registerData.password = ''
   registerData.confirmPassword = ''
@@ -48,15 +42,11 @@ function resetRegisterData() {
 }
 
 function goToRegister() { showRegister.value = true; resetRegisterData() }
-function goToStep(target) { if (target < 1 || target >= step.value) return; step.value = target; animateStep('back'); clearError() }
+function goToStep(target) { if (target < 1 || target >= step.value) return; step.value = target; clearError() }
 
 function nextStep() {
   clearError()
   const cur = currentStep.value
-  if (cur.fields[0] === 'verificationCode') {
-    if (step.value < steps.length) { step.value++; animateStep('forward') }
-    return
-  }
   for (const f of cur.fields) {
     if (!registerData[f]) {
       const label = cur.labels[cur.fields.indexOf(f)]
@@ -64,11 +54,10 @@ function nextStep() {
       return
     }
   }
-  if (step.value < steps.length) { step.value++; animateStep('forward') }
+  if (step.value < steps.length) step.value++
 }
 
-function prevStep() { if (step.value > 1) { step.value--; animateStep('back'); clearError() } }
-function skipVerification() { registerData.verificationCode = '000000'; if (step.value < steps.length) { step.value++; animateStep('forward') } }
+function prevStep() { if (step.value > 1) { step.value--; clearError() } }
 function handleStepEnter() { step.value < steps.length ? nextStep() : handleRegister() }
 
 async function handleLogin() {
@@ -78,9 +67,7 @@ async function handleLogin() {
   loading.value = true
   try {
     const res = await axios.post('/token/', { email: loginForm.email, password: loginForm.password })
-    const { access, refresh } = res.data
-    if (loginForm.keepLogged) { localStorage.setItem('access_token', access); localStorage.setItem('refresh_token', refresh) }
-    else { sessionStorage.setItem('access_token', access); sessionStorage.setItem('refresh_token', refresh) }
+    setTokens(res.data, loginForm.keepLogged)
     successMessage.value = 'Login realizado com sucesso!'
     router.push({ name: 'profile' })
   } catch (err) {
@@ -101,12 +88,13 @@ async function handleRegister() {
   loading.value = true
   try {
     const res = await axios.post('/registro/', { email: registerData.email, name: registerData.name, password: registerData.password })
-    const { access, refresh } = res.data
-    if (access && refresh) {
-      localStorage.setItem('access_token', access); localStorage.setItem('refresh_token', refresh); router.push({ name: 'profile' }); return
+    if (res.data.access && res.data.refresh) {
+      setTokens(res.data, true)
+      router.push({ name: 'profile' })
+      return
     }
     const loginRes = await axios.post('/token/', { email: registerData.email, password: registerData.password })
-    localStorage.setItem('access_token', loginRes.data.access); localStorage.setItem('refresh_token', loginRes.data.refresh)
+    setTokens(loginRes.data, true)
     router.push({ name: 'profile' })
   } catch (err) {
     if (err.response?.data?.email) setError('register.email', 'Este e-mail já está em uso')
@@ -115,11 +103,7 @@ async function handleRegister() {
   } finally { loading.value = false }
 }
 
-function resendCode() { clearError(); successMessage.value = 'Código reenviado com sucesso.' }
 function backToLogin() { showRegister.value = false; resetRegisterData() }
-
-onBeforeUnmount(() => { if (stepAnimationTimer.value) clearTimeout(stepAnimationTimer.value) })
-
 </script>
 
 <template>
@@ -128,7 +112,7 @@ onBeforeUnmount(() => { if (stepAnimationTimer.value) clearTimeout(stepAnimation
 
     <div
       class="main-card"
-      :class="{ 'slide-left': showRegister, 'step-forward': stepDirection === 'forward', 'step-back': stepDirection === 'back' }"
+      :class="{ 'slide-left': showRegister }"
     >
       <div v-if="!showRegister" class="card-content">
         <div v-if="successMessage" class="field-success">{{ successMessage }}</div>
@@ -188,11 +172,6 @@ onBeforeUnmount(() => { if (stepAnimationTimer.value) clearTimeout(stepAnimation
             @keyup.enter="handleStepEnter"
             @input="clearErrorForField(`register.${field}`)"
           >
-        </div>
-
-        <div v-if="step === 2" class="verification-actions">
-          <button class="resend-link" @click="resendCode">Reenviar código</button>
-          <button class="debug-link" @click="skipVerification">Pular verificação (debug)</button>
         </div>
 
         <div class="step-buttons">
@@ -263,10 +242,6 @@ html, body {
 }
 
 .main-card.slide-left { transform: translateX(25vw); }
-.main-card.step-forward { transform: translateX(25vw); }
-.main-card.slide-left.step-forward { transform: translateX(25vw); }
-.main-card.step-back { transform: translateX(25vw); }
-.main-card.slide-left.step-back { transform: translateX(25vw); }
 
 .card-content { height: 100%; display: flex; flex-direction: column; justify-content: center; }
 .form-group { margin-bottom: 20px; }
@@ -276,14 +251,12 @@ html, body {
 .checkbox-group { display: flex; align-items: center; gap: 10px; margin-bottom: 25px; }
 .checkbox-group input { width: 18px; height: 18px; cursor: pointer; }
 .checkbox-group label { margin-bottom: 0; font-size: 14px; color: #4b5563; cursor: pointer; }
-.btn-primary { width: 100%; background: url('/images/backgroundlogin.png'); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: opacity 0.2s, transform 0.1s; }
+.btn-primary { width: 100%; background: linear-gradient(135deg, #4F46E5 0%, #06B6D4 100%); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: opacity 0.2s, transform 0.1s; }
 .btn-primary:hover { opacity: 0.9; transform: scale(0.98); }
 .create-account-link { text-align: center; margin-top: 20px; }
 .create-account-link span { color: #6b7280; font-size: 14px; }
 .link-button { background: none; border: none; color: #4F46E5; font-weight: 600; cursor: pointer; font-size: 14px; text-decoration: underline; margin-left: 5px; }
 .link-button:hover { color: #06B6D4; }
-.resend-code { text-align: right; margin-top: -12px; margin-bottom: 20px; }
-.resend-link { background: none; border: none; color: #4F46E5; font-size: 12px; cursor: pointer; text-decoration: underline; }
 .back-to-login { text-align: center; margin-top: 20px; }
 .back-to-login span { color: #6b7280; font-size: 14px; display: block; margin-bottom: 8px; }
 .back-login-link { background: none; border: none; color: #4F46E5; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: underline; }
@@ -304,8 +277,6 @@ html, body {
 .step-buttons .btn-primary, .step-buttons .btn-secondary { flex: 1; }
 .btn-secondary { background: #e5e7eb; color: #1f2937; border: none; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
 .btn-secondary:hover { background: #d1d5db; }
-.verification-actions { display: flex; justify-content: space-between; align-items: center; margin: -10px 0 20px; }
-.debug-link { background: none; border: none; color: #f59e0b; font-size: 12px; cursor: pointer; text-decoration: underline; }
 .field-error { display: block; margin-bottom: 8px; color: #dc2626; font-size: 13px; font-weight: 700; animation: errorShake 0.25s ease-in-out; }
 .field-success { display: block; margin-bottom: 16px; color: #15803d; font-size: 13px; font-weight: 700; }
 

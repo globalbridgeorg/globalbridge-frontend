@@ -2,9 +2,18 @@ import { ref, onMounted, onUnmounted, computed } from "vue"
 
 export function useScrollAnimation(endScroll = 600) {
   const scrollY = ref(0)
-  const updateScroll = () => { scrollY.value = window.scrollY }
+  let ticking = false
 
-  onMounted(() => window.addEventListener("scroll", updateScroll))
+  const updateScroll = () => {
+    if (ticking) return
+    ticking = true
+    requestAnimationFrame(() => {
+      scrollY.value = window.scrollY
+      ticking = false
+    })
+  }
+
+  onMounted(() => window.addEventListener("scroll", updateScroll, { passive: true }))
   onUnmounted(() => window.removeEventListener("scroll", updateScroll))
 
   const videoStyle = computed(() => {

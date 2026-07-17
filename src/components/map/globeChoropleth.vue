@@ -1,15 +1,19 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount, reactive, computed } from 'vue'
 import Globe from 'globe.gl'
-import * as d3 from 'd3'
+import { scaleSequentialSqrt } from 'd3-scale'
+import { interpolatePurples } from 'd3-scale-chromatic'
+import { geoCentroid } from 'd3-geo'
 import * as topojson from 'topojson-client'
 import universitiesByCountry from '@/stores/universitiesByCountry'
 
 // ─── Cache de módulo: só faz fetch uma vez por sessão ───────────────────────
+// Topologia servida localmente (public/data/countries-110m.json, extraída do
+// pacote world-atlas@2) em vez de depender do unpkg em runtime.
 let _worldCache = null
 async function getWorldData() {
   if (_worldCache) return _worldCache
-  _worldCache = await fetch('https://unpkg.com/world-atlas@2/countries-110m.json').then(r => r.json())
+  _worldCache = await fetch('/data/countries-110m.json').then(r => r.json())
   return _worldCache
 }
 
@@ -160,7 +164,7 @@ onMounted(async () => {
   countriesFeatures = countries.features
 
   const maxUniv = Math.max(...countries.features.map(d => d.properties.universities), 1)
-  colorScale = d3.scaleSequentialSqrt(d3.interpolatePurples).domain([0, maxUniv])
+  colorScale = scaleSequentialSqrt(interpolatePurples).domain([0, maxUniv])
 
   // 2. Limpa instância anterior se existir
   if (globeEl.value) {
@@ -171,7 +175,7 @@ onMounted(async () => {
   globe = Globe()(globeEl.value)
     .width(window.innerWidth)
     .height(window.innerHeight)
-    .globeImageUrl('//unpkg.com/three-globe/example/img/earth-dark.jpg')
+    .globeImageUrl('/textures/earth-dark.jpg')
     .backgroundColor('#3b1060')
 
   const renderer = globe.renderer?.()
@@ -203,7 +207,7 @@ onMounted(async () => {
         .polygonLabel(d => `<b>${d.properties.name}</b><br/>Universidades: ${d.properties.universities}`)
         .onPolygonHover(d => { hoverD = d; refreshGlobe() })
         .onPolygonClick(d => {
-          const [lng, lat] = d3.geoCentroid(d)
+          const [lng, lat] = geoCentroid(d)
           globe.pointOfView({ lat, lng, altitude: 1.4 }, 1000)
         })
 
@@ -263,17 +267,25 @@ onBeforeUnmount(() => {
     <button class="collapse-btn" @click="panelCollapsed = !panelCollapsed">{{ panelCollapsed ? '›' : '‹' }}</button>
     <div class="panel-inner">
       <div class="filter-section" v-for="section in filters" :key="section.id">
-        <div class="section-header" @click="toggleSection(section.id)">
+        <button type="button" class="section-header" :aria-expanded="openSections[section.id]" @click="toggleSection(section.id)">
           <span class="section-icon">{{ section.icon }}</span>
           <span class="section-label">{{ section.label }}</span>
           <span class="section-arrow" :class="{ open: openSections[section.id] }">▾</span>
-        </div>
+        </button>
         <div class="section-options" :class="{ open: openSections[section.id] }">
-          <div v-for="opt in section.options" :key="opt.value" class="option-item" :class="{ active: activeFilters[section.id]?.includes(opt.value) }" @click="toggleFilter(section.id, opt.value)">
+          <button
+            type="button"
+            v-for="opt in section.options"
+            :key="opt.value"
+            class="option-item"
+            :class="{ active: activeFilters[section.id]?.includes(opt.value) }"
+            :aria-pressed="activeFilters[section.id]?.includes(opt.value)"
+            @click="toggleFilter(section.id, opt.value)"
+          >
             <span class="option-check">{{ activeFilters[section.id]?.includes(opt.value) ? '✓' : '' }}</span>
             <span class="option-text">{{ opt.label }}</span>
             <span class="option-count" v-if="opt.count">{{ opt.count }}</span>
-          </div>
+          </button>
         </div>
       </div>
       <button class="clear-btn" @click="clearFilters">Limpar filtros</button>
@@ -391,11 +403,18 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   gap: 8px;
+  width: 100%;
   padding: 8px 10px;
   cursor: pointer;
   border-radius: 6px;
+  background: transparent;
+  border: none;
+  text-align: left;
+  font: inherit;
 }
 .section-header:hover { background: rgba(123,45,139,0.08); }
+.section-header:focus-visible,
+.option-item:focus-visible { outline: 2px solid #7b2d8b; outline-offset: 2px; }
 .section-icon { font-size: 12px; }
 .section-label {
   flex: 1;
@@ -421,9 +440,14 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   gap: 7px;
+  width: 100%;
   padding: 6px 10px 6px 24px;
   cursor: pointer;
   border-radius: 5px;
+  background: transparent;
+  border: none;
+  text-align: left;
+  font: inherit;
 }
 .option-item:hover { background: rgba(123,45,139,0.07); }
 .option-item.active { background: rgba(123,45,139,0.12); }
