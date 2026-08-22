@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, computed, onBeforeUnmount } from 'vue'
+import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from '@/services/axios'
 
@@ -13,6 +13,10 @@ const successMessage = ref('')
 const step = ref(1)
 const stepDirection = ref('')
 const stepAnimationTimer = ref(null)
+const cardPhase = ref('idle')
+const cardPhaseTimers = []
+const justMounted = ref(true)
+onMounted(() => { cardPhaseTimers.push(setTimeout(() => { justMounted.value = false }, 700)) })
 
 const steps = [
   { fields: ['email'], labels: ['E-mail'], placeholders: ['exemplo@dominio.com'], types: ['email'], label: 'E-mail' },
@@ -47,7 +51,19 @@ function resetRegisterData() {
   successMessage.value = ''
 }
 
-function goToRegister() { showRegister.value = true; resetRegisterData() }
+function switchAuthMode(toRegister) {
+  if (cardPhase.value !== 'idle') return
+  cardPhaseTimers.splice(0).forEach(clearTimeout)
+  cardPhase.value = 'exiting'
+  cardPhaseTimers.push(setTimeout(() => {
+    if (toRegister) { showRegister.value = true; resetRegisterData() }
+    else { showRegister.value = false; resetRegisterData() }
+    cardPhase.value = 'entering'
+    cardPhaseTimers.push(setTimeout(() => { cardPhase.value = 'idle' }, 300))
+  }, 220))
+}
+
+function goToRegister() { switchAuthMode(true) }
 function goToStep(target) { if (target < 1 || target >= step.value) return; step.value = target; animateStep('back'); clearError() }
 
 function nextStep() {
@@ -116,9 +132,12 @@ async function handleRegister() {
 }
 
 function resendCode() { clearError(); successMessage.value = 'Código reenviado com sucesso.' }
-function backToLogin() { showRegister.value = false; resetRegisterData() }
+function backToLogin() { switchAuthMode(false) }
 
-onBeforeUnmount(() => { if (stepAnimationTimer.value) clearTimeout(stepAnimationTimer.value) })
+onBeforeUnmount(() => {
+  if (stepAnimationTimer.value) clearTimeout(stepAnimationTimer.value)
+  cardPhaseTimers.splice(0).forEach(clearTimeout)
+})
 
 </script>
 
@@ -215,7 +234,7 @@ onBeforeUnmount(() => { if (stepAnimationTimer.value) clearTimeout(stepAnimation
 
     <div
       class="main-card"
-      :class="{ 'slide-left': showRegister, 'step-forward': stepDirection === 'forward', 'step-back': stepDirection === 'back' }"
+      :class="{ 'slide-left': showRegister, 'step-forward': stepDirection === 'forward', 'step-back': stepDirection === 'back', 'mount-in': justMounted, 'card-exit': cardPhase === 'exiting', 'card-enter': cardPhase === 'entering' }"
     >
       <div v-if="!showRegister" class="card-content">
         <div v-if="successMessage" class="field-success">{{ successMessage }}</div>
@@ -334,8 +353,8 @@ html, body {
 .stars { position: absolute; inset: 0; opacity: 0.5; }
 
 .skyline { position: absolute; left: 0; bottom: 0; width: 300%; animation: scroll linear infinite; }
-.skyline-back { height: 50%; opacity: 0.5; animation-duration: 80s; }
-.skyline-front { height: 60%; animation-duration: 42s; animation-direction: reverse; }
+.skyline-back { height: 70%; opacity: 0.5; animation-duration: 80s; }
+.skyline-front { height: 80%; animation-duration: 42s; animation-direction: reverse; }
 
 @keyframes scroll {
   from { transform: translateX(0); }
@@ -352,7 +371,7 @@ html, body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .page-container, .skyline, .plane { animation: none; }
+  .page-container, .skyline, .plane, .main-card, .main-card.mount-in, .main-card.card-exit, .main-card.card-enter { animation: none; }
 }
 
 /* ── Card de login/cadastro ──────────────────────────────────────────── */
@@ -368,21 +387,31 @@ html, body {
   width: 100%;
   max-width: 460px;
   min-height: 400px;
+  --card-shift: 0vw;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
-  transform: translateX(0) scale(1);
-  animation: cardIn 0.7s cubic-bezier(.16, 1, .3, 1) both;
+  transform: translateX(var(--card-shift)) scale(1);
 }
 
+.main-card.mount-in { animation: cardIn 0.7s cubic-bezier(.16, 1, .3, 1) both; }
 @keyframes cardIn {
   from { opacity: 0; transform: translateY(24px) scale(0.97); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.main-card.slide-left { transform: translateX(25vw); }
-.main-card.step-forward { transform: translateX(25vw); }
-.main-card.slide-left.step-forward { transform: translateX(25vw); }
-.main-card.step-back { transform: translateX(25vw); }
-.main-card.slide-left.step-back { transform: translateX(25vw); }
+.main-card.slide-left { --card-shift: 25vw; }
+.main-card.step-forward { --card-shift: 25vw; }
+.main-card.slide-left.step-forward { --card-shift: 25vw; }
+.main-card.step-back { --card-shift: 25vw; }
+.main-card.slide-left.step-back { --card-shift: 25vw; }
+
+.main-card.card-exit { animation: cardExit 0.22s ease both; }
+@keyframes cardExit { to { opacity: 0; transform: translateX(var(--card-shift)) translateY(10px); } }
+
+.main-card.card-enter { animation: cardEnter 0.28s ease both; }
+@keyframes cardEnter {
+  from { opacity: 0; transform: translateX(var(--card-shift)) translateY(10px); }
+  to { opacity: 1; transform: translateX(var(--card-shift)) translateY(0); }
+}
 
 .card-content { height: 100%; display: flex; flex-direction: column; justify-content: center; }
 .form-group { margin-bottom: 20px; }
