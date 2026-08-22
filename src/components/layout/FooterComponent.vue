@@ -73,7 +73,7 @@ onBeforeUnmount(() => marqueeTween?.kill())
           <div class="footer-links-col">
             <span class="footer-links-label">Plataforma</span>
             <router-link to="/mapview">Meu destino</router-link>
-            <router-link to="/#passos">Agências</router-link>
+            <router-link to="/como-funciona#agencias">Agências</router-link>
             <router-link to="/#formatos">Planos</router-link>
           </div>
 
@@ -272,8 +272,8 @@ onBeforeUnmount(() => marqueeTween?.kill())
   font-weight: 900;
   text-transform: uppercase;
   font-size: clamp(3rem, 2rem + 6vw, 7rem);
-  color: rgba(23, 17, 26, 0.08);
-  -webkit-text-stroke: 1.5px rgba(23, 17, 26, 0.18);
+  color: rgba(218, 3, 128, 0.08);
+  -webkit-text-stroke: 1.5px rgba(0, 0, 0, 0.18);
 }
 
 @media (min-width: 768px) {

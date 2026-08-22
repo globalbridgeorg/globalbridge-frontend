@@ -4,6 +4,7 @@ import TestView from '@/views/TestView.vue';
 import MapView from '@/views/MapView.vue';
 import LoginView from '@/views/LoginView.vue';
 import ProfileView from '@/views/ProfileView.vue';
+import ComoFuncionaView from '@/views/ComoFuncionaView.vue';
 
 const routes = [
   {
@@ -28,6 +29,12 @@ const routes = [
     path: '/profile',
     name: 'profile',
     component: ProfileView,
+    meta: { headerWidth: 'full' }
+  },
+  {
+    path: '/como-funciona',
+    name: 'como-funciona',
+    component: ComoFuncionaView,
     meta: { headerWidth: 'full' }
   },
   {
