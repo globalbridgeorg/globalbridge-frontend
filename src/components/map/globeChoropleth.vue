@@ -25,6 +25,7 @@ let animationFrame = null
 let initFrame = null
 let initFrame2 = null
 let handleResize = null
+let handleVisibility = null
 let countriesFeatures = []
 
 const openSections = reactive({ emprego: true, universidade: false, idioma: false, cultura: false })
@@ -160,7 +161,7 @@ onMounted(async () => {
   countriesFeatures = countries.features
 
   const maxUniv = Math.max(...countries.features.map(d => d.properties.universities), 1)
-  colorScale = d3.scaleSequentialSqrt(d3.interpolateRgb('#4A1F52', '#B01FB0')).domain([0, maxUniv])
+  colorScale = d3.scaleSequentialSqrt(d3.interpolatePurples).domain([0, maxUniv])
 
   // 2. Limpa instância anterior se existir
   if (globeEl.value) {
@@ -168,11 +169,14 @@ onMounted(async () => {
   }
 
   // 3. Inicializa o globo SEM polígonos primeiro (WebGL sobe mais rápido)
-  globe = Globe()(globeEl.value)
+  // powerPreference força o navegador a usar a GPU dedicada em notebooks
+  // com chip híbrido, em vez da integrada (que é a causa mais comum de
+  // um WebGL "pesado" sem motivo aparente) — não afeta a qualidade visual.
+  globe = Globe({ rendererConfig: { powerPreference: 'high-performance' } })(globeEl.value)
     .width(window.innerWidth)
     .height(window.innerHeight)
     .globeImageUrl('//unpkg.com/three-globe/example/img/earth-dark.jpg')
-    .backgroundColor('#2E0A2E')
+    .backgroundColor('#3b1060')
 
   const renderer = globe.renderer?.()
   if (renderer) renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5))
@@ -198,8 +202,8 @@ onMounted(async () => {
         .polygonsData(countries.features)
         .polygonAltitude(getPolygonAltitude)
         .polygonCapColor(d => d.properties.matchesFilter ? colorScale(d.properties.universities) : 'rgba(20,5,30,0.35)')
-        .polygonSideColor(() => 'rgba(176,31,176,0.25)')
-        .polygonStrokeColor(() => '#2E0A2E')
+        .polygonSideColor(() => 'rgba(128,0,128,0.25)')
+        .polygonStrokeColor(() => '#2d004b')
         .polygonLabel(d => `<b>${d.properties.name}</b><br/>Universidades: ${d.properties.universities}`)
         .onPolygonHover(d => { hoverD = d; refreshGlobe() })
         .onPolygonClick(d => {
@@ -221,6 +225,19 @@ onMounted(async () => {
     }, 150)
   }
   window.addEventListener('resize', handleResize)
+
+  // 6. Pausa o loop de render (e a auto-rotação) quando a aba não está
+  //    visível — o globo continua rodando em segundo plano se não fizermos
+  //    isso, gastando GPU/CPU à toa enquanto ninguém está olhando.
+  handleVisibility = () => {
+    if (!globe) return
+    if (document.hidden) {
+      globe.pauseAnimation()
+    } else {
+      globe.resumeAnimation()
+    }
+  }
+  document.addEventListener('visibilitychange', handleVisibility)
 })
 
 onBeforeUnmount(() => {
@@ -229,6 +246,7 @@ onBeforeUnmount(() => {
   if (animationFrame) { cancelAnimationFrame(animationFrame); animationFrame = null }
   if (resizeTimer) { clearTimeout(resizeTimer); resizeTimer = null }
   if (handleResize) { window.removeEventListener('resize', handleResize); handleResize = null }
+  if (handleVisibility) { document.removeEventListener('visibilitychange', handleVisibility); handleVisibility = null }
 
   if (globe) {
     if (globe.controls) {
