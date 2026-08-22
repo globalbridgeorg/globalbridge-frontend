@@ -9,6 +9,7 @@ import { palette } from '@/utils/palette'
 gsap.registerPlugin(ScrollTrigger)
 
 const paises = ref([])
+const carregando = ref(true)
 
 // Configuração dos gráficos - ADICIONE aqui novos indicadores que
 // vierem do backend, sem precisar mexer no template ou na animação.
@@ -64,6 +65,7 @@ onMounted(async () => {
     paises.value = []
   }
 
+  carregando.value = false
   await nextTick()
   animarGraficos()
 })
@@ -149,6 +151,17 @@ const animarGraficos = () => {
       <span class="col-programas">Programas</span>
     </div>
 
+    <div v-if="carregando" class="pais-skeleton" aria-hidden="true">
+      <div v-for="n in 3" :key="n" class="skeleton-row"></div>
+    </div>
+
+    <p v-else-if="!paises.length" class="estado-vazio">
+      Ainda não temos dados de procura suficientes pra montar esse ranking.
+      Volte em breve — ou <router-link to="/mapview">explore o mapa</router-link>
+      pra ver todos os países disponíveis.
+    </p>
+
+    <template v-else>
     <div
       v-for="(pais, index) in paises"
       :key="pais.id"
@@ -199,6 +212,7 @@ const animarGraficos = () => {
         </span>
       </div>
     </div>
+    </template>
   </div>
 </template>
 
@@ -242,6 +256,46 @@ const animarGraficos = () => {
     border-top: 1px solid var(--gb-purple-deep-18);
     gap: 16px;
     position: relative;
+}
+
+.pais-skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 30px 0;
+}
+
+.skeleton-row {
+    height: 88px;
+    border-radius: var(--gb-radius-card);
+    background: linear-gradient(90deg, rgba(46, 10, 46, 0.06) 25%, rgba(46, 10, 46, 0.1) 37%, rgba(46, 10, 46, 0.06) 63%);
+    background-size: 400% 100%;
+    animation: gb-skeleton-shimmer 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .skeleton-row {
+        animation: none;
+    }
+}
+
+@keyframes gb-skeleton-shimmer {
+    0% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.estado-vazio {
+    padding: 40px 0;
+    border-top: 1px solid var(--gb-purple-deep-18);
+    color: var(--gb-ink-soft);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    max-width: 52ch;
+}
+
+.estado-vazio a {
+    color: var(--gb-magenta);
+    font-weight: 600;
 }
 
 .rank-numero {
