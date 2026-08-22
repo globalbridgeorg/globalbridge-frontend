@@ -1,8 +1,48 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, nextTick } from 'vue'
 
 const publico = ref('estudante')
-function pick(v) { publico.value = v }
+const formShell = ref(null)
+
+async function pick(v) {
+  if (v === publico.value) return
+  const shell = formShell.value
+
+  if (shell) {
+    shell.style.height = shell.getBoundingClientRect().height + 'px'
+    shell.classList.add('resizing')
+  }
+
+  publico.value = v
+  await nextTick()
+
+  if (shell) {
+    // mede a altura real liberando a altura travada por um instante
+    // (ver ProfileView.vue: com a altura antiga fixada, scrollHeight só
+    // "estoura" quando o conteúdo novo é maior, nunca quando é menor)
+    const lockedHeight = shell.style.height
+    shell.style.height = 'auto'
+    const endHeight = shell.scrollHeight
+    shell.style.height = lockedHeight
+
+    void shell.offsetHeight
+    shell.style.height = endHeight + 'px'
+
+    let done = false
+    const cleanup = () => {
+      if (done) return
+      done = true
+      shell.style.height = ''
+      shell.classList.remove('resizing')
+      shell.removeEventListener('transitionend', onEnd)
+    }
+    const onEnd = (event) => {
+      if (event.target === shell && event.propertyName === 'height') cleanup()
+    }
+    shell.addEventListener('transitionend', onEnd)
+    setTimeout(cleanup, 320)
+  }
+}
 </script>
 
 <template>
@@ -76,29 +116,32 @@ function pick(v) { publico.value = v }
       </div>
 
       <div class="segmented">
+        <div class="segmented-thumb" :class="{ right: publico === 'agencia' }"></div>
         <button class="seg-btn" :class="{ active: publico === 'estudante' }" @click="pick('estudante')">Sou estudante</button>
         <button class="seg-btn" :class="{ active: publico === 'agencia' }" @click="pick('agencia')">Sou agência</button>
       </div>
 
-      <div class="form-grid">
-        <div class="field"><label>Nome</label><input type="text" placeholder="Seu nome" /></div>
-        <div class="field"><label>E-mail</label><input type="email" placeholder="seu@email.com" /></div>
-        <div v-if="publico === 'agencia'" class="field full"><label>Nome da agência</label><input type="text" placeholder="Nome da sua agência ou instituição" /></div>
-        <div class="field full">
-          <label>Assunto</label>
-          <select>
-            <option>Dúvida sobre destino ou programa</option>
-            <option>Problema com uma agência</option>
-            <option>Cadastro de programas</option>
-            <option>Parceria institucional</option>
-            <option>Suporte técnico</option>
-            <option>Sugestão pra plataforma</option>
-          </select>
-        </div>
-        <div class="field full"><label>Mensagem</label><textarea rows="4" placeholder="Conte com detalhes o que você precisa"></textarea></div>
-        <div class="form-actions">
-          <button class="btn btn-dark" type="button">Enviar mensagem</button>
-          <p class="form-note">Respondemos pelo e-mail que você deixar aqui.</p>
+      <div class="form-shell" ref="formShell">
+        <div class="form-grid">
+          <div class="field"><label>Nome</label><input type="text" placeholder="Seu nome" /></div>
+          <div class="field"><label>E-mail</label><input type="email" placeholder="seu@email.com" /></div>
+          <div v-if="publico === 'agencia'" class="field full"><label>Nome da agência</label><input type="text" placeholder="Nome da sua agência ou instituição" /></div>
+          <div class="field full">
+            <label>Assunto</label>
+            <select>
+              <option>Dúvida sobre destino ou programa</option>
+              <option>Problema com uma agência</option>
+              <option>Cadastro de programas</option>
+              <option>Parceria institucional</option>
+              <option>Suporte técnico</option>
+              <option>Sugestão pra plataforma</option>
+            </select>
+          </div>
+          <div class="field full"><label>Mensagem</label><textarea rows="4" placeholder="Conte com detalhes o que você precisa"></textarea></div>
+          <div class="form-actions">
+            <button class="btn btn-dark" type="button">Enviar mensagem</button>
+            <p class="form-note">Respondemos pelo e-mail que você deixar aqui.</p>
+          </div>
         </div>
       </div>
     </section>
@@ -372,6 +415,7 @@ function pick(v) { publico.value = v }
 }
 
 .segmented {
+  position: relative;
   display: inline-flex;
   background: #fff;
   border: 1px solid var(--gb-purple-deep-16);
@@ -380,7 +424,25 @@ function pick(v) { publico.value = v }
   margin-bottom: 28px;
 }
 
+.segmented-thumb {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  height: calc(100% - 8px);
+  background: var(--gb-dark);
+  border-radius: var(--gb-radius-pill);
+  transition: transform 0.25s ease;
+}
+
+.segmented-thumb.right {
+  transform: translateX(100%);
+}
+
 .seg-btn {
+  position: relative;
+  z-index: 1;
+  flex: 1;
   border: none;
   background: transparent;
   padding: 9px 20px;
@@ -392,11 +454,19 @@ function pick(v) { publico.value = v }
   text-transform: uppercase;
   color: var(--gb-ink-soft);
   cursor: pointer;
+  transition: color 0.25s ease;
 }
 
 .seg-btn.active {
-  background: var(--gb-dark);
   color: #fff;
+}
+
+.form-shell {
+  transition: height 0.28s ease;
+}
+
+.form-shell.resizing {
+  overflow: hidden;
 }
 
 .form-grid {
@@ -577,5 +647,13 @@ function pick(v) { publico.value = v }
   color: var(--gb-ink-soft);
   max-width: 460px;
   margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .segmented-thumb,
+  .seg-btn,
+  .form-shell {
+    transition: none;
+  }
 }
 </style>
