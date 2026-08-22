@@ -32,10 +32,10 @@ const activeFilters = reactive({ emprego: [], universidade: [], idioma: [], cult
 
 // ─── Dados estáticos ────────────────────────────────────────────────────────
 const filters = [
-  { id: 'emprego', icon: '', label: 'Emprego', options: [{ value: 'tech', label: 'Tecnologia', count: '4.2k' },{ value: 'saude', label: 'Saúde', count: '1.8k' },{ value: 'engenharia', label: 'Engenharia', count: '2.1k' },{ value: 'financas', label: 'Finanças', count: '900' },{ value: 'educacao', label: 'Educação', count: '3.4k' },{ value: 'artes', label: 'Artes & Design', count: '650' }] },
-  { id: 'universidade', icon: '', label: 'Universidade', options: [{ value: 'top100', label: 'Top 100 Mundial' },{ value: 'bolsas', label: 'Oferece Bolsas' },{ value: 'intercambio', label: 'Intercâmbio' },{ value: 'publicas', label: 'Públicas' },{ value: 'privadas', label: 'Privadas' },{ value: 'ead', label: 'EAD / Online' }] },
-  { id: 'idioma', icon: '', label: 'Idioma', options: [{ value: 'ingles', label: 'Inglês' },{ value: 'espanhol', label: 'Espanhol' },{ value: 'frances', label: 'Francês' },{ value: 'alemao', label: 'Alemão' },{ value: 'mandarin', label: 'Mandarim' },{ value: 'japones', label: 'Japonês' },{ value: 'portugues', label: 'Português' }] },
-  { id: 'cultura', icon: '', label: 'Cultura', options: [{ value: 'gastronomia', label: 'Gastronomia' },{ value: 'musica', label: 'Música' },{ value: 'esportes', label: 'Esportes' },{ value: 'religiao', label: 'Diversidade Religiosa' },{ value: 'festivais', label: 'Festivais' },{ value: 'natureza', label: 'Natureza & Aventura' }] }
+  { id: 'emprego', label: 'Emprego', options: [{ value: 'tech', label: 'Tecnologia', count: '4.2k' },{ value: 'saude', label: 'Saúde', count: '1.8k' },{ value: 'engenharia', label: 'Engenharia', count: '2.1k' },{ value: 'financas', label: 'Finanças', count: '900' },{ value: 'educacao', label: 'Educação', count: '3.4k' },{ value: 'artes', label: 'Artes & Design', count: '650' }] },
+  { id: 'universidade', label: 'Universidade', options: [{ value: 'top100', label: 'Top 100 Mundial' },{ value: 'bolsas', label: 'Oferece Bolsas' },{ value: 'intercambio', label: 'Intercâmbio' },{ value: 'publicas', label: 'Públicas' },{ value: 'privadas', label: 'Privadas' },{ value: 'ead', label: 'EAD / Online' }] },
+  { id: 'idioma', label: 'Idioma', options: [{ value: 'ingles', label: 'Inglês' },{ value: 'espanhol', label: 'Espanhol' },{ value: 'frances', label: 'Francês' },{ value: 'alemao', label: 'Alemão' },{ value: 'mandarin', label: 'Mandarim' },{ value: 'japones', label: 'Japonês' },{ value: 'portugues', label: 'Português' }] },
+  { id: 'cultura', label: 'Cultura', options: [{ value: 'gastronomia', label: 'Gastronomia' },{ value: 'musica', label: 'Música' },{ value: 'esportes', label: 'Esportes' },{ value: 'religiao', label: 'Diversidade Religiosa' },{ value: 'festivais', label: 'Festivais' },{ value: 'natureza', label: 'Natureza & Aventura' }] }
 ]
 
 const agencies = [
@@ -160,7 +160,7 @@ onMounted(async () => {
   countriesFeatures = countries.features
 
   const maxUniv = Math.max(...countries.features.map(d => d.properties.universities), 1)
-  colorScale = d3.scaleSequentialSqrt(d3.interpolatePurples).domain([0, maxUniv])
+  colorScale = d3.scaleSequentialSqrt(d3.interpolateRgb('#4A1F52', '#B01FB0')).domain([0, maxUniv])
 
   // 2. Limpa instância anterior se existir
   if (globeEl.value) {
@@ -172,7 +172,7 @@ onMounted(async () => {
     .width(window.innerWidth)
     .height(window.innerHeight)
     .globeImageUrl('//unpkg.com/three-globe/example/img/earth-dark.jpg')
-    .backgroundColor('#3b1060')
+    .backgroundColor('#2E0A2E')
 
   const renderer = globe.renderer?.()
   if (renderer) renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5))
@@ -198,8 +198,8 @@ onMounted(async () => {
         .polygonsData(countries.features)
         .polygonAltitude(getPolygonAltitude)
         .polygonCapColor(d => d.properties.matchesFilter ? colorScale(d.properties.universities) : 'rgba(20,5,30,0.35)')
-        .polygonSideColor(() => 'rgba(128,0,128,0.25)')
-        .polygonStrokeColor(() => '#2d004b')
+        .polygonSideColor(() => 'rgba(176,31,176,0.25)')
+        .polygonStrokeColor(() => '#2E0A2E')
         .polygonLabel(d => `<b>${d.properties.name}</b><br/>Universidades: ${d.properties.universities}`)
         .onPolygonHover(d => { hoverD = d; refreshGlobe() })
         .onPolygonClick(d => {
@@ -260,17 +260,32 @@ onBeforeUnmount(() => {
   </Transition>
 
   <aside class="filter-panel" :class="{ collapsed: panelCollapsed }">
-    <button class="collapse-btn" @click="panelCollapsed = !panelCollapsed">{{ panelCollapsed ? '›' : '‹' }}</button>
+    <button class="collapse-btn" @click="panelCollapsed = !panelCollapsed" :aria-label="panelCollapsed ? 'Expandir filtros' : 'Recolher filtros'">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" :style="{ transform: panelCollapsed ? 'rotate(180deg)' : 'none' }">
+        <path d="M10 3L5 8L10 13" stroke="#17111A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </button>
     <div class="panel-inner">
+      <div class="panel-heading">
+        <span class="panel-eyebrow">Explorar por</span>
+        <h2 class="panel-title">Filtros</h2>
+      </div>
+
       <div class="filter-section" v-for="section in filters" :key="section.id">
         <div class="section-header" @click="toggleSection(section.id)">
-          <span class="section-icon">{{ section.icon }}</span>
           <span class="section-label">{{ section.label }}</span>
-          <span class="section-arrow" :class="{ open: openSections[section.id] }">▾</span>
+          <span class="section-count" v-if="activeFilters[section.id]?.length">{{ activeFilters[section.id].length }}</span>
+          <svg class="section-arrow" :class="{ open: openSections[section.id] }" width="12" height="12" viewBox="0 0 16 16" fill="none">
+            <path d="M4 6L8 10L12 6" stroke="#757067" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
         </div>
         <div class="section-options" :class="{ open: openSections[section.id] }">
           <div v-for="opt in section.options" :key="opt.value" class="option-item" :class="{ active: activeFilters[section.id]?.includes(opt.value) }" @click="toggleFilter(section.id, opt.value)">
-            <span class="option-check">{{ activeFilters[section.id]?.includes(opt.value) ? '✓' : '' }}</span>
+            <span class="option-check">
+              <svg v-if="activeFilters[section.id]?.includes(opt.value)" width="10" height="10" viewBox="0 0 12 12" fill="none">
+                <path d="M2 6L4.8 8.8L10 3" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
             <span class="option-text">{{ opt.label }}</span>
             <span class="option-count" v-if="opt.count">{{ opt.count }}</span>
           </div>
@@ -281,7 +296,10 @@ onBeforeUnmount(() => {
   </aside>
 
   <aside class="agencies-panel">
-    <h2 class="agencies-title">Agências Disponíveis</h2>
+    <div class="panel-heading">
+      <span class="panel-eyebrow">{{ filteredAgencies.length }} encontrada{{ filteredAgencies.length === 1 ? '' : 's' }}</span>
+      <h2 class="panel-title">Agências</h2>
+    </div>
     <div class="agencies-list">
       <div v-for="agency in filteredAgencies" :key="agency.id" class="agency-card">
         <div class="agency-header">
@@ -292,7 +310,13 @@ onBeforeUnmount(() => {
         </div>
         <p class="agency-desc">{{ agency.description }}</p>
         <div class="agency-footer">
-          <span class="agency-location">📍 {{ agency.location }}</span>
+          <span class="agency-location">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+              <path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6C3.5 9.5 8 14.5 8 14.5C8 14.5 12.5 9.5 12.5 6C12.5 3.5 10.5 1.5 8 1.5Z" stroke="#757067" stroke-width="1.3" />
+              <circle cx="8" cy="6" r="1.6" stroke="#757067" stroke-width="1.3" />
+            </svg>
+            {{ agency.location }}
+          </span>
           <button class="agency-btn">Acessar</button>
         </div>
       </div>
@@ -300,7 +324,7 @@ onBeforeUnmount(() => {
     </div>
   </aside>
 
-  <div class="active-badge" v-if="totalActiveFilters > 0">{{ totalActiveFilters }} filtro(s) ativo(s)</div>
+  <div class="active-badge" v-if="totalActiveFilters > 0">{{ totalActiveFilters }} filtro{{ totalActiveFilters === 1 ? '' : 's' }} ativo{{ totalActiveFilters === 1 ? '' : 's' }}</div>
   <div ref="globeEl" class="globe-wrap"></div>
 </template>
 
@@ -318,7 +342,7 @@ onBeforeUnmount(() => {
   position: fixed;
   inset: 0;
   z-index: 200;
-  background: #3b1060;
+  background: var(--gb-purple-deep);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -328,16 +352,16 @@ onBeforeUnmount(() => {
 .loading-spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid rgba(123,45,139,0.3);
-  border-top-color: #c084fc;
+  border: 3px solid rgba(176,31,176,0.25);
+  border-top-color: var(--gb-magenta);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
 .loading-text {
-  font-family: 'Montserrat', sans-serif;
+  font-family: var(--gb-font-eyebrow);
   font-size: 12px;
   font-weight: 700;
-  color: #c084fc;
+  color: var(--gb-accent-light);
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -346,68 +370,100 @@ onBeforeUnmount(() => {
 .fade-enter-active, .fade-leave-active { transition: opacity 0.4s ease; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 
+/* ── Shared panel heading ────────────────────────────────────────────── */
+.panel-heading {
+  padding: 32px 24px 20px;
+  border-bottom: 1px solid var(--gb-purple-deep-16);
+  flex-shrink: 0;
+}
+.panel-eyebrow {
+  font-family: var(--gb-font-eyebrow);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gb-ink-faint);
+}
+.panel-title {
+  font-family: var(--gb-font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 22px;
+  color: var(--gb-dark);
+  margin: 8px 0 0;
+}
+
 /* ── Filter panel ────────────────────────────────────────────────────── */
 .filter-panel {
   position: fixed;
   top: 0;
   left: 0;
   height: 100vh;
-  width: 210px;
-  background: #f5f0f0;
-  border-right: 1px solid #e0d8e8;
+  width: 300px;
+  background: var(--gb-cream);
+  border-right: 1px solid var(--gb-purple-deep-16);
   transition: transform 0.35s cubic-bezier(.4,0,.2,1);
   z-index: 100;
-  font-family: 'DM Sans', sans-serif;
+  display: flex;
+  flex-direction: column;
 }
-.filter-panel.collapsed { transform: translateX(-178px); }
+.filter-panel.collapsed { transform: translateX(-268px); }
 .collapse-btn {
   position: absolute;
   top: 50%;
-  right: -15px;
+  right: -16px;
   transform: translateY(-50%);
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: #fff;
-  border: 1px solid #d0b8e0;
-  color: #7b2d8b;
-  font-size: 18px;
+  border: 1px solid var(--gb-purple-deep-16);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  box-shadow: 0 2px 10px rgba(23,17,26,0.14);
   z-index: 101;
 }
+.collapse-btn:hover { background: var(--gb-cream); }
+.collapse-btn svg { transition: transform 0.25s ease; }
 .panel-inner {
-  padding: 80px 14px 20px;
+  padding: 8px 16px 16px;
   overflow-y: auto;
-  height: 100%;
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
 }
+.filter-section { border-bottom: 1px solid var(--gb-purple-deep-16); }
 .section-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
+  gap: 10px;
+  padding: 16px 8px;
   cursor: pointer;
-  border-radius: 6px;
 }
-.section-header:hover { background: rgba(123,45,139,0.08); }
-.section-icon { font-size: 12px; }
+.section-header:hover .section-label { color: var(--gb-magenta); }
 .section-label {
   flex: 1;
-  font-family: 'Montserrat', sans-serif;
+  font-family: var(--gb-font-eyebrow);
   font-weight: 700;
-  font-size: 10px;
-  color: #2a002a;
+  font-size: 12.5px;
+  letter-spacing: 0.1em;
+  color: var(--gb-dark);
   text-transform: uppercase;
+  transition: color 0.15s ease;
+}
+.section-count {
+  font-family: var(--gb-font-eyebrow);
+  font-weight: 700;
+  font-size: 10.5px;
+  color: #fff;
+  background: var(--gb-magenta);
+  border-radius: var(--gb-radius-pill);
+  padding: 2px 8px;
 }
 .section-arrow {
-  font-size: 10px;
-  color: #7b2d8b;
+  flex-shrink: 0;
   transition: transform 0.25s;
 }
 .section-arrow.open { transform: rotate(180deg); }
@@ -420,57 +476,56 @@ onBeforeUnmount(() => {
 .option-item {
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 6px 10px 6px 24px;
+  gap: 10px;
+  padding: 9px 8px 9px 4px;
   cursor: pointer;
-  border-radius: 5px;
+  border-radius: 8px;
 }
-.option-item:hover { background: rgba(123,45,139,0.07); }
-.option-item.active { background: rgba(123,45,139,0.12); }
+.option-item:hover { background: rgba(46,10,46,0.04); }
 .option-check {
-  width: 13px;
-  height: 13px;
-  border: 1.5px solid #c0a0d0;
-  border-radius: 3px;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  border: 1.5px solid var(--gb-purple-deep-16);
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 9px;
-  color: #7b2d8b;
   background: #fff;
 }
 .option-item.active .option-check {
-  background: #7b2d8b;
-  color: #fff;
-  border-color: #7b2d8b;
+  background: var(--gb-magenta);
+  border-color: transparent;
 }
 .option-text {
   flex: 1;
-  font-size: 11px;
-  color: #3a2040;
+  font-size: 13px;
+  color: var(--gb-dark);
 }
 .option-count {
-  font-size: 9px;
-  color: #7b2d8b;
-  background: rgba(123,45,139,0.1);
-  padding: 1px 5px;
-  border-radius: 8px;
-  font-weight: 700;
+  font-family: var(--gb-font-eyebrow);
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--gb-ink-faint);
+  background: var(--gb-purple-deep-16);
+  padding: 2px 8px;
+  border-radius: var(--gb-radius-pill);
 }
 .clear-btn {
-  margin-top: auto;
-  padding: 8px;
-  border: 1px solid #c0a0d0;
-  border-radius: 7px;
+  margin: 20px 8px 4px;
+  padding: 11px;
+  border: 1px solid var(--gb-purple-deep-16);
+  border-radius: 12px;
   background: transparent;
-  color: #7b2d8b;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 10px;
+  color: var(--gb-dark);
+  font-family: var(--gb-font-eyebrow);
   font-weight: 700;
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
   cursor: pointer;
   text-transform: uppercase;
 }
-.clear-btn:hover { background: rgba(123,45,139,0.08); }
+.clear-btn:hover { background: rgba(46,10,46,0.04); }
 
 /* ── Agencies panel ──────────────────────────────────────────────────── */
 .agencies-panel {
@@ -478,94 +533,102 @@ onBeforeUnmount(() => {
   top: 0;
   right: 0;
   height: 100vh;
-  width: 220px;
-  background: #f5f0f0;
-  border-left: 1px solid #e0d8e8;
+  width: 320px;
+  background: var(--gb-cream);
+  border-left: 1px solid var(--gb-purple-deep-16);
   display: flex;
   flex-direction: column;
   z-index: 100;
 }
-.agencies-title {
-  font-family: 'Syne', sans-serif;
-  font-weight: 800;
-  font-size: 13px;
-  color: #2a002a;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  padding: 30px 17px 12px;
-  border-bottom: 1px solid #e0d0e8;
-}
 .agencies-list {
   flex: 1;
   overflow-y: auto;
-  padding: 10px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 .agency-card {
-  background: #ffffff;
-  border: 1px solid #e8ddf0;
-  border-radius: 8px;
-  padding: 10px 12px;
+  background: #fff;
+  border: 1px solid var(--gb-purple-deep-16);
+  border-radius: var(--gb-radius-card);
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .agency-card:hover {
-  box-shadow: 0 3px 12px rgba(123,45,139,0.1);
-  border-color: #c0a0d0;
+  box-shadow: 0 8px 20px rgba(23,17,26,0.08);
+  border-color: var(--gb-magenta);
+}
+.agency-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
 }
 .agency-name {
-  font-family: 'Syne', sans-serif;
-  font-weight: 800;
-  font-size: 12px;
-  color: #1a001a;
+  font-family: var(--gb-font-display);
+  font-weight: 900;
+  font-size: 14px;
+  color: var(--gb-dark);
   text-transform: uppercase;
 }
-.star { font-size: 11px; color: #ddd; }
-.star.filled { color: #7b2d8b; }
-.agency-desc { font-size: 10px; color: #5a3a6a; line-height: 1.5; }
+.agency-stars { white-space: nowrap; }
+.star { font-size: 12px; color: var(--gb-purple-deep-16); }
+.star.filled { color: var(--gb-magenta); }
+.agency-desc { font-size: 12px; color: var(--gb-ink-soft); line-height: 1.55; margin: 0; }
 .agency-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 2px;
+  gap: 8px;
+  margin-top: 4px;
 }
-.agency-location { font-size: 9px; color: #8a5a9a; }
+.agency-location {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--gb-ink-faint);
+}
 .agency-btn {
-  background: #7b2d8b;
+  background: var(--gb-dark);
   color: #fff;
   border: none;
-  border-radius: 5px;
-  padding: 4px 10px;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 9px;
+  border-radius: var(--gb-radius-pill);
+  padding: 6px 14px;
+  font-family: var(--gb-font-eyebrow);
   font-weight: 700;
+  font-size: 10.5px;
+  letter-spacing: 0.05em;
   cursor: pointer;
   text-transform: uppercase;
+  white-space: nowrap;
 }
-.agency-btn:hover { background: #5a1f68; }
+.agency-btn:hover { background: var(--gb-magenta); }
 .no-agencies {
-  font-size: 11px;
-  color: #8a5a9a;
+  font-size: 12px;
+  color: var(--gb-ink-faint);
   text-align: center;
   padding: 20px 0;
 }
 
 .active-badge {
   position: fixed;
-  bottom: 20px;
+  bottom: 28px;
   left: 50%;
   transform: translateX(-50%);
-  background: #7b2d8b;
+  background: var(--gb-magenta);
   color: #fff;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 11px;
+  font-family: var(--gb-font-eyebrow);
+  font-size: 12px;
   font-weight: 700;
-  padding: 5px 14px;
-  border-radius: 20px;
-  box-shadow: 0 4px 16px rgba(123,45,139,0.35);
+  letter-spacing: 0.04em;
+  padding: 9px 20px;
+  border-radius: var(--gb-radius-pill);
+  box-shadow: 0 8px 24px rgba(176,31,176,0.4);
   z-index: 150;
   animation: fadeIn 0.2s ease;
 }
