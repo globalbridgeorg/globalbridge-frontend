@@ -142,7 +142,11 @@ onMounted(() => {
       />
 
       <div v-else class="foto-placeholder">
-        <span>Selecionar foto</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 8.5C4 7.67 4.67 7 5.5 7h2.4l1-1.6c.3-.5.85-.8 1.44-.8h3.32c.59 0 1.14.3 1.44.8l1 1.6h2.4c.83 0 1.5.67 1.5 1.5v9c0 .83-.67 1.5-1.5 1.5h-13C4.67 19 4 18.33 4 17.5v-9Z" />
+          <circle cx="12" cy="13" r="3.2" />
+        </svg>
+        <span>Adicionar foto</span>
       </div>
 
       <div class="overlay">
@@ -166,19 +170,20 @@ onMounted(() => {
   height: 110px;
   border-radius: 50%;
   overflow: hidden;
-  border: 1px solid #444;
-  background: #f3f4f6;
+  border: 1px solid var(--gb-purple-deep-16);
+  background: var(--gb-cream);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
   margin: 0;
-  transition: opacity 0.2s ease;
+  transition: border-color 0.2s ease, background 0.2s ease;
 }
 
 .foto-container:hover {
-  opacity: 0.9;
+  border-color: var(--gb-magenta);
+  background: #fff;
 }
 
 .foto-container .overlay {
@@ -214,10 +219,29 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 40px;
-  color: #6b7280;
+  gap: 6px;
+  color: var(--gb-ink-faint);
+  transition: color 0.2s ease;
+}
+
+.foto-container:hover .foto-placeholder {
+  color: var(--gb-magenta);
+}
+
+.foto-placeholder svg {
+  width: 26px;
+  height: 26px;
+  stroke: currentColor;
+}
+
+.foto-placeholder span {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: center;
 }
 </style>
 
