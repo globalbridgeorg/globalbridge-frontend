@@ -51,7 +51,7 @@ const toggleMenu = () => {
     <nav class="navbar_links desktop-nav">
       <router-link to="/mapview">Meu destino</router-link>
       <router-link to="/como-funciona">Como funciona</router-link>
-      <a href="mailto:contato@globalbridge.com">Contato</a>
+      <router-link to="/contato">Contato</router-link>
       <a @click.prevent="installPWA" class="install-link">
         Instalar App
       </a>
@@ -71,7 +71,7 @@ const toggleMenu = () => {
       <div v-if="mobileMenuOpen" id="mobile-nav" class="mobile-nav">
         <router-link to="/mapview" @click="toggleMenu">Meu destino</router-link>
         <router-link to="/como-funciona" @click="toggleMenu">Como funciona</router-link>
-        <a href="mailto:contato@globalbridge.com" @click="toggleMenu">Contato</a>
+        <router-link to="/contato" @click="toggleMenu">Contato</router-link>
         <div class="buttonsmenu">
           <ButtonComponent 
             text="Instalar App" 
