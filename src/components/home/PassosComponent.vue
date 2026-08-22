@@ -75,7 +75,7 @@ onBeforeUnmount(() => ctx?.revert())
 
         <div v-if="passo.legenda" class="legenda">
           <div v-for="item in passo.legenda" :key="item.label" class="legenda-item">
-            <span class="legenda-linha" :style="{ background: item.cor }"></span>
+            <span class="legenda-linha" :style="{ '--legenda-cor': item.cor }"></span>
             <span>{{ item.label }}</span>
           </div>
         </div>
@@ -94,10 +94,7 @@ onBeforeUnmount(() => ctx?.revert())
 <style scoped>
 .passos {
   width: 100%;
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: var(--gb-space-y) var(--gb-space-x);
-  box-sizing: border-box;
+  padding: var(--gb-space-y) 0;
   scroll-margin-top: 96px;
 }
 
@@ -174,6 +171,7 @@ onBeforeUnmount(() => ctx?.revert())
   height: 4px;
   border-radius: 4px;
   flex-shrink: 0;
+  background: var(--legenda-cor);
 }
 
 .avaliacao {
@@ -211,9 +209,4 @@ onBeforeUnmount(() => ctx?.revert())
   }
 }
 
-@media (max-width: 1600px) {
-  .passos {
-    max-width: 1225px;
-  }
-}
 </style>

@@ -68,10 +68,7 @@ onBeforeUnmount(() => ctx?.revert())
 <style scoped>
 .formato {
   width: 100%;
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: var(--gb-space-y-continuation) var(--gb-space-x) var(--gb-space-y);
-  box-sizing: border-box;
+  padding: var(--gb-space-y-continuation) 0 var(--gb-space-y);
   scroll-margin-top: 96px;
 }
 
@@ -159,9 +156,4 @@ onBeforeUnmount(() => ctx?.revert())
   }
 }
 
-@media (max-width: 1600px) {
-  .formato {
-    max-width: 1225px;
-  }
-}
 </style>

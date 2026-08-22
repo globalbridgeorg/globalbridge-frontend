@@ -49,28 +49,28 @@ onMounted(() => {
     <PhotoGrid :imagesCol1="fotosEsquerda" :imagesCol2="fotosDireita" />
   </section>
 
-  <section>
+  <section class="gb-section">
     <Landing />
   </section>
 
-  <section>
+  <section class="gb-section">
     <MotorComponent />
   </section>
 
-  <section>
+  <section class="gb-section">
     <Paises />
   </section>
 
-  <section>
+  <section class="gb-section">
     <FaqComponent />
   </section>
 
-  <section>
+  <section class="gb-section">
     <CustoComponent />
     <FormatoComponent />
   </section>
 
-  <section>
+  <section class="gb-section">
     <PassosComponent />
     <TimelineComponent />
   </section>

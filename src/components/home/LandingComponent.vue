@@ -98,7 +98,7 @@ onBeforeUnmount(() => {
         <p class="blue-subtitle">
           Veja planos de intercâmbio com ensino de idioma integrado. Comece seu futuro hoje!
         </p>
-        <ButtonComponent text="Ver os planos" iconType="secondary" style="background-color: white; color: #42023C;" @click="irParaFormatos" />
+        <ButtonComponent text="Ver os planos" iconType="secondary" class="btn-ghost-light" @click="irParaFormatos" />
 
         <ul class="idiomas-pills">
           <li v-for="idioma in idiomas" :key="idioma">{{ idioma }}</li>
@@ -133,7 +133,7 @@ onBeforeUnmount(() => {
         <div class="opcoes-footer">
           <span class="opcoes-updated">Seleção atualizada 2026</span>
           <router-link to="/mapview">
-            <ButtonComponent text="Ver os 40 países" iconType="tertiary" style="background-color: #17111A; color: #fff;" />
+            <ButtonComponent text="Ver os 40 países" iconType="tertiary" class="btn-dark" />
           </router-link>
         </div>
       </div>
@@ -144,10 +144,7 @@ onBeforeUnmount(() => {
 <style scoped>
 .programas {
   width: 100%;
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: var(--gb-space-y) var(--gb-space-x) 0;
-  box-sizing: border-box;
+  padding: var(--gb-space-y) 0 0;
   display: flex;
   flex-direction: column;
   gap: 32px;
@@ -369,9 +366,4 @@ onBeforeUnmount(() => {
   }
 }
 
-@media (max-width: 1600px) {
-  .programas {
-    max-width: 1225px;
-  }
-}
 </style>

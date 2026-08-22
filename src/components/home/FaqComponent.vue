@@ -102,10 +102,7 @@ onBeforeUnmount(() => ctx?.revert())
 /* Mobile First */
 .faq-section {
     width: 100%;
-    padding: var(--gb-space-y) var(--gb-space-x);
-    max-width: 1440px;
-    margin: 0 auto;
-    box-sizing: border-box;
+    padding: var(--gb-space-y) 0;
 }
 
 .faq-title {
@@ -192,11 +189,5 @@ onBeforeUnmount(() => ctx?.revert())
         width: 65%;
         font-size: 16px;
     }
-}
-
-@media (max-width: 1600px) {
-  .faq-section {
-    max-width: 1225px;
-  }
 }
 </style>

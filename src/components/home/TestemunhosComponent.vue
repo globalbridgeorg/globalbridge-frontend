@@ -48,7 +48,7 @@ onBeforeUnmount(() => ctx?.revert())
 
 <template>
   <section class="testemunhos">
-    <div class="inner">
+    <div class="inner gb-section">
       <SectionEyebrow number="10" label="Quem já foi" />
       <h2 class="gb-heading">Já embarcaram<br />com a gente</h2>
 
@@ -89,13 +89,6 @@ onBeforeUnmount(() => ctx?.revert())
   padding: 56px 0;
 }
 
-.inner {
-  width: 100%;
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 0 5%;
-  box-sizing: border-box;
-}
 
 .gb-heading {
   margin: 24px 0 32px;
@@ -171,9 +164,4 @@ onBeforeUnmount(() => ctx?.revert())
   }
 }
 
-@media (max-width: 1600px) {
-  .inner {
-    max-width: 1225px;
-  }
-}
 </style>

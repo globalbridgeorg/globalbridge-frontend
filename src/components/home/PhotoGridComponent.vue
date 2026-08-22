@@ -37,14 +37,14 @@ onUnmounted(() => {
 <template>
   <div class="main-layout-wrapper">
     <div class="info-side">
-      <BadgeComponent style="background-color: #e5e0cf;">
+      <BadgeComponent class="badge-neutral">
         O céu é o limite
       </BadgeComponent>
       <h2 class="roboto-condensed">VOE ALÉM DOS SEUS LIMITES</h2>
-      <p style="padding-bottom: 30px;">
+      <p class="paragrafo-espacado">
         A GlobalBridge conecta você às melhores oportunidades de intercâmbio, reunindo informações essenciais sobre países, custo de vida, cultura e possibilidades de estudo e trabalho.
       </p>
-      <p style="font-weight: 600; padding-bottom: 30px;">
+      <p class="paragrafo-espacado paragrafo-destaque">
         Compare destinos, entenda requisitos de visto e programas disponíveis, encontre agências verificadas com mais clareza e segurança.
       </p>
       <p>
@@ -95,6 +95,14 @@ onUnmounted(() => {
   line-height: 0.9;
   font-weight: 800;
   margin: 20px 0;
+}
+
+.paragrafo-espacado {
+  padding-bottom: 30px;
+}
+
+.paragrafo-destaque {
+  font-weight: 600;
 }
 
 .photo-section {

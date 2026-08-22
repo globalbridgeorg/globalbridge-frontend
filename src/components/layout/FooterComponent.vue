@@ -55,7 +55,7 @@ onBeforeUnmount(() => marqueeTween?.kill())
             <ButtonComponent
               :text="buttonText"
               iconType="secondary"
-              style="background-color: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.35);"
+              class="btn-outline-light"
             />
           </router-link>
         </div>
@@ -89,7 +89,7 @@ onBeforeUnmount(() => marqueeTween?.kill())
           <ButtonComponent
             text="Entre em contato"
             iconType="primary"
-            style="background-color: #17111A; color: #fff;"
+            class="btn-dark"
           />
         </a>
       </div>

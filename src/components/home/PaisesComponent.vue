@@ -166,14 +166,15 @@ const animarGraficos = () => {
       v-for="(pais, index) in paises"
       :key="pais.id"
       class="pais"
+      :style="{ '--rank-color': corPorPosicao(index) }"
       :ref="el => setPaisRef(el, pais.id)"
     >
-      <span class="rank-numero" :style="{ color: corPorPosicao(index) }">
+      <span class="rank-numero">
         {{ String(index + 1).padStart(2, '0') }}
       </span>
 
       <div class="esquerda">
-        <h3 class="nome" :style="{ color: corPorPosicao(index) }">{{ pais.nome.toUpperCase() }}</h3>
+        <h3 class="nome">{{ pais.nome.toUpperCase() }}</h3>
       </div>
 
       <div class="direita">
@@ -192,7 +193,6 @@ const animarGraficos = () => {
                 <div
                 class="preenchido"
                 :class="metric.key"
-                :style="{ background: corPorPosicao(index) }"
                 :ref="el => setBarraRef(el, `${pais.id}-${metric.key}`)"
                 ></div>
 
@@ -202,7 +202,7 @@ const animarGraficos = () => {
         </div>
       </div>
 
-      <div class="programas" :style="{ color: corPorPosicao(index) }">
+      <div class="programas">
         <span
           class="programas-numero"
           :ref="el => setProgramasRef(el, pais.id)"
@@ -222,10 +222,7 @@ const animarGraficos = () => {
     justify-content: center;
     align-items: center;
     width: 100%;
-    max-width: 1440px;
-    margin: 0 auto;
-    padding: var(--gb-space-y) var(--gb-space-x);
-    box-sizing: border-box;
+    padding: var(--gb-space-y) 0;
 }
 
 .heading-row {
@@ -303,6 +300,7 @@ const animarGraficos = () => {
   font-weight: 700;
   font-size: 13px;
   letter-spacing: 0.1em;
+  color: var(--rank-color);
 }
 
 .esquerda {
@@ -314,6 +312,7 @@ const animarGraficos = () => {
     font-weight: 900;
     font-size: 24px;
     margin: 0;
+    color: var(--rank-color);
 }
 
 .direita {
@@ -352,6 +351,7 @@ const animarGraficos = () => {
     width: 0%;
     border-radius: 20px;
     flex-shrink: 0;
+    background: var(--rank-color);
 }
 
 .linha span {
@@ -366,6 +366,7 @@ const animarGraficos = () => {
   display: flex;
   align-items: baseline;
   gap: 8px;
+  color: var(--rank-color);
 }
 
 .programas-numero {
@@ -469,11 +470,5 @@ const animarGraficos = () => {
     .barra {
         height: 12px;
     }
-}
-
-@media (max-width: 1600px) {
-  .container {
-    max-width: 1225px;
-  }
 }
 </style>

@@ -110,9 +110,10 @@ onBeforeUnmount(() => ctx?.revert())
         :key="plano.pais"
         class="card"
         :class="{ destaque: plano.destaque }"
+        :style="{ '--tag-color': plano.tagColor }"
         :ref="el => (cardsRef[i] = el)"
       >
-        <span class="tag" :style="{ color: plano.tagColor }">{{ plano.tag }}</span>
+        <span class="tag">{{ plano.tag }}</span>
         <h3 class="pais">{{ plano.pais }}</h3>
 
         <ul class="itens">
@@ -134,10 +135,7 @@ onBeforeUnmount(() => ctx?.revert())
 <style scoped>
 .custo {
   width: 100%;
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: var(--gb-space-y) var(--gb-space-x);
-  box-sizing: border-box;
+  padding: var(--gb-space-y) 0;
 }
 
 .heading-row {
@@ -182,6 +180,7 @@ onBeforeUnmount(() => ctx?.revert())
   letter-spacing: 0.1em;
   text-transform: uppercase;
   margin-bottom: 8px;
+  color: var(--tag-color);
 }
 
 .pais {
@@ -249,9 +248,4 @@ onBeforeUnmount(() => ctx?.revert())
   }
 }
 
-@media (max-width: 1600px) {
-  .custo {
-    max-width: 1225px;
-  }
-}
 </style>

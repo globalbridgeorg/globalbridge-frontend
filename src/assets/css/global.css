@@ -85,3 +85,45 @@ body {
   white-space: nowrap;
   border: 0;
 }
+
+/* Padding lateral + largura máxima padrão de toda seção de conteúdo da
+   home. Fica só aqui — os componentes de seção não definem mais a própria
+   margem lateral, só o espaçamento vertical (que varia por seção). */
+.gb-section {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding-inline: var(--gb-space-x);
+  box-sizing: border-box;
+}
+
+@media (max-width: 1600px) {
+  .gb-section {
+    max-width: 1225px;
+  }
+}
+
+/* Variantes de cor do ButtonComponent — evita repetir o mesmo
+   background-color/color inline em cada tela que usa um botão escuro ou
+   um botão contornado sobre fundo escuro. */
+.swap-btn.btn-dark {
+  background: var(--gb-dark);
+  color: #fff;
+}
+
+.swap-btn.btn-ghost-light {
+  background: #fff;
+  color: #42023C;
+}
+
+.swap-btn.btn-outline-light {
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+/* Variante neutra do BadgeComponent (usada nas seções que ainda têm o
+   badge cinza-areia, fora do sistema de eyebrow numerado). */
+.badge-neutral {
+  background-color: #E5E0CF;
+}

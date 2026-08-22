@@ -101,14 +101,14 @@ onBeforeUnmount(() => {
 <template>
   <div class="container">
     <div>
-      <BadgeComponent style="background-color: #e5e0cf;">
+      <BadgeComponent class="badge-neutral">
         Procure sua oportunidade dos sonhos
       </BadgeComponent>
       <h2>NOSSOS MOTORES PRINCIPAIS</h2>
     </div>
 
     <div class="cards-wrap" ref="cardsWrap" @mouseleave="activate(cardRefs[0])">
-      <div v-for="(item, index) in items" :key="item.label" class="card" :style="{ background: item.color }"
+      <div v-for="(item, index) in items" :key="item.label" class="card" :style="{ '--card-color': item.color }"
         ref="cardRefs" @mouseenter="activate(cardRefs[index])">
         <div class="card-label">{{ item.label }}</div>
         <div class="card-body">
@@ -127,10 +127,7 @@ onBeforeUnmount(() => {
 <style scoped>
 .container {
   width: 100%;
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: var(--gb-space-y) var(--gb-space-x);
-  box-sizing: border-box;
+  padding: var(--gb-space-y) 0;
 
   & h2 {
     font-size: 2.2vw;
@@ -164,6 +161,7 @@ BadgeComponent {
   overflow: hidden;
   cursor: pointer;
   padding: 24px 20px;
+  background: var(--card-color);
   color: #fff;
   display: flex;
   flex-direction: column;
@@ -222,9 +220,4 @@ BadgeComponent {
   white-space: nowrap;
 }
 
-@media (max-width: 1600px) {
-  .container {
-    max-width: 1225px;
-  }
-}
 </style>
