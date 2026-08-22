@@ -4,8 +4,11 @@ import ButtonComponent from '@/components/common/ButtonComponent.vue'
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { scrollToTarget } from '@/utils/lenis'
 
 gsap.registerPlugin(ScrollTrigger)
+
+const irParaFormatos = () => scrollToTarget('#formatos')
 
 const idiomas = ['Inglês', 'Espanhol', 'Japonês', 'Alemão', '+8 idiomas']
 
@@ -86,7 +89,7 @@ onBeforeUnmount(() => {
           Programas completos para quem deseja estudar, trabalhar e viver uma
           experiência internacional com mais segurança e planejamento.
         </p>
-        <ButtonComponent text="Saiba mais" iconType="primary" />
+        <ButtonComponent text="Comparar formatos" iconType="primary" @click="irParaFormatos" />
       </div>
 
       <div class="card card-blue" ref="cardBlueRef">
@@ -94,7 +97,7 @@ onBeforeUnmount(() => {
         <p class="blue-subtitle">
           Veja planos de intercâmbio com ensino de idioma integrado. Comece seu futuro hoje!
         </p>
-        <ButtonComponent text="Ver os planos" iconType="secondary" style="background-color: white; color: #42023C;" />
+        <ButtonComponent text="Ver os planos" iconType="secondary" style="background-color: white; color: #42023C;" @click="irParaFormatos" />
 
         <ul class="idiomas-pills">
           <li v-for="idioma in idiomas" :key="idioma">{{ idioma }}</li>
@@ -128,7 +131,9 @@ onBeforeUnmount(() => {
 
         <div class="opcoes-footer">
           <span class="opcoes-updated">Seleção atualizada 2026</span>
-          <ButtonComponent text="Veja todos" iconType="tertiary" style="background-color: #17111A; color: #fff;" />
+          <router-link to="/mapview">
+            <ButtonComponent text="Ver os 40 países" iconType="tertiary" style="background-color: #17111A; color: #fff;" />
+          </router-link>
         </div>
       </div>
     </div>

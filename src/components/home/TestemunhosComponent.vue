@@ -8,16 +8,19 @@ gsap.registerPlugin(ScrollTrigger)
 
 const depoimentos = [
   {
+    nome: 'Marina T.',
     estrelas: 5,
     texto: 'Comparei sete países numa tarde e entendi que Dublin caberia no meu orçamento. Seis meses depois eu estava lá, com o visto aprovado na primeira tentativa.',
     curso: 'Curso de idioma · Irlanda'
   },
   {
+    nome: 'Lucas A.',
     estrelas: 4,
     texto: 'O que mudou o jogo foi ver as agências avaliadas. Falei direto com três, escolhi a que respondeu melhor e não paguei intermediário nenhum.',
     curso: 'Study & Work · Canadá'
   },
   {
+    nome: 'Sofia K.',
     estrelas: 5,
     texto: 'Eu não falava japonês e achava que isso me barrava. Achei um programa com idioma integrado e comecei do zero, em Kyoto.',
     curso: 'Idioma · Japão'
@@ -70,7 +73,7 @@ onBeforeUnmount(() => ctx?.revert())
               </svg>
             </span>
             <div>
-              <strong>Nome do aluno</strong>
+              <strong>{{ dep.nome }}</strong>
               <span class="curso">{{ dep.curso }}</span>
             </div>
           </div>

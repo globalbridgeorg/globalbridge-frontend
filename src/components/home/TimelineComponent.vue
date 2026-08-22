@@ -28,7 +28,22 @@ const documentos = [
 
 const etapasWrapRef = ref(null)
 const checklistRef = ref(null)
+const copiado = ref(false)
 let ctx
+let copiadoTimeout
+
+const copiarChecklist = async () => {
+  const lista = documentos.map(doc => `- ${doc}`).join('\n')
+
+  try {
+    await navigator.clipboard.writeText(lista)
+    copiado.value = true
+    clearTimeout(copiadoTimeout)
+    copiadoTimeout = setTimeout(() => (copiado.value = false), 2000)
+  } catch (error) {
+    console.error('Não foi possível copiar o checklist:', error)
+  }
+}
 
 onMounted(() => {
   ctx = gsap.context(() => {
@@ -52,7 +67,10 @@ onMounted(() => {
   })
 })
 
-onBeforeUnmount(() => ctx?.revert())
+onBeforeUnmount(() => {
+  ctx?.revert()
+  clearTimeout(copiadoTimeout)
+})
 </script>
 
 <template>
@@ -86,7 +104,11 @@ onBeforeUnmount(() => ctx?.revert())
             <span>{{ doc }}</span>
           </li>
         </ul>
-        <ButtonComponent text="Baixar o checklist" iconType="primary" />
+        <ButtonComponent
+          :text="copiado ? 'Lista copiada!' : 'Copiar checklist'"
+          iconType="primary"
+          @click="copiarChecklist"
+        />
       </div>
     </div>
   </section>

@@ -35,7 +35,7 @@ onBeforeUnmount(() => ctx?.revert())
 </script>
 
 <template>
-  <section class="formato">
+  <section id="formatos" class="formato">
     <div class="heading-row">
       <h2 class="gb-heading">Qual formato<br />combina com você</h2>
       <p class="heading-desc">
@@ -72,6 +72,7 @@ onBeforeUnmount(() => ctx?.revert())
   margin: 0 auto;
   padding: 56px 5% 40px;
   box-sizing: border-box;
+  scroll-margin-top: 96px;
 }
 
 .heading-row {

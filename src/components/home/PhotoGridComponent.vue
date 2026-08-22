@@ -56,10 +56,10 @@ onUnmounted(() => {
       <div class="gallery-mask">
         <div class="gallery-container">
           <div class="column col-left" ref="col1">
-            <img v-for="(img, i) in imagesCol1" :key="i" :src="img" alt="Gallery 1">
+            <img v-for="(img, i) in imagesCol1" :key="i" :src="img" alt="Cidade destino de intercâmbio">
           </div>
           <div class="column col-right" ref="col2">
-            <img v-for="(img, i) in imagesCol2" :key="i" :src="img" alt="Gallery 2">
+            <img v-for="(img, i) in imagesCol2" :key="i" :src="img" alt="Cidade destino de intercâmbio">
           </div>
         </div>
       </div>

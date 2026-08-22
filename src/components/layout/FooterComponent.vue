@@ -45,12 +45,12 @@ onBeforeUnmount(() => marqueeTween?.kill())
 
         <div class="cta-buttons">
           <router-link :to="buttonmapview">
-            <ButtonComponent text="Fale com a gente" iconType="primary" />
+            <ButtonComponent text="Explorar destinos" iconType="primary" />
           </router-link>
 
           <router-link :to="buttonLink">
             <ButtonComponent
-              :text="isLoggedIn ? buttonText : 'Cadastre-se'"
+              :text="buttonText"
               iconType="secondary"
               style="background-color: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.35);"
             />
@@ -70,8 +70,8 @@ onBeforeUnmount(() => marqueeTween?.kill())
           <div class="footer-links-col">
             <span class="footer-links-label">Plataforma</span>
             <router-link to="/mapview">Meu destino</router-link>
-            <a href="#">Agências</a>
-            <a href="#">Planos</a>
+            <router-link to="/#passos">Agências</router-link>
+            <router-link to="/#formatos">Planos</router-link>
           </div>
 
           <div class="footer-links-col">
@@ -82,12 +82,13 @@ onBeforeUnmount(() => marqueeTween?.kill())
           </div>
         </div>
 
-        <ButtonComponent
-          text="Entre em contato"
-          iconType="primary"
-          class="footer-contact-btn"
-          style="background-color: #17111A; color: #fff;"
-        />
+        <a href="mailto:contato@globalbridge.com" class="footer-contact-btn">
+          <ButtonComponent
+            text="Entre em contato"
+            iconType="primary"
+            style="background-color: #17111A; color: #fff;"
+          />
+        </a>
       </div>
 
       <div class="footer-bottom">

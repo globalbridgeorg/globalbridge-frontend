@@ -52,7 +52,7 @@ onBeforeUnmount(() => ctx?.revert())
 </script>
 
 <template>
-  <section class="passos">
+  <section id="passos" class="passos">
     <SectionEyebrow number="09" label="Preparação" />
 
     <h2 class="gb-heading">Três passos até<br />o embarque</h2>
@@ -97,6 +97,7 @@ onBeforeUnmount(() => ctx?.revert())
   margin: 0 auto;
   padding: 40px 5%;
   box-sizing: border-box;
+  scroll-margin-top: 96px;
 }
 
 .gb-heading {

@@ -1,4 +1,7 @@
 <script setup>
+import { onMounted } from "vue"
+import { useRoute } from "vue-router"
+import { scrollToTarget } from "@/utils/lenis"
 import VideoComponent from "@/components/home/VideoComponent.vue";
 import ButtonComponent from "@/components/common/ButtonComponent.vue";
 import PhotoGrid from '@/components/home/PhotoGridComponent.vue'
@@ -25,6 +28,14 @@ const fotosDireita = [
   '/images/imagemgb1.png',
   '/images/imagemgb2.png'
 ]
+
+const route = useRoute()
+
+onMounted(() => {
+  if (!route.hash) return
+  // espera o layout (vídeo, fontes, imagens) assentar antes de calcular a posição do alvo
+  setTimeout(() => scrollToTarget(route.hash), 400)
+})
 </script>
 
 <template>

@@ -9,7 +9,7 @@ gsap.registerPlugin(ScrollTrigger)
 const props = defineProps({
   title: {
     type: String,
-    default: "PERGUNTAS FREQUENTES"
+    default: "Tire suas dúvidas"
   },
   faqs: {
     type: Array,
