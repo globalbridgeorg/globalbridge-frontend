@@ -79,8 +79,7 @@ const animarGraficos = () => {
       scrollTrigger: {
         trigger: paisEl,
         start: "top 80%",
-        end: "bottom top", // necessário para o onLeaveBack funcionar corretamente
-        toggleActions: "restart ",
+        once: true, // anima só na primeira vez que entra na tela, nunca reinicia ao rolar de novo
       }
     })
 
