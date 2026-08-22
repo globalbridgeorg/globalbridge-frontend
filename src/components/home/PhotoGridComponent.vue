@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import BadgeComponent from '@/components/common/BadgeComponent.vue'
+import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
 
 defineProps({
   imagesCol1: Array,
@@ -37,9 +37,7 @@ onUnmounted(() => {
 <template>
   <div class="main-layout-wrapper">
     <div class="info-side">
-      <BadgeComponent class="badge-neutral">
-        O céu é o limite
-      </BadgeComponent>
+      <SectionEyebrow label="Sobre a GlobalBridge" />
       <h2 class="roboto-condensed">VOE ALÉM DOS SEUS LIMITES</h2>
       <p class="paragrafo-espacado">
         A GlobalBridge conecta você às melhores oportunidades de intercâmbio, reunindo informações essenciais sobre países, custo de vida, cultura e possibilidades de estudo e trabalho.

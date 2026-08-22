@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, onBeforeUpdate, onBeforeUnmount, nextTick } from 'vue'
-import BadgeComponent from '@/components/common/BadgeComponent.vue'
+import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
 import gsap from 'gsap'
 
 const items = [
@@ -101,9 +101,7 @@ onBeforeUnmount(() => {
 <template>
   <div class="container">
     <div>
-      <BadgeComponent class="badge-neutral">
-        Procure sua oportunidade dos sonhos
-      </BadgeComponent>
+      <SectionEyebrow label="Nossos motores" />
       <h2>NOSSOS MOTORES PRINCIPAIS</h2>
     </div>
 
@@ -134,11 +132,6 @@ onBeforeUnmount(() => {
     margin-top: 10px;
     margin-bottom: 30px;
   }
-}
-
-BadgeComponent {
-  font-size: 0.78vw;
-  padding: 10px 18px;
 }
 
 * {

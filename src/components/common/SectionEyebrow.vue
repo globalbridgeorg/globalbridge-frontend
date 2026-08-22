@@ -1,9 +1,5 @@
 <script setup>
 defineProps({
-  number: {
-    type: [String, Number],
-    required: true
-  },
   label: {
     type: String,
     required: true
@@ -17,7 +13,6 @@ defineProps({
 
 <template>
   <div class="eyebrow" :class="{ dark }">
-    <span class="eyebrow-number">{{ number }}</span>
     <span class="eyebrow-label">{{ label }}</span>
   </div>
 </template>
@@ -26,19 +21,9 @@ defineProps({
 .eyebrow {
   display: flex;
   align-items: baseline;
-  gap: 16px;
   width: 100%;
   padding-top: 16px;
   border-top: 1px solid var(--gb-purple-deep-18);
-}
-
-.eyebrow-number {
-  font-family: var(--gb-font-eyebrow);
-  font-weight: 700;
-  font-size: 12.5px;
-  letter-spacing: 0.16em;
-  color: var(--gb-magenta);
-  white-space: nowrap;
 }
 
 .eyebrow-label {

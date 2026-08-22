@@ -1,5 +1,6 @@
 <script setup>
 import ButtonComponent from '@/components/common/ButtonComponent.vue'
+import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -75,6 +76,8 @@ onBeforeUnmount(() => {
 
 <template>
   <section class="timeline">
+    <SectionEyebrow label="Cronograma" />
+
     <div class="heading-row">
       <h2 class="gb-heading">Um ano até<br />o embarque</h2>
       <p class="heading-desc">
@@ -117,7 +120,7 @@ onBeforeUnmount(() => {
 <style scoped>
 .timeline {
   width: 100%;
-  padding: var(--gb-space-y-continuation) 0 var(--gb-space-y);
+  padding: var(--gb-space-y) 0;
 }
 
 .heading-row {

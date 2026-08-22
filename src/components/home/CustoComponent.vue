@@ -93,7 +93,7 @@ onBeforeUnmount(() => ctx?.revert())
 
 <template>
   <section class="custo">
-    <SectionEyebrow number="08" label="Quanto custa" />
+    <SectionEyebrow label="Quanto custa" />
 
     <div class="heading-row">
       <h2 class="gb-heading">O custo real<br />de seis meses</h2>

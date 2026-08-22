@@ -37,14 +37,9 @@ body {
   --gb-font-eyebrow: 'Archivo Narrow', sans-serif;
   --gb-font-display: 'Archivo', sans-serif;
 
-  /* Espaçamento vertical das seções da home: uma seção "principal" (com o
-     próprio SectionEyebrow) usa --gb-space-y; uma seção "de continuação"
-     (empilhada sob outra, sem eyebrow próprio — ex.: Formato sob Custo,
-     Timeline sob Passos) usa --gb-space-y-continuation no lugar do topo
-     pra criar separação já que não tem eyebrow marcando o início. */
+  /* Espaçamento vertical padrão entre/dentro das seções da home. */
   --gb-space-x: 5%;
   --gb-space-y: 40px;
-  --gb-space-y-continuation: 56px;
 
   --gb-radius-card: 12px;
   --gb-radius-pill: 20px;
@@ -86,9 +81,8 @@ body {
   border: 0;
 }
 
-/* Padding lateral + largura máxima padrão de toda seção de conteúdo da
-   home. Fica só aqui — os componentes de seção não definem mais a própria
-   margem lateral, só o espaçamento vertical (que varia por seção). */
+/* Largura máxima padrão de toda seção de conteúdo da home (sem padding
+   lateral — conteúdo vai até a borda da viewport de propósito). */
 .gb-section {
   width: 100%;
   max-width: 1440px;
@@ -119,10 +113,4 @@ body {
   background: transparent;
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.35);
-}
-
-/* Variante neutra do BadgeComponent (usada nas seções que ainda têm o
-   badge cinza-areia, fora do sistema de eyebrow numerado). */
-.badge-neutral {
-  background-color: #E5E0CF;
 }

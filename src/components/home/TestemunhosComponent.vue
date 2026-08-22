@@ -49,7 +49,7 @@ onBeforeUnmount(() => ctx?.revert())
 <template>
   <section class="testemunhos">
     <div class="inner gb-section">
-      <SectionEyebrow number="10" label="Quem já foi" />
+      <SectionEyebrow label="Quem já foi" />
       <h2 class="gb-heading">Já embarcaram<br />com a gente</h2>
 
       <div class="cards">

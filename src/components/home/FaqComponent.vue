@@ -81,7 +81,7 @@ onBeforeUnmount(() => ctx?.revert())
 
 <template>
   <section class="faq-section">
-    <SectionEyebrow number="07" label="Perguntas frequentes" />
+    <SectionEyebrow label="Perguntas frequentes" />
 
     <h2 class="faq-title gb-heading">{{ title }}</h2>
 

@@ -77,7 +77,7 @@ onBeforeUnmount(() => {
 
 <template>
   <section class="programas" ref="sectionRef">
-    <SectionEyebrow number="03" label="Programas disponíveis" />
+    <SectionEyebrow label="Programas disponíveis" />
     <h2 class="sr-only">Programas disponíveis</h2>
 
     <div class="cards-row">

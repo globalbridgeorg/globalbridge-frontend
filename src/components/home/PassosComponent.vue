@@ -54,7 +54,7 @@ onBeforeUnmount(() => ctx?.revert())
 
 <template>
   <section id="passos" class="passos">
-    <SectionEyebrow number="09" label="Preparação" />
+    <SectionEyebrow label="Preparação" />
 
     <h2 class="gb-heading">Três passos até<br />o embarque</h2>
 

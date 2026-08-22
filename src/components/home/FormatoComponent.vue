@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
+import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
@@ -36,6 +37,8 @@ onBeforeUnmount(() => ctx?.revert())
 
 <template>
   <section id="formatos" class="formato">
+    <SectionEyebrow label="Formatos disponíveis" />
+
     <div class="heading-row">
       <h2 class="gb-heading">Qual formato<br />combina com você</h2>
       <p class="heading-desc">
@@ -68,7 +71,7 @@ onBeforeUnmount(() => ctx?.revert())
 <style scoped>
 .formato {
   width: 100%;
-  padding: var(--gb-space-y-continuation) 0 var(--gb-space-y);
+  padding: var(--gb-space-y) 0;
   scroll-margin-top: 96px;
 }
 

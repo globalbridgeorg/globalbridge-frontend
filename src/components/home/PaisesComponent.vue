@@ -133,7 +133,7 @@ const animarGraficos = () => {
 
 <template>
   <div class="container">
-    <SectionEyebrow number="06" label="Dados de 2026" />
+    <SectionEyebrow label="Dados de 2026" />
 
     <div class="heading-row">
       <h2 class="gb-heading">Países mais<br />procurados</h2>
