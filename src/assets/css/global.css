@@ -23,9 +23,13 @@ body {
   --gb-magenta: #B01FB0;
   --gb-magenta-strong: #7A0F74;
   --gb-mauve: #5A4757;
-  --gb-blue: #3E7BF0;
+  --gb-blue: #3972DE;
   --gb-orange: #F0651E;
   --gb-green: #3D9A4B;
+  /* Mesmo tom de --gb-mauve na família, mas escurecido para 4.5:1 em texto
+     pequeno (labels/legendas) sobre --gb-cream e --gb-pink — ver auditoria
+     de acessibilidade da branch reworking. */
+  --gb-ink-faint: #757067;
 
   --gb-font-eyebrow: 'Archivo Narrow', sans-serif;
   --gb-font-display: 'Archivo', sans-serif;
@@ -48,4 +52,20 @@ body {
 
 .gb-heading .accent {
   color: var(--gb-magenta);
+}
+
+/* Para títulos de seção que existem para a hierarquia de headings, mas cujo
+   design usa só o SectionEyebrow como rótulo visível (ex.: Programas
+   disponíveis) — mantém a estrutura para leitores de tela sem duplicar
+   visualmente o que o eyebrow já mostra. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

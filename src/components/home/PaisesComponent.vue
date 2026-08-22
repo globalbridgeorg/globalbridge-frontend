@@ -17,7 +17,7 @@ const metricsConfig = [
 ]
 
 // Cores de destaque por posição no ranking (top 3 / meio / final), igual referência visual
-const rankColors = ['#D8442C', '#7A0F74', '#D8442C', '#D8442C', '#D8442C', '#3D9A4B', '#3D9A4B', '#3D9A4B']
+const rankColors = ['#C93F29', '#7A0F74', '#C93F29', '#C93F29', '#C93F29', '#33803E', '#33803E', '#33803E']
 const corPorPosicao = (index) => rankColors[index % rankColors.length]
 
 // Refs dinâmicas (guardadas em objetos por id/chave, já que v-for não permite array de refs facilmente com múltiplos níveis)
@@ -324,7 +324,7 @@ const animarGraficos = () => {
 .programas-label {
     display: block;
     font-size: 11px;
-    color: #8A8479;
+    color: var(--gb-ink-faint);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -387,7 +387,7 @@ const animarGraficos = () => {
       font-size: 11px;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: #8A8479;
+      color: var(--gb-ink-faint);
     }
 
     .col-rank { width: 24px; }

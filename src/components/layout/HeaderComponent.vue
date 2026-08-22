@@ -35,7 +35,13 @@ const toggleMenu = () => {
     </div>
 
   <!-- nav mobile -->
-    <button class="mobile-menu-btn" @click="toggleMenu" aria-label="Menu">
+    <button
+      class="mobile-menu-btn"
+      @click="toggleMenu"
+      aria-label="Menu"
+      :aria-expanded="mobileMenuOpen"
+      aria-controls="mobile-nav"
+    >
       <span></span>
       <span></span>
       <span></span>
@@ -62,7 +68,7 @@ const toggleMenu = () => {
 
     <!-- menu mobile -->
     <Transition name="mobile-menu">
-      <div v-if="mobileMenuOpen" class="mobile-nav">
+      <div v-if="mobileMenuOpen" id="mobile-nav" class="mobile-nav">
         <router-link to="/mapview" @click="toggleMenu">Meu destino</router-link>
         <router-link to="/#passos" @click="toggleMenu">Como funciona</router-link>
         <a href="mailto:contato@globalbridge.com" @click="toggleMenu">Contato</a>
@@ -140,9 +146,11 @@ const toggleMenu = () => {
 .mobile-menu-btn {
   display: none;
   flex-direction: column;
-  justify-content: space-between;
-  width: 30px;
-  height: 21px;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 44px;
+  height: 44px;
   background: transparent;
   border: none;
   cursor: pointer;
@@ -150,7 +158,7 @@ const toggleMenu = () => {
 }
 
 .mobile-menu-btn span {
-  width: 100%;
+  width: 26px;
   height: 3px;
   background: #42023C;
   border-radius: 3px;

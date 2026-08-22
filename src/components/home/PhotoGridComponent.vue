@@ -40,7 +40,7 @@ onUnmounted(() => {
       <BadgeComponent style="background-color: #e5e0cf;">
         O céu é o limite
       </BadgeComponent>
-      <h1 class="roboto-condensed">VOE ALÉM DOS SEUS LIMITES</h1>
+      <h2 class="roboto-condensed">VOE ALÉM DOS SEUS LIMITES</h2>
       <p style="padding-bottom: 30px;">
         A GlobalBridge conecta você às melhores oportunidades de intercâmbio, reunindo informações essenciais sobre países, custo de vida, cultura e possibilidades de estudo e trabalho.
       </p>
@@ -91,7 +91,7 @@ onUnmounted(() => {
   padding-right: 50px;
 }
 
-.info-side h1 {
+.info-side h2 {
   line-height: 0.9;
   font-weight: 800;
   margin: 20px 0;

@@ -77,6 +77,7 @@ onBeforeUnmount(() => {
 <template>
   <section class="programas" ref="sectionRef">
     <SectionEyebrow number="03" label="Programas disponíveis" />
+    <h2 class="sr-only">Programas disponíveis</h2>
 
     <div class="cards-row">
       <div class="card card-pink" ref="cardPinkRef">
@@ -336,7 +337,7 @@ onBeforeUnmount(() => {
   font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #8A8479;
+  color: var(--gb-ink-faint);
 }
 
 @media (min-width: 900px) {

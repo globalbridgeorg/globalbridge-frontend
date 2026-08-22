@@ -121,7 +121,7 @@ onBeforeUnmount(() => ctx?.revert())
 .formato-row span[data-label]::before {
   content: attr(data-label) ": ";
   font-weight: 700;
-  color: #8A8479;
+  color: var(--gb-ink-faint);
 }
 
 .formato-row span {
@@ -151,7 +151,7 @@ onBeforeUnmount(() => ctx?.revert())
     font-size: 11px;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: #8A8479;
+    color: var(--gb-ink-faint);
   }
 
   .formato-row span[data-label]::before {

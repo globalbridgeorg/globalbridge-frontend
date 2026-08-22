@@ -226,7 +226,7 @@ onBeforeUnmount(() => ctx?.revert())
   font-size: 10px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #8A8479;
+  color: var(--gb-ink-faint);
 }
 
 .total strong {

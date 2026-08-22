@@ -23,6 +23,9 @@ onMounted(() => {
   const track = marqueeTrackRef.value
   if (!track) return
 
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  if (prefersReducedMotion) return
+
   // a track tem o texto duplicado (2x); anda metade da largura e reinicia sem "salto" visível
   marqueeTween = gsap.to(track, {
     xPercent: -50,
@@ -97,7 +100,7 @@ onBeforeUnmount(() => marqueeTween?.kill())
       </div>
     </div>
 
-    <div class="marquee">
+    <div class="marquee" aria-hidden="true">
       <div class="marquee-track" ref="marqueeTrackRef">
         <span>Moldando seu futuro&nbsp;·&nbsp;Moldando seu futuro&nbsp;·&nbsp;Moldando seu futuro&nbsp;·&nbsp;Moldando seu futuro&nbsp;·&nbsp;</span>
         <span aria-hidden="true">Moldando seu futuro&nbsp;·&nbsp;Moldando seu futuro&nbsp;·&nbsp;Moldando seu futuro&nbsp;·&nbsp;Moldando seu futuro&nbsp;·&nbsp;</span>
@@ -209,7 +212,7 @@ onBeforeUnmount(() => marqueeTween?.kill())
   font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #8A5F82;
+  color: #74506D;
   margin-bottom: 4px;
 }
 

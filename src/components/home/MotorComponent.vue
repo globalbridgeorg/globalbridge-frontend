@@ -13,21 +13,21 @@ const items = [
   },
   {
     label: 'Idioma',
-    color: '#3B6EF5',
+    color: '#3A6CF0',
     text: 'Conheça os idiomas falados, o nível de proficiência necessário e as oportunidades para aprender ou aprimorar uma nova língua durante o intercâmbio.',
     image: '/images/MotoresIdiomas.png',
     tag: 'Fale o idioma de verdade'
   },
   {
     label: 'Ensino',
-    color: '#F5822D',
+    color: '#B4601F',
     text: 'Explore a qualidade das instituições, os tipos de cursos disponíveis e as opções de programas acadêmicos para estudantes internacionais.',
     image: '/images/motoresEnsino.png',
     tag: 'Ensino em foco'
   },
   {
     label: 'Oportunidade',
-    color: '#4CA855',
+    color: '#3C8543',
     text: 'Veja as possibilidades de trabalho, estágios e outros programas que você pode estudar e trabalhar enquanto vive a experiência internacional.',
     image: '/images/motoresOportunidades.png',
     tag: 'Oportunidade em foco'
