@@ -334,8 +334,8 @@ html, body {
 .stars { position: absolute; inset: 0; opacity: 0.5; }
 
 .skyline { position: absolute; left: 0; bottom: 0; width: 300%; animation: scroll linear infinite; }
-.skyline-back { height: 32%; opacity: 0.5; animation-duration: 80s; }
-.skyline-front { height: 38%; animation-duration: 42s; animation-direction: reverse; }
+.skyline-back { height: 50%; opacity: 0.5; animation-duration: 80s; }
+.skyline-front { height: 60%; animation-duration: 42s; animation-direction: reverse; }
 
 @keyframes scroll {
   from { transform: translateX(0); }
