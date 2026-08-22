@@ -1,6 +1,7 @@
 <script setup>
 import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
 import ButtonComponent from '@/components/common/ButtonComponent.vue'
+import VideoComponent from '@/components/home/VideoComponent.vue'
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -108,7 +109,7 @@ onBeforeUnmount(() => {
 
     <div class="destino-row">
       <div class="destino-imagem" ref="destinoRef">
-        <img src="/images/imagemgb2.png" alt="Destino em destaque" />
+        <VideoComponent src="/videos/video-landing.mp4" compact />
         <span class="destino-caption">destino em destaque — rua movimentada</span>
       </div>
 
@@ -239,16 +240,8 @@ onBeforeUnmount(() => {
   position: relative;
   border-radius: 12px;
   overflow: hidden;
-  min-height: 280px;
+  height: 280px;
   background: #E5E0CF;
-}
-
-.destino-imagem img {
-  width: 100%;
-  height: 100%;
-  min-height: 280px;
-  object-fit: cover;
-  display: block;
 }
 
 .destino-caption {
@@ -353,11 +346,7 @@ onBeforeUnmount(() => {
 
   .destino-imagem {
     flex: 0.8;
-    min-height: 0;
-  }
-
-  .destino-imagem img {
-    min-height: 0;
+    height: auto;
   }
 
   .opcoes {

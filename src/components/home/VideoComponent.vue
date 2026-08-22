@@ -8,7 +8,10 @@ const props = defineProps({
   animateOnScroll: { type: Boolean, default: false },
   title: String,
   description: String,
-  pills: Array
+  pills: Array,
+  // Modo compacto: preenche a altura do elemento pai em vez do hero de
+  // tela cheia (100vh) — pra usar o vídeo dentro de um card/seção comum.
+  compact: { type: Boolean, default: false }
 })
 
 const { videoSrc, loadVideo } = useVideoLoader()
@@ -39,10 +42,10 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div 
+  <div
     :class="[
-      'video-container', 
-      { 'scroll-wrapper': props.animateOnScroll && !isMobile }
+      'video-container',
+      { 'scroll-wrapper': props.animateOnScroll && !isMobile, compact: props.compact }
     ]"
   >
     <div 
@@ -174,6 +177,20 @@ onUnmounted(() => {
   top: 0;
 }
 
+/* Modo compacto: preenche a altura do elemento pai (que precisa ter uma
+   altura definida -- height, ou um item de flex com align-items: stretch)
+   em vez do dimensionamento de hero em tela cheia. */
+.video-container.compact {
+  min-height: 0;
+  height: 100%;
+  padding-bottom: 0;
+}
+
+.video-container.compact .video-overlay-content {
+  min-height: 0;
+  height: 100%;
+}
+
 /* mobile */
 @media (max-width: 768px) {
   .video-container {
@@ -193,6 +210,18 @@ onUnmounted(() => {
 
   .video-bg {
     border-radius: 24px;
+  }
+
+  .video-container.compact {
+    padding: 0;
+    min-height: 0;
+    height: 100%;
+  }
+
+  .video-container.compact .video-overlay-content {
+    min-height: 0;
+    height: 100%;
+    border-radius: 0;
   }
 
   .hero-layout {
