@@ -102,7 +102,7 @@ onBeforeUnmount(() => ctx?.revert())
 /* Mobile First */
 .faq-section {
     width: 100%;
-    padding: 30px 0 30px 0;
+    padding: var(--gb-space-y) var(--gb-space-x);
     max-width: 1440px;
     margin: 0 auto;
     box-sizing: border-box;

@@ -3,6 +3,7 @@ import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { palette } from '@/utils/palette'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -10,7 +11,7 @@ const planos = [
   {
     pais: 'Irlanda',
     tag: 'Mais procurado',
-    tagColor: '#B01FB0',
+    tagColor: palette.magentaOnPink,
     destaque: true,
     itens: [
       { label: 'Curso · 6 meses', valor: 14500 },
@@ -25,7 +26,7 @@ const planos = [
   {
     pais: 'Canadá',
     tag: 'Pode trabalhar',
-    tagColor: '#5A4757',
+    tagColor: palette.mauve,
     destaque: false,
     itens: [
       { label: 'Curso · 6 meses', valor: 16800 },
@@ -40,7 +41,7 @@ const planos = [
   {
     pais: 'Portugal',
     tag: 'Mais barato',
-    tagColor: '#3D9A4B',
+    tagColor: palette.green,
     destaque: false,
     itens: [
       { label: 'Curso · 6 meses', valor: 9800 },
@@ -135,7 +136,7 @@ onBeforeUnmount(() => ctx?.revert())
   width: 100%;
   max-width: 1440px;
   margin: 0 auto;
-  padding: 40px 5%;
+  padding: var(--gb-space-y) var(--gb-space-x);
   box-sizing: border-box;
 }
 
@@ -149,7 +150,7 @@ onBeforeUnmount(() => ctx?.revert())
 .heading-desc {
   font-size: 0.95rem;
   line-height: 1.6;
-  color: #55505A;
+  color: var(--gb-ink-soft);
   max-width: 420px;
   margin: 0;
 }

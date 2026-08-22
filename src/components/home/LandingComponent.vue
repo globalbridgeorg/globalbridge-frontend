@@ -146,7 +146,7 @@ onBeforeUnmount(() => {
   width: 100%;
   max-width: 1440px;
   margin: 0 auto;
-  padding: 40px 5% 0;
+  padding: var(--gb-space-y) var(--gb-space-x) 0;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -294,7 +294,7 @@ onBeforeUnmount(() => {
 .opcoes-desc {
   font-size: 0.95rem;
   line-height: 1.55;
-  color: #55505A;
+  color: var(--gb-ink-soft);
   margin: 0 0 20px;
 }
 

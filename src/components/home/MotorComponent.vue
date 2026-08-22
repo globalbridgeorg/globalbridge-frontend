@@ -129,6 +129,7 @@ onBeforeUnmount(() => {
   width: 100%;
   max-width: 1440px;
   margin: 0 auto;
+  padding: var(--gb-space-y) var(--gb-space-x);
   box-sizing: border-box;
 
   & h2 {
@@ -159,7 +160,7 @@ BadgeComponent {
   position: relative;
   flex: 1 1 0;
   min-width: 160px;
-  border-radius: 20px;
+  border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
   padding: 24px 20px;
@@ -205,7 +206,7 @@ BadgeComponent {
 
 .card-image {
   flex: 1 1 55%;
-  border-radius: 14px;
+  border-radius: 8px;
   background-size: cover;
   background-position: start;
   min-height: 0;

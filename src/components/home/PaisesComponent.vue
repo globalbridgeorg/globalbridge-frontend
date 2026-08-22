@@ -4,6 +4,7 @@ import axios from '@/services/axios'
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
+import { palette } from '@/utils/palette'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -17,7 +18,7 @@ const metricsConfig = [
 ]
 
 // Cores de destaque por posição no ranking (top 3 / meio / final), igual referência visual
-const rankColors = ['#C93F29', '#7A0F74', '#C93F29', '#C93F29', '#C93F29', '#33803E', '#33803E', '#33803E']
+const rankColors = [palette.red, palette.magentaStrong, palette.red, palette.red, palette.red, palette.green, palette.green, palette.green]
 const corPorPosicao = (index) => rankColors[index % rankColors.length]
 
 // Refs dinâmicas (guardadas em objetos por id/chave, já que v-for não permite array de refs facilmente com múltiplos níveis)
@@ -209,7 +210,7 @@ const animarGraficos = () => {
     width: 100%;
     max-width: 1440px;
     margin: 0 auto;
-    padding: 40px 5%;
+    padding: var(--gb-space-y) var(--gb-space-x);
     box-sizing: border-box;
 }
 
@@ -223,7 +224,7 @@ const animarGraficos = () => {
 .heading-desc {
   font-size: 0.95rem;
   line-height: 1.6;
-  color: #55505A;
+  color: var(--gb-ink-soft);
   max-width: 480px;
   margin: 0;
 }

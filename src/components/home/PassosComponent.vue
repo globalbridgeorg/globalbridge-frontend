@@ -3,6 +3,7 @@ import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { palette } from '@/utils/palette'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -18,9 +19,9 @@ const passos = [
     titulo: 'Compare programas',
     texto: 'Universidade, curso de idioma, Study & Work ou Au Pair, com duração e requisitos lado a lado.',
     legenda: [
-      { label: 'Universidade · 12 meses', cor: '#7A0F74' },
-      { label: 'Idioma · 6 meses', cor: '#B01FB0' },
-      { label: 'Study & Work · 9 meses', cor: '#FBC2F4' }
+      { label: 'Universidade · 12 meses', cor: palette.magentaStrong },
+      { label: 'Idioma · 6 meses', cor: palette.magenta },
+      { label: 'Study & Work · 9 meses', cor: palette.blue }
     ]
   },
   {
@@ -95,7 +96,7 @@ onBeforeUnmount(() => ctx?.revert())
   width: 100%;
   max-width: 1440px;
   margin: 0 auto;
-  padding: 40px 5%;
+  padding: var(--gb-space-y) var(--gb-space-x);
   box-sizing: border-box;
   scroll-margin-top: 96px;
 }
@@ -120,7 +121,7 @@ onBeforeUnmount(() => ctx?.revert())
   font-weight: 900;
   font-size: 2.2rem;
   color: var(--gb-magenta);
-  opacity: 0.5;
+  opacity: 0.7;
   margin-bottom: 12px;
 }
 
@@ -136,7 +137,7 @@ onBeforeUnmount(() => ctx?.revert())
 .texto {
   font-size: 0.9rem;
   line-height: 1.6;
-  color: #55505A;
+  color: var(--gb-ink-soft);
   margin: 0 0 16px;
 }
 
@@ -165,7 +166,7 @@ onBeforeUnmount(() => ctx?.revert())
   align-items: center;
   gap: 10px;
   font-size: 0.82rem;
-  color: #55505A;
+  color: var(--gb-ink-soft);
 }
 
 .legenda-linha {
@@ -190,7 +191,7 @@ onBeforeUnmount(() => ctx?.revert())
 
 .nota-texto {
   font-size: 0.82rem;
-  color: #55505A;
+  color: var(--gb-ink-soft);
 }
 
 @media (min-width: 900px) {

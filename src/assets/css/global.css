@@ -30,9 +30,25 @@ body {
      pequeno (labels/legendas) sobre --gb-cream e --gb-pink — ver auditoria
      de acessibilidade da branch reworking. */
   --gb-ink-faint: #757067;
+  --gb-ink-soft: #55505A;
+  --gb-mauve-muted: #6B4E64;
+  --gb-accent-light: #FF7DEE;
 
   --gb-font-eyebrow: 'Archivo Narrow', sans-serif;
   --gb-font-display: 'Archivo', sans-serif;
+
+  /* Espaçamento vertical das seções da home: uma seção "principal" (com o
+     próprio SectionEyebrow) usa --gb-space-y; uma seção "de continuação"
+     (empilhada sob outra, sem eyebrow próprio — ex.: Formato sob Custo,
+     Timeline sob Passos) usa --gb-space-y-continuation no lugar do topo
+     pra criar separação já que não tem eyebrow marcando o início. */
+  --gb-space-x: 5%;
+  --gb-space-y: 40px;
+  --gb-space-y-continuation: 56px;
+
+  --gb-radius-card: 12px;
+  --gb-radius-pill: 20px;
+  --gb-shadow-card: 0 10px 24px rgba(23, 17, 26, 0.08);
 }
 
 .gb-heading {

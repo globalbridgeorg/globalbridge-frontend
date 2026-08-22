@@ -158,7 +158,7 @@ onBeforeUnmount(() => ctx?.revert())
 .autor .curso {
   display: block;
   font-size: 0.78rem;
-  color: #6B4E64;
+  color: var(--gb-mauve-muted);
 }
 
 @media (min-width: 900px) {

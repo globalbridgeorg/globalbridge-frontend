@@ -152,7 +152,7 @@ onBeforeUnmount(() => marqueeTween?.kill())
 }
 
 .cta-title .accent {
-  color: #FF7DEE;
+  color: var(--gb-accent-light);
 }
 
 .cta-subtitle {
@@ -241,7 +241,7 @@ onBeforeUnmount(() => marqueeTween?.kill())
   padding: 24px 0;
   border-top: 1px solid rgba(23, 17, 26, 0.15);
   font-size: 0.8rem;
-  color: #6B4E64;
+  color: var(--gb-mauve-muted);
 }
 
 .footer-legal a {

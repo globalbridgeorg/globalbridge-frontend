@@ -70,7 +70,7 @@ onBeforeUnmount(() => ctx?.revert())
   width: 100%;
   max-width: 1440px;
   margin: 0 auto;
-  padding: 56px 5% 40px;
+  padding: var(--gb-space-y-continuation) var(--gb-space-x) var(--gb-space-y);
   box-sizing: border-box;
   scroll-margin-top: 96px;
 }
@@ -85,7 +85,7 @@ onBeforeUnmount(() => ctx?.revert())
 .heading-desc {
   font-size: 0.95rem;
   line-height: 1.6;
-  color: #55505A;
+  color: var(--gb-ink-soft);
   max-width: 460px;
   margin: 0;
 }

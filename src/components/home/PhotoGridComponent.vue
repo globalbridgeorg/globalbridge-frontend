@@ -157,7 +157,7 @@ onUnmounted(() => {
 @media (max-width: 768px) {
   .main-layout-wrapper {
     flex-direction: column;
-    padding: 40px 5%;
+    padding: var(--gb-space-y) var(--gb-space-x);
     min-height: auto;
     gap: 40px;
   }

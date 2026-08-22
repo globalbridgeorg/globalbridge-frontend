@@ -99,7 +99,7 @@ onBeforeUnmount(() => {
         <ul>
           <li v-for="doc in documentos" :key="doc" class="doc-item">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M3 8.5L6.2 11.5L13 4.5" stroke="#FF7DEE" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M3 8.5L6.2 11.5L13 4.5" stroke="var(--gb-accent-light)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             <span>{{ doc }}</span>
           </li>
@@ -119,7 +119,7 @@ onBeforeUnmount(() => {
   width: 100%;
   max-width: 1440px;
   margin: 0 auto;
-  padding: 56px 5% 40px;
+  padding: var(--gb-space-y-continuation) var(--gb-space-x) var(--gb-space-y);
   box-sizing: border-box;
 }
 
@@ -133,7 +133,7 @@ onBeforeUnmount(() => {
 .heading-desc {
   font-size: 0.95rem;
   line-height: 1.6;
-  color: #55505A;
+  color: var(--gb-ink-soft);
   max-width: 420px;
   margin: 0;
 }
@@ -184,7 +184,7 @@ onBeforeUnmount(() => {
 .etapa-corpo p {
   font-size: 0.85rem;
   line-height: 1.5;
-  color: #55505A;
+  color: var(--gb-ink-soft);
   margin: 0;
 }
 
