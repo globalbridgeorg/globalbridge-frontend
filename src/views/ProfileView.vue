@@ -18,11 +18,11 @@ const profile = ref({
 
 const section = ref('perfil')
 const sidebarItems = [
-  { key: 'perfil', label: 'Perfil', image: '/images/motoresCultura.png', color: 'rgba(122,15,116,0.45)' },
-  { key: 'seguranca', label: 'Segurança', image: '/images/motoresEnsino.png', color: 'rgba(57,114,222,0.45)' },
-  { key: 'favoritos', label: 'Favoritos', image: '/images/MotoresIdiomas.png', color: 'rgba(240,101,30,0.4)' },
-  { key: 'avaliacoes', label: 'Avaliações', image: '/images/motoresOportunidades.png', color: 'rgba(61,154,75,0.4)' },
-  { key: 'preferencias', label: 'Preferências', image: '/images/motoresCultura.png', color: 'rgba(90,71,87,0.5)' }
+  { key: 'perfil', label: 'Perfil', image: '/images/profile_perfil.png', color: 'rgba(122,15,116,0.45)' },
+  { key: 'seguranca', label: 'Segurança', image: '/images/profile_secure.png', color: 'rgba(57,114,222,0.45)' },
+  { key: 'favoritos', label: 'Favoritos', image: '/images/profile_favorite.png', color: 'rgba(240,101,30,0.4)' },
+  { key: 'avaliacoes', label: 'Avaliações', image: '/images/profile_saved.png', color: 'rgba(61,154,75,0.4)' },
+  { key: 'preferencias', label: 'Preferências', image: '/images/profile_settings.png', color: 'rgba(90,71,87,0.5)' }
 ]
 
 const sidebarMeta = computed(() => ({
@@ -236,7 +236,7 @@ onMounted(() => {
             >
               <div class="side-thumb">
                 <img :src="item.image" alt="" />
-                <div class="tint" :style="{ background: item.color }"></div>
+               
               </div>
               <div class="side-text">
                 <span class="side-label">{{ item.label }}</span>
@@ -436,8 +436,8 @@ onMounted(() => {
 .side-item:hover { background: rgba(46, 10, 46, 0.04); }
 .side-item.active { background: var(--gb-dark); }
 .side-thumb { width: 34px; height: 34px; border-radius: 8px; overflow: hidden; flex-shrink: 0; position: relative; }
-.side-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.side-thumb .tint { position: absolute; inset: 0; mix-blend-mode: multiply; opacity: 0.5; }
+.side-thumb img { width: 100%; height: 100%; object-fit: contain; padding: 6px; display: block; filter: brightness(0); transition: filter 0.15s ease; }
+.side-item.active .side-thumb img { filter: brightness(0) invert(1); }
 .side-text { display: flex; flex-direction: column; min-width: 0; }
 .side-label { font-size: 13px; font-weight: 700; color: var(--gb-dark); }
 .side-item.active .side-label { color: #fff; }
