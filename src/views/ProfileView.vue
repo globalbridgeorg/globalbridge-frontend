@@ -160,7 +160,7 @@ onMounted(() => {
   <div class="profile-page">
     <div class="top-banner"><span>Minha conta</span></div>
 
-    <div class="content">
+    <div class="content gb-section">
       <div v-if="loading" class="loading-state">Carregando perfil...</div>
 
       <template v-else>
@@ -204,7 +204,8 @@ onMounted(() => {
           </div>
 
           <div>
-            <div v-if="section === 'perfil'" class="panel">
+            <Transition name="panel-pop" mode="out-in">
+            <div v-if="section === 'perfil'" class="panel" key="perfil">
               <h3>Dados pessoais</h3>
               <p class="panel-sub">Informações da sua conta e do seu perfil público</p>
               <div class="field-row">
@@ -221,7 +222,7 @@ onMounted(() => {
               <span v-if="profileSaved" class="saved-flash">Perfil atualizado ✓</span>
             </div>
 
-            <div v-else-if="section === 'seguranca'" class="panel">
+            <div v-else-if="section === 'seguranca'" class="panel" key="seguranca">
               <h3>Segurança</h3>
               <p class="panel-sub">Senha, autenticação e dispositivos conectados</p>
               <div class="field" style="margin-bottom:14px; max-width:360px;"><label>Senha atual</label><input type="password" placeholder="••••••••" /></div>
@@ -247,7 +248,7 @@ onMounted(() => {
               </div>
             </div>
 
-            <div v-else-if="section === 'favoritos'" class="panel">
+            <div v-else-if="section === 'favoritos'" class="panel" key="favoritos">
               <h3>Favoritos</h3>
               <p class="panel-sub">Destinos que você salvou para comparar depois</p>
               <table class="fav-table">
@@ -262,7 +263,7 @@ onMounted(() => {
               <p v-if="!favorites.length" class="panel-empty">Você ainda não salvou nenhum destino.</p>
             </div>
 
-            <div v-else-if="section === 'avaliacoes'" class="panel">
+            <div v-else-if="section === 'avaliacoes'" class="panel" key="avaliacoes">
               <h3>Avaliações</h3>
               <p class="panel-sub">Experiências que você compartilhou com outros estudantes</p>
               <div v-for="(rev, i) in reviews" :key="i" class="review-item">
@@ -276,7 +277,7 @@ onMounted(() => {
               <button class="cta-write">Escrever nova avaliação</button>
             </div>
 
-            <div v-else-if="section === 'preferencias'" class="panel">
+            <div v-else-if="section === 'preferencias'" class="panel" key="preferencias">
               <h3>Preferências</h3>
               <p class="panel-sub">Personalize as recomendações de intercâmbio</p>
               <div class="pref-group">
@@ -300,6 +301,7 @@ onMounted(() => {
                 <button class="toggle-sw" :class="{ on: notifWhats }" @click="notifWhats = !notifWhats"></button>
               </div>
             </div>
+            </Transition>
           </div>
         </div>
 
@@ -368,7 +370,7 @@ onMounted(() => {
   padding-bottom: 16px;
 }
 
-.content { max-width: 1160px; margin: 0 auto; padding: 32px 24px 90px; }
+.content { padding: 32px 24px 90px; }
 
 .loading-state,
 .profile-error {
@@ -401,6 +403,10 @@ onMounted(() => {
 .side-item.active .side-meta { color: rgba(255, 255, 255, 0.6); }
 
 .panel { background: #fff; border: 1px solid var(--gb-purple-deep-16); border-radius: var(--gb-radius-card); padding: 26px 28px; }
+.panel-pop-enter-active,
+.panel-pop-leave-active { transition: opacity 0.18s ease, transform 0.18s ease; }
+.panel-pop-enter-from,
+.panel-pop-leave-to { opacity: 0; transform: scale(0.94); }
 .panel h3 { font-family: var(--gb-font-display); font-weight: 900; text-transform: uppercase; font-size: 17px; color: var(--gb-dark); margin: 0 0 4px; }
 .panel .panel-sub { font-size: 12.5px; color: var(--gb-ink-soft); margin: 0 0 20px; }
 .panel-empty { font-size: 13px; color: var(--gb-ink-faint); }
