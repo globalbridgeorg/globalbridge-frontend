@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from '@/services/axios'
 import PhotoComponent from '@/components/profile/PhotoComponent.vue'
@@ -33,7 +33,42 @@ const sidebarMeta = computed(() => ({
   preferencias: (idioma.value || 'Sem idioma') + ' · ' + (programa.value || 'sem programa')
 }))
 
-function selectSection(key) { section.value = key }
+const panelShell = ref(null)
+
+async function selectSection(key) {
+  if (key === section.value) return
+  const shell = panelShell.value
+
+  if (shell) {
+    shell.style.height = shell.getBoundingClientRect().height + 'px'
+    shell.classList.add('resizing')
+  }
+
+  section.value = key
+  await nextTick()
+
+  if (shell) {
+    const endHeight = shell.scrollHeight
+    // força o reflow para o navegador registrar a altura de partida antes de animar para a nova
+    void shell.offsetHeight
+    shell.style.height = endHeight + 'px'
+
+    let done = false
+    const cleanup = () => {
+      if (done) return
+      done = true
+      shell.style.height = ''
+      shell.classList.remove('resizing')
+      shell.removeEventListener('transitionend', onEnd)
+    }
+    const onEnd = (event) => {
+      if (event.target === shell && event.propertyName === 'height') cleanup()
+    }
+    shell.addEventListener('transitionend', onEnd)
+    // rede de segurança caso a transição não dispare (ex.: altura igual, prefers-reduced-motion)
+    setTimeout(cleanup, 320)
+  }
+}
 
 // ---- Perfil (nome é salvo de verdade; telefone/cidade/bio ainda não têm campo no backend) ----
 const editForm = reactive({ name: '', telefone: '', cidade: '', sobre: '' })
@@ -204,7 +239,7 @@ onMounted(() => {
           </div>
 
           <div>
-            <Transition name="panel-pop" mode="out-in">
+            <div class="panel-shell" ref="panelShell">
             <div v-if="section === 'perfil'" class="panel" key="perfil">
               <h3>Dados pessoais</h3>
               <p class="panel-sub">Informações da sua conta e do seu perfil público</p>
@@ -301,7 +336,7 @@ onMounted(() => {
                 <button class="toggle-sw" :class="{ on: notifWhats }" @click="notifWhats = !notifWhats"></button>
               </div>
             </div>
-            </Transition>
+            </div>
           </div>
         </div>
 
@@ -354,7 +389,7 @@ onMounted(() => {
 
 .top-banner {
   width: 100%;
-  height: 110px;
+  height: 190px;
   background: linear-gradient(120deg, var(--gb-purple-deep) 0%, var(--gb-dark) 100%);
   display: flex;
   align-items: flex-end;
@@ -363,7 +398,7 @@ onMounted(() => {
 .top-banner span {
   font-family: var(--gb-font-eyebrow);
   font-weight: 700;
-  font-size: 12px;
+  font-size: 22px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.6);
@@ -402,11 +437,9 @@ onMounted(() => {
 .side-meta { font-size: 11px; color: var(--gb-ink-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .side-item.active .side-meta { color: rgba(255, 255, 255, 0.6); }
 
+.panel-shell { transition: height 0.28s ease; }
+.panel-shell.resizing { overflow: hidden; }
 .panel { background: #fff; border: 1px solid var(--gb-purple-deep-16); border-radius: var(--gb-radius-card); padding: 26px 28px; }
-.panel-pop-enter-active,
-.panel-pop-leave-active { transition: opacity 0.18s ease, transform 0.18s ease; }
-.panel-pop-enter-from,
-.panel-pop-leave-to { opacity: 0; transform: scale(0.94); }
 .panel h3 { font-family: var(--gb-font-display); font-weight: 900; text-transform: uppercase; font-size: 17px; color: var(--gb-dark); margin: 0 0 4px; }
 .panel .panel-sub { font-size: 12.5px; color: var(--gb-ink-soft); margin: 0 0 20px; }
 .panel-empty { font-size: 13px; color: var(--gb-ink-faint); }
@@ -497,5 +530,9 @@ onMounted(() => {
 
 @media (max-width: 640px) {
   .profile-header { flex-direction: column; align-items: flex-start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel-shell { transition: none; }
 }
 </style>
