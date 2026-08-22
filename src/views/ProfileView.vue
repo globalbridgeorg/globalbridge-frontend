@@ -48,7 +48,14 @@ async function selectSection(key) {
   await nextTick()
 
   if (shell) {
+    // mede a altura real do conteúdo novo liberando a altura travada por um instante
+    // (com a altura antiga ainda fixada, scrollHeight só "estoura" quando o conteúdo novo
+    // é maior — quando é menor ele só devolve a altura antiga, e o encolher não anima)
+    const lockedHeight = shell.style.height
+    shell.style.height = 'auto'
     const endHeight = shell.scrollHeight
+    shell.style.height = lockedHeight
+
     // força o reflow para o navegador registrar a altura de partida antes de animar para a nova
     void shell.offsetHeight
     shell.style.height = endHeight + 'px'
@@ -421,7 +428,7 @@ onMounted(() => {
 .who h2 { margin: 0 0 3px; font-family: var(--gb-font-display); font-weight: 900; font-size: 19px; text-transform: uppercase; color: var(--gb-dark); }
 .who p { margin: 0; font-size: 13px; color: var(--gb-ink-soft); }
 
-.layout { display: grid; grid-template-columns: 230px 1fr; gap: 24px; margin-top: 12px; align-items: start; }
+.layout { display: grid; grid-template-columns: 230px 1fr; gap: 24px; margin-top: 12px; align-items: start; padding-bottom: 40px; }
 @media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
 
 .side-nav { display: flex; flex-direction: column; gap: 4px; background: #fff; border: 1px solid var(--gb-purple-deep-16); border-radius: var(--gb-radius-card); padding: 10px; }
