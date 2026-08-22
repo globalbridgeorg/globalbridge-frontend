@@ -1,12 +1,12 @@
 <script setup>
-import BadgeComponent from '@/components/common/BadgeComponent.vue'
-import { ref } from "vue"
+import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
+import { ref, onMounted, onBeforeUnmount } from "vue"
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+gsap.registerPlugin(ScrollTrigger)
 
 const props = defineProps({
-  badgeText: {
-    type: String,
-    default: "Dúvidas frequentes"
-  },
   title: {
     type: String,
     default: "PERGUNTAS FREQUENTES"
@@ -59,17 +59,33 @@ const activeId = ref(null)
 const toggleFaq = (id) => {
   activeId.value = activeId.value === id ? null : id
 }
+
+const listRef = ref(null)
+let ctx
+
+onMounted(() => {
+  ctx = gsap.context(() => {
+    gsap.from('.faq-item', {
+      opacity: 0,
+      y: 16,
+      duration: 0.5,
+      stagger: 0.08,
+      ease: 'power2.out',
+      scrollTrigger: { trigger: listRef.value, start: 'top 80%' }
+    })
+  }, listRef.value)
+})
+
+onBeforeUnmount(() => ctx?.revert())
 </script>
 
 <template>
   <section class="faq-section">
-    <BadgeComponent style="background-color: #E5E0CF; color: #66635C;">
-      {{ badgeText }}
-    </BadgeComponent>
+    <SectionEyebrow number="07" label="Perguntas frequentes" />
 
-    <h2 class="faq-title">{{ title }}</h2>
+    <h2 class="faq-title gb-heading">{{ title }}</h2>
 
-    <div class="faq-list">
+    <div class="faq-list" ref="listRef">
       <div
         v-for="faq in faqs"
         :key="faq.id"
@@ -93,11 +109,8 @@ const toggleFaq = (id) => {
 }
 
 .faq-title {
-    font-size: 24px;
-    font-weight: 800;
-    margin-top: 12px;
+    margin-top: 24px;
     margin-bottom: 20px;
-    color: #1a1a1a;
 }
 
 .faq-list {
@@ -136,7 +149,6 @@ const toggleFaq = (id) => {
 @media (min-width: 768px) {
 
     .faq-title {
-        font-size: 32px;
         margin-bottom: 30px;
     }
 
@@ -163,7 +175,6 @@ const toggleFaq = (id) => {
 
 
     .faq-title {
-        font-size: 2.2vw;
         margin-bottom: 40px;
     }
 

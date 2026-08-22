@@ -6,6 +6,11 @@ import Landing from '@/components/home/LandingComponent.vue';
 import Paises from '@/components/home/PaisesComponent.vue';
 import FaqComponent from "@/components/home/FaqComponent.vue";
 import MotorComponent from "@/components/home/MotorComponent.vue";
+import CustoComponent from "@/components/home/CustoComponent.vue";
+import FormatoComponent from "@/components/home/FormatoComponent.vue";
+import PassosComponent from "@/components/home/PassosComponent.vue";
+import TimelineComponent from "@/components/home/TimelineComponent.vue";
+import TestemunhosComponent from "@/components/home/TestemunhosComponent.vue";
 
 const fotosEsquerda = [
   '/images/imagemgb1.png',
@@ -34,20 +39,33 @@ const fotosDireita = [
   </section>
 
   <section>
-    <Landing src="/videos/video-landing.mp4" />
-
+    <Landing />
   </section>
 
   <section>
     <MotorComponent />
   </section>
 
-  <section> 
-    <FaqComponent />
-  </section>
-  
   <section>
     <Paises />
+  </section>
+
+  <section>
+    <FaqComponent />
+  </section>
+
+  <section>
+    <CustoComponent />
+    <FormatoComponent />
+  </section>
+
+  <section>
+    <PassosComponent />
+    <TimelineComponent />
+  </section>
+
+  <section>
+    <TestemunhosComponent />
   </section>
 </template>
 

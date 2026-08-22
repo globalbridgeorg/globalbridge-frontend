@@ -12,4 +12,40 @@ body {
 
 :root {
   font-family: 'Montserrat', sans-serif;
+
+  /* Design tokens — rework v2 (Figma "Rato petista") */
+  --gb-cream: #FBF6E7;
+  --gb-dark: #17111A;
+  --gb-purple-deep: #2E0A2E;
+  --gb-purple-deep-18: rgba(46, 10, 46, 0.18);
+  --gb-purple-deep-16: rgba(46, 10, 46, 0.16);
+  --gb-pink: #FBC2F4;
+  --gb-magenta: #B01FB0;
+  --gb-magenta-strong: #7A0F74;
+  --gb-mauve: #5A4757;
+  --gb-blue: #3E7BF0;
+  --gb-orange: #F0651E;
+  --gb-green: #3D9A4B;
+
+  --gb-font-eyebrow: 'Archivo Narrow', sans-serif;
+  --gb-font-display: 'Archivo', sans-serif;
+}
+
+.gb-heading {
+  font-family: var(--gb-font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.0239em;
+  line-height: 1.07;
+  color: var(--gb-dark);
+  margin: 0;
+  font-size: clamp(1.75rem, 1.1rem + 3vw, 3.24rem);
+}
+
+.gb-heading.on-dark {
+  color: var(--gb-cream);
+}
+
+.gb-heading .accent {
+  color: var(--gb-magenta);
 }
