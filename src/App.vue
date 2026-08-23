@@ -21,7 +21,7 @@ onMounted(() => {
     />
     <div class="page-viewport">
       <router-view v-slot="{ Component, route: currentRoute }">
-        <transition name="page-focus">
+        <transition :name="currentRoute.name === 'mapview' ? 'page-focus-noenter' : 'page-focus'">
           <component :is="Component" :key="currentRoute.path" />
         </transition>
       </router-view>
@@ -75,9 +75,30 @@ header {
   opacity: 0;
 }
 
+/* Indo para o mapview a entrada é instantânea (sem zoom/blur); a saída
+   de outras páginas para o mapview mantém a animação normal. */
+:deep(.page-focus-noenter-enter-active) {
+  transition: none;
+}
+
+:deep(.page-focus-noenter-leave-active) {
+  transition: transform 0.26s ease, filter 0.26s ease, opacity 0.26s ease;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  z-index: 1;
+}
+
+:deep(.page-focus-noenter-leave-to) {
+  transform: scale(1.045);
+  filter: blur(7px);
+  opacity: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   :deep(.page-focus-enter-active),
-  :deep(.page-focus-leave-active) {
+  :deep(.page-focus-leave-active),
+  :deep(.page-focus-noenter-leave-active) {
     transition: none !important;
   }
 }
