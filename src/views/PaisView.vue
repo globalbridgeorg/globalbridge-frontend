@@ -51,6 +51,7 @@ function animarEntrada() {
       duration: 0.6,
       stagger: 0.1,
       ease: 'power2.out',
+      clearProps: 'transform,opacity',
       scrollTrigger: { trigger: '.pais-view', start: 'top 70%' }
     })
     gsap.utils.toArray('.reveal-grid').forEach((grid) => {
@@ -60,6 +61,7 @@ function animarEntrada() {
         duration: 0.5,
         stagger: 0.08,
         ease: 'power2.out',
+        clearProps: 'transform,opacity',
         scrollTrigger: { trigger: grid, start: 'top 85%' }
       })
     })
