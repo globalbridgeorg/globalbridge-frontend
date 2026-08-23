@@ -170,7 +170,7 @@ onBeforeUnmount(() => ctx?.revert())
 
 <style scoped>
 .pais-view {
-  padding: 28px 5% 72px;
+  padding: 120px 5% 72px;
 }
 
 .breadcrumb {

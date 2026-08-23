@@ -1,14 +1,10 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import axios from '@/services/axios'
-import { prefersReducedMotion } from '@/composables/usePageTransition'
 import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
 import PaisCard from '@/components/catalog/PaisCard.vue'
-
-gsap.registerPlugin(ScrollTrigger)
+import AgenciaCard from '@/components/catalog/AgenciaCard.vue'
 
 const REGIOES = [
   { valor: 'asia', label: 'Ásia' },
@@ -23,56 +19,44 @@ const route = useRoute()
 const router = useRouter()
 
 const paises = ref([])
-const carregando = ref(true)
+const renderKey = ref('inicial')
+const primeiraCarga = ref(true)
+const carregandoFiltro = ref(false)
 const erro = ref(false)
 
 const regiaoAtiva = computed(() => route.query.regiao ?? '')
 
 function selecionarRegiao(valor) {
+  if (valor === regiaoAtiva.value) return
   router.push({ path: '/destinos', query: valor ? { regiao: valor } : {} })
 }
 
 async function carregarPaises() {
-  carregando.value = true
   erro.value = false
+  const alvo = regiaoAtiva.value
   try {
-    const params = regiaoAtiva.value ? { regiao: regiaoAtiva.value } : {}
+    const params = alvo ? { regiao: alvo } : {}
     const { data } = await axios.get('/paises/', { params })
+    // só troca o conteúdo (e dispara a transição) quando o resultado já
+    // está pronto — a grade antiga fica parada na tela durante o fetch
+    // em vez de piscar um estado vazio no meio do caminho.
     paises.value = Array.isArray(data) ? data : (data.results ?? [])
+    renderKey.value = alvo || 'todos'
   } catch (e) {
     console.error('Erro ao buscar destinos:', e)
     erro.value = true
   } finally {
-    carregando.value = false
+    primeiraCarga.value = false
+    carregandoFiltro.value = false
   }
 }
 
-let ctx
-function animarGrid() {
-  if (prefersReducedMotion()) return
-  ctx?.revert()
-  ctx = gsap.context(() => {
-    const grid = document.querySelector('.destinos-grid')
-    if (!grid) return
-    gsap.from(grid.children, {
-      opacity: 0,
-      y: 20,
-      duration: 0.5,
-      stagger: 0.06,
-      ease: 'power2.out'
-    })
-  })
-}
-
-watch(regiaoAtiva, carregarPaises)
-
-onMounted(async () => {
-  await carregarPaises()
-  await nextTick()
-  animarGrid()
+watch(regiaoAtiva, () => {
+  carregandoFiltro.value = true
+  carregarPaises()
 })
 
-onBeforeUnmount(() => ctx?.revert())
+onMounted(carregarPaises)
 </script>
 
 <template>
@@ -80,7 +64,7 @@ onBeforeUnmount(() => ctx?.revert())
     <div class="hero">
       <span class="hero-eyebrow">Explore o mapa</span>
       <h1 class="gb-heading">Todos os <span class="accent">destinos</span></h1>
-      <p>Filtre por região pra achar o próximo passo.</p>
+      <p>Filtre por região pra achar o próximo passo — e conheça a agência em destaque de cada um.</p>
     </div>
 
     <div class="region-filters" role="group" aria-label="Filtrar por região">
@@ -97,9 +81,9 @@ onBeforeUnmount(() => ctx?.revert())
     </div>
 
     <div class="destinos">
-      <SectionEyebrow :label="carregando ? 'Carregando' : `${paises.length} destino${paises.length === 1 ? '' : 's'} encontrado${paises.length === 1 ? '' : 's'}`" />
+      <SectionEyebrow :label="primeiraCarga ? 'Carregando' : `${paises.length} destino${paises.length === 1 ? '' : 's'} encontrado${paises.length === 1 ? '' : 's'}`" />
 
-      <div v-if="carregando" class="pais-skeleton" aria-hidden="true">
+      <div v-if="primeiraCarga" class="pais-skeleton" aria-hidden="true">
         <div v-for="n in 6" :key="n" class="skeleton-card"></div>
       </div>
 
@@ -107,25 +91,35 @@ onBeforeUnmount(() => ctx?.revert())
 
       <p v-else-if="!paises.length" class="estado-vazio">Nenhum destino cadastrado pra essa região ainda.</p>
 
-      <div v-else class="destinos-grid">
-        <PaisCard
-          v-for="pais in paises"
-          :key="pais.id"
-          :nome="pais.nome"
-          :regiao="pais.regiao"
-          :idioma="pais.idioma"
-          :custo-de-vida="pais.custo_de_vida"
-          :programas-count="pais.programas_count ?? 0"
-          :to="{ name: 'pais', params: { id: pais.id } }"
-        />
-      </div>
+      <Transition v-else name="filtro-fade" mode="out-in">
+        <div :key="renderKey" class="destinos-grid" :class="{ 'is-loading': carregandoFiltro }">
+          <article v-for="pais in paises" :key="pais.id" class="destino-par">
+            <PaisCard
+              :nome="pais.nome"
+              :regiao="pais.regiao"
+              :idioma="pais.idioma"
+              :custo-de-vida="pais.custo_de_vida"
+              :programas-count="pais.programas_count ?? 0"
+              :to="{ name: 'pais', params: { id: pais.id } }"
+            />
+            <AgenciaCard
+              v-if="pais.agencia_destaque"
+              :nome="pais.agencia_destaque.nome"
+              :descricao="pais.agencia_destaque.descricao"
+              :cidade="pais.agencia_destaque.cidade"
+              :nota-media="pais.agencia_destaque.nota_media"
+              :to="{ name: 'agencia', params: { id: pais.agencia_destaque.id } }"
+            />
+          </article>
+        </div>
+      </Transition>
     </div>
   </div>
 </template>
 
 <style scoped>
 .destinos-view {
-  padding: 28px 5% 72px;
+  padding: 120px 5% 72px;
 }
 
 .hero {
@@ -191,6 +185,28 @@ onBeforeUnmount(() => ctx?.revert())
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 18px;
+  min-height: 60px;
+  transition: opacity 0.15s ease;
+}
+
+.destinos-grid.is-loading {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.destino-par {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.filtro-fade-enter-active, .filtro-fade-leave-active {
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+.filtro-fade-enter-from, .filtro-fade-leave-to {
+  opacity: 0;
+  transform: translateY(8px);
 }
 
 .pais-skeleton {
@@ -214,6 +230,7 @@ onBeforeUnmount(() => ctx?.revert())
 
 @media (prefers-reduced-motion: reduce) {
   .skeleton-card { animation: none; }
+  .filtro-fade-enter-active, .filtro-fade-leave-active { transition: none; }
 }
 
 .estado-erro, .estado-vazio {

@@ -183,7 +183,7 @@ onBeforeUnmount(() => ctx?.revert())
 
 <style scoped>
 .regiao-view {
-  padding: 28px 5% 72px;
+  padding: 120px 5% 72px;
 }
 
 .breadcrumb {
