@@ -21,7 +21,7 @@ onMounted(() => {
     />
     <div class="page-viewport">
       <router-view v-slot="{ Component, route: currentRoute }">
-        <transition :name="currentRoute.name === 'mapview' ? 'page-focus-noenter' : 'page-focus'">
+        <transition type="transition" :name="currentRoute.name === 'mapview' ? 'page-focus-noenter' : 'page-focus'">
           <component :is="Component" :key="currentRoute.path" />
         </transition>
       </router-view>
