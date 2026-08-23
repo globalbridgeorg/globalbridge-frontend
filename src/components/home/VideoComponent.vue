@@ -1,6 +1,5 @@
 <script setup>
 import { onMounted, onUnmounted, ref, computed } from "vue"
-import { useVideoLoader } from "@/composables/useVideoLoader.js"
 import { useScrollAnimation } from "@/composables/useScrollAnimation.js"
 
 const props = defineProps({
@@ -13,8 +12,6 @@ const props = defineProps({
   // tela cheia (100vh) — pra usar o vídeo dentro de um card/seção comum.
   compact: { type: Boolean, default: false }
 })
-
-const { videoSrc, loadVideo } = useVideoLoader()
 
 const isMobile = ref(false)
 
@@ -31,7 +28,6 @@ const finalVideoStyle = computed(() => {
 })
 
 onMounted(() => {
-  loadVideo(props.src)
   checkMobile()
   window.addEventListener('resize', checkMobile)
 })
@@ -53,8 +49,9 @@ onUnmounted(() => {
       :style="finalVideoStyle"
     >
       <video
-        v-if="videoSrc"
-        :src="videoSrc"
+        v-if="src"
+        :src="src"
+        preload="auto"
         autoplay muted loop playsinline
         disablePictureInPicture
         controlsList="nodownload nofullscreen noremoteplayback"
