@@ -52,11 +52,11 @@ header {
    como se a câmera passasse por ela; a nova entra logo atrás, um pouco
    menor, ganhando nitidez até encaixar. */
 :deep(.page-focus-enter-active) {
-  transition: transform 0.34s ease 0.05s, filter 0.34s ease 0.05s, opacity 0.34s ease 0.05s;
+  transition: transform 0.2s ease 0.02s, filter 0.2s ease 0.02s, opacity 0.2s ease 0.02s;
 }
 
 :deep(.page-viewport > .page-focus-leave-active) {
-  transition: transform 0.26s ease, filter 0.26s ease, opacity 0.26s ease;
+  transition: transform 0.16s ease, filter 0.16s ease, opacity 0.16s ease;
   position: absolute;
   inset: 0;
   width: 100%;
@@ -82,7 +82,7 @@ header {
 }
 
 :deep(.page-viewport > .page-focus-noenter-leave-active) {
-  transition: transform 0.26s ease, filter 0.26s ease, opacity 0.26s ease;
+  transition: transform 0.16s ease, filter 0.16s ease, opacity 0.16s ease;
   position: absolute;
   inset: 0;
   width: 100%;
