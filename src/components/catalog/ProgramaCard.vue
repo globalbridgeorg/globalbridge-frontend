@@ -22,7 +22,7 @@ defineProps({
     </div>
     <div class="card-footer">
       <span class="footer-meta">{{ footerMeta }}</span>
-      <component :is="to ? 'router-link' : 'span'" :to="to" class="cta">{{ ctaText }}</component>
+      <router-link v-if="to" :to="to" class="cta">{{ ctaText }}</router-link>
     </div>
   </article>
 </template>

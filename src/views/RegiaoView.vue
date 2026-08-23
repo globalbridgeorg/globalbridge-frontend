@@ -106,9 +106,13 @@ onBeforeUnmount(() => ctx?.revert())
       <div class="skeleton-row"></div>
     </div>
 
-    <p v-else-if="erro" class="estado-erro">
-      Não conseguimos carregar essa região agora. <router-link to="/destinos">Volte para todos os destinos</router-link>.
-    </p>
+    <div v-else-if="erro" class="estado-erro">
+      <p>Não conseguimos carregar essa região agora.</p>
+      <div class="estado-erro-acoes">
+        <button class="btn-tentar-novamente" @click="carregarRegiao">Tentar novamente</button>
+        <router-link to="/destinos">Voltar para todos os destinos</router-link>
+      </div>
+    </div>
 
     <template v-else>
       <nav class="breadcrumb" aria-label="Caminho de navegação">
@@ -159,7 +163,7 @@ onBeforeUnmount(() => ctx?.revert())
           </div>
         </div>
       </section>
-      <p v-else class="estado-vazio reveal-section">Ainda não há destinos cadastrados nessa região.</p>
+      <p v-else class="estado-vazio reveal-section">Ainda não há destinos cadastrados pra essa região.</p>
 
       <section v-if="agencias.length" class="agencias reveal-section">
         <SectionEyebrow :label="`${agencias.length} encontrada${agencias.length === 1 ? '' : 's'}`" />
@@ -176,7 +180,7 @@ onBeforeUnmount(() => ctx?.revert())
           />
         </div>
       </section>
-      <p v-else class="estado-vazio reveal-section">Ainda não há agências parceiras cadastradas nessa região.</p>
+      <p v-else class="estado-vazio reveal-section">Ainda não há agências parceiras cadastradas pra essa região.</p>
     </template>
   </div>
 </template>
@@ -353,6 +357,34 @@ onBeforeUnmount(() => ctx?.revert())
   text-align: center;
   color: var(--gb-ink-soft);
   font-size: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.estado-erro-acoes {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.btn-tentar-novamente {
+  border: 1px solid var(--gb-purple-deep-16);
+  color: var(--gb-dark);
+  font-family: var(--gb-font-eyebrow);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 11px 22px;
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.btn-tentar-novamente:hover {
+  background: rgba(46, 10, 46, 0.04);
 }
 
 .estado-erro a {

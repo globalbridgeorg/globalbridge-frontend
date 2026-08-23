@@ -88,9 +88,13 @@ onBeforeUnmount(() => ctx?.revert())
       <div class="skeleton-row"></div>
     </div>
 
-    <p v-else-if="erro" class="estado-erro">
-      Não conseguimos carregar essa agência agora. <router-link to="/destinos">Volte para todos os destinos</router-link>.
-    </p>
+    <div v-else-if="erro" class="estado-erro">
+      <p>Não conseguimos carregar essa agência agora.</p>
+      <div class="estado-erro-acoes">
+        <button class="btn-tentar-novamente" @click="carregarAgencia">Tentar novamente</button>
+        <router-link to="/destinos">Voltar para todos os destinos</router-link>
+      </div>
+    </div>
 
     <template v-else-if="agencia">
       <nav class="breadcrumb" aria-label="Caminho de navegação">
@@ -133,7 +137,6 @@ onBeforeUnmount(() => ctx?.revert())
             tag="Programa"
             :duracao="`${plano.duracao_min} a ${plano.duracao_max} meses`"
             :footer-meta="`R$ ${Number(plano.preco).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`"
-            cta-text="Ver programa"
           />
         </div>
         <p v-else class="estado-vazio">Ainda não há programas cadastrados pra essa agência.</p>
@@ -373,6 +376,34 @@ onBeforeUnmount(() => ctx?.revert())
   text-align: center;
   color: var(--gb-ink-soft);
   font-size: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.estado-erro-acoes {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.btn-tentar-novamente {
+  border: 1px solid var(--gb-purple-deep-16);
+  color: var(--gb-dark);
+  font-family: var(--gb-font-eyebrow);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 11px 22px;
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.btn-tentar-novamente:hover {
+  background: rgba(46, 10, 46, 0.04);
 }
 
 .estado-erro a {

@@ -87,9 +87,14 @@ onMounted(carregarPaises)
         <div v-for="n in 6" :key="n" class="skeleton-card"></div>
       </div>
 
-      <p v-else-if="erro" class="estado-erro">Não conseguimos carregar os destinos agora. Tente novamente em instantes.</p>
+      <div v-else-if="erro" class="estado-erro">
+        <p>Não conseguimos carregar os destinos agora.</p>
+        <button class="btn-tentar-novamente" @click="carregarPaises">Tentar novamente</button>
+      </div>
 
-      <p v-else-if="!paises.length" class="estado-vazio">Nenhum destino cadastrado pra essa região ainda.</p>
+      <p v-else-if="!paises.length" class="estado-vazio">
+        Ainda não há destinos cadastrados{{ regiaoAtiva ? ' pra essa região' : '' }}.
+      </p>
 
       <Transition v-else name="filtro-fade" mode="out-in">
         <div :key="renderKey" class="destinos-grid" :class="{ 'is-loading': carregandoFiltro }">
@@ -237,6 +242,31 @@ onMounted(carregarPaises)
   padding: 40px 0;
   color: var(--gb-ink-soft);
   font-size: 0.95rem;
+}
+
+.estado-erro {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.btn-tentar-novamente {
+  border: 1px solid var(--gb-purple-deep-16);
+  color: var(--gb-dark);
+  font-family: var(--gb-font-eyebrow);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 11px 22px;
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.btn-tentar-novamente:hover {
+  background: rgba(46, 10, 46, 0.04);
 }
 
 @media (max-width: 1200px) {

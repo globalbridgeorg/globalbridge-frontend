@@ -85,9 +85,13 @@ onBeforeUnmount(() => ctx?.revert())
       <div class="skeleton-row"></div>
     </div>
 
-    <p v-else-if="erro" class="estado-erro">
-      Não conseguimos carregar esse destino agora. <router-link to="/destinos">Volte para todos os destinos</router-link>.
-    </p>
+    <div v-else-if="erro" class="estado-erro">
+      <p>Não conseguimos carregar esse destino agora.</p>
+      <div class="estado-erro-acoes">
+        <button class="btn-tentar-novamente" @click="carregarPais">Tentar novamente</button>
+        <router-link to="/destinos">Voltar para todos os destinos</router-link>
+      </div>
+    </div>
 
     <template v-else-if="pais">
       <nav class="breadcrumb" aria-label="Caminho de navegação">
@@ -142,7 +146,6 @@ onBeforeUnmount(() => ctx?.revert())
             :descricao="programa.descricao"
             tag="Programa"
             :duracao="`${programa.duracao_min} a ${programa.duracao_max} meses`"
-            :to="{ path: '/destinos' }"
           />
         </div>
       </section>
@@ -343,11 +346,39 @@ onBeforeUnmount(() => ctx?.revert())
   text-align: center;
   color: var(--gb-ink-soft);
   font-size: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.estado-erro-acoes {
+  display: flex;
+  align-items: center;
+  gap: 18px;
 }
 
 .estado-erro a {
   color: var(--gb-magenta);
   font-weight: 600;
+}
+
+.btn-tentar-novamente {
+  border: 1px solid var(--gb-purple-deep-16);
+  color: var(--gb-dark);
+  font-family: var(--gb-font-eyebrow);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 11px 22px;
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.btn-tentar-novamente:hover {
+  background: rgba(46, 10, 46, 0.04);
 }
 
 .estado-skeleton {
