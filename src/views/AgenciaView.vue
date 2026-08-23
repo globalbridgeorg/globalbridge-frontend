@@ -10,10 +10,21 @@ import ProgramaCard from '@/components/catalog/ProgramaCard.vue'
 
 gsap.registerPlugin(ScrollTrigger)
 
+const REGIAO_LABELS = {
+  asia: 'Ásia',
+  europa: 'Europa',
+  america_norte: 'América do Norte',
+  america_sul: 'América do Sul',
+  oceania: 'Oceania',
+  africa: 'África'
+}
+
 const route = useRoute()
 const agencia = ref(null)
 const carregando = ref(true)
 const erro = ref(false)
+
+const regiaoLabel = computed(() => REGIAO_LABELS[agencia.value?.regiao] ?? agencia.value?.regiao)
 
 const getStoredToken = () => localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
 const estaLogado = computed(() => !!getStoredToken())
@@ -146,6 +157,14 @@ onBeforeUnmount(() => ctx?.revert())
     <template v-else-if="agencia">
       <nav class="breadcrumb" aria-label="Caminho de navegação">
         <router-link to="/destinos">Destinos</router-link>
+        <template v-if="agencia.regiao">
+          <span>/</span>
+          <router-link :to="{ name: 'regiao', params: { regiao: agencia.regiao } }">{{ regiaoLabel }}</router-link>
+        </template>
+        <template v-if="agencia.pais_id">
+          <span>/</span>
+          <router-link :to="{ name: 'pais', params: { id: agencia.pais_id } }">{{ agencia.pais }}</router-link>
+        </template>
         <span>/</span>
         <span class="current">{{ agencia.nome }}</span>
       </nav>
@@ -170,6 +189,15 @@ onBeforeUnmount(() => ctx?.revert())
           <a v-if="agencia.contato" :href="`mailto:${agencia.contato}`" class="btn-primary-lg">Falar com a agência</a>
           <a v-if="agencia.site" :href="agencia.site" target="_blank" rel="noopener" class="btn-outline-lg">Visitar site</a>
         </div>
+      </section>
+
+      <section class="como-funciona reveal-section">
+        <SectionEyebrow label="Como funciona" />
+        <h2 class="gb-heading">O processo com<br />{{ agencia.nome }}</h2>
+        <p v-if="agencia.como_funciona" class="como-funciona-texto">{{ agencia.como_funciona }}</p>
+        <p v-else class="estado-vazio">
+          {{ agencia.nome }} ainda não descreveu aqui como funciona o processo de inscrição e atendimento.
+        </p>
       </section>
 
       <section class="catalogo reveal-section">
@@ -395,8 +423,17 @@ onBeforeUnmount(() => ctx?.revert())
   background: rgba(46, 10, 46, 0.04);
 }
 
-.catalogo, .avaliacoes {
+.como-funciona, .catalogo, .avaliacoes {
   padding: 48px 0 0;
+}
+
+.como-funciona-texto {
+  font-size: 0.98rem;
+  line-height: 1.7;
+  color: var(--gb-ink-soft);
+  max-width: 640px;
+  margin: 0;
+  white-space: pre-line;
 }
 
 .gb-heading {
