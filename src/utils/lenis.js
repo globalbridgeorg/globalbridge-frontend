@@ -35,14 +35,14 @@ export const scrollToTarget = (target, options = {}) => {
   }
 }
 
-// Volta pro topo instantaneamente ao trocar de página. Precisa passar pelo
-// Lenis (em vez de window.scrollTo) porque ele mantém seu próprio estado de
+// Volta pro topo suavemente ao trocar de página. Precisa passar pelo Lenis
+// (em vez de window.scrollTo) porque ele mantém seu próprio estado de
 // scroll e recoloca a página onde estava a cada frame, sobrescrevendo
 // qualquer scrollTo nativo.
 export const resetScroll = () => {
   if (lenisInstance) {
-    lenisInstance.scrollTo(0, { immediate: true })
+    lenisInstance.scrollTo(0, { duration: 0.9, easing: (t) => 1 - Math.pow(1 - t, 3) })
   } else {
-    window.scrollTo(0, 0)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 }
