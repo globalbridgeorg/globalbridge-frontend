@@ -321,6 +321,7 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+
 html, body {
   margin: 0;
   padding: 0;
@@ -378,7 +379,7 @@ html, body {
 .main-card {
   position: relative;
   z-index: 1;
-  background: rgba(251, 246, 231, 0.94);
+  background: rgb(252, 252, 252);
   backdrop-filter: blur(18px);
   border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: 4px 4px 40px 4px;

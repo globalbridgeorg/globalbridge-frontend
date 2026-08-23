@@ -418,7 +418,7 @@ onBeforeUnmount(() => {
   left: 0;
   height: 100vh;
   width: 300px;
-  background: var(--gb-cream);
+  background: white;
   border-right: 1px solid var(--gb-purple-deep-16);
   transition: transform 0.35s cubic-bezier(.4,0,.2,1);
   z-index: 100;
@@ -552,7 +552,7 @@ onBeforeUnmount(() => {
   right: 0;
   height: 100vh;
   width: 320px;
-  background: var(--gb-cream);
+  background: white;
   border-left: 1px solid var(--gb-purple-deep-16);
   display: flex;
   flex-direction: column;

@@ -575,7 +575,7 @@ async function pick(v) {
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  background: var(--gb-cream);
+  background: white;
   border: 1px solid var(--gb-purple-deep-16);
   display: flex;
   align-items: center;

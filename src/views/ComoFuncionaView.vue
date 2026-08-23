@@ -147,11 +147,13 @@ const paraAgencias = [
 <style scoped>
 .como-funciona {
   width: 100%;
-  background: var(--gb-cream);
+  background: white;
 }
 
 .hero {
   padding: var(--gb-space-y) 0 40px;
+  padding-top: 120px;
+  
 }
 
 .hero-heading {
@@ -505,6 +507,6 @@ const paraAgencias = [
 }
 
 .gb-heading.on-dark {
-  color: var(--gb-cream);
+  color: white;
 }
 </style>

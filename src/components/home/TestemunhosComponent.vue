@@ -101,7 +101,7 @@ onBeforeUnmount(() => ctx?.revert())
 }
 
 .card {
-  background: var(--gb-cream);
+  background: white;
   border-radius: 10px;
   padding: 24px;
   display: flex;
