@@ -7,7 +7,6 @@ import axios from '@/services/axios'
 import { prefersReducedMotion } from '@/composables/usePageTransition'
 import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
 import PaisCard from '@/components/catalog/PaisCard.vue'
-import AgenciaCard from '@/components/catalog/AgenciaCard.vue'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -165,22 +164,7 @@ onBeforeUnmount(() => ctx?.revert())
       </section>
       <p v-else class="estado-vazio reveal-section">Ainda não há destinos cadastrados pra essa região.</p>
 
-      <section v-if="agencias.length" class="agencias reveal-section">
-        <SectionEyebrow :label="`${agencias.length} encontrada${agencias.length === 1 ? '' : 's'}`" />
-        <h2 class="gb-heading">Agências que atendem<br />a região</h2>
-        <div class="agencias-grid reveal-grid">
-          <AgenciaCard
-            v-for="agencia in agencias"
-            :key="agencia.id"
-            :nome="agencia.nome"
-            :descricao="agencia.descricao"
-            :cidade="agencia.cidade"
-            :nota-media="agencia.nota_media"
-            :to="{ name: 'agencia', params: { id: agencia.id } }"
-          />
-        </div>
-      </section>
-      <p v-else class="estado-vazio reveal-section">Ainda não há agências parceiras cadastradas pra essa região.</p>
+      <p class="dica-agencias reveal-section">As agências parceiras aparecem na página de cada país — escolha um destino acima pra ver quem atende lá.</p>
     </template>
   </div>
 </template>
@@ -286,7 +270,7 @@ onBeforeUnmount(() => ctx?.revert())
   color: var(--gb-ink-faint);
 }
 
-.countries, .agencias {
+.countries {
   padding: 48px 0 0;
 }
 
@@ -294,18 +278,21 @@ onBeforeUnmount(() => ctx?.revert())
   margin: 8px 0 24px;
 }
 
-.countries-grid, .agencias-grid {
+.countries-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 18px;
 }
 
-.agencias-grid {
-  grid-template-columns: repeat(3, 1fr);
-}
-
 .comparativo {
   margin-top: 40px;
+}
+
+.dica-agencias {
+  padding: 32px 0 0;
+  color: var(--gb-ink-faint);
+  font-size: 0.9rem;
+  font-style: italic;
 }
 
 .table-head, .comp-row {
@@ -420,7 +407,6 @@ onBeforeUnmount(() => ctx?.revert())
 
 @media (max-width: 1200px) {
   .countries-grid { grid-template-columns: repeat(3, 1fr); }
-  .agencias-grid { grid-template-columns: repeat(2, 1fr); }
   .stats { grid-template-columns: repeat(2, 1fr); }
 }
 
@@ -429,7 +415,7 @@ onBeforeUnmount(() => ctx?.revert())
 }
 
 @media (max-width: 720px) {
-  .countries-grid, .agencias-grid { grid-template-columns: 1fr; }
+  .countries-grid { grid-template-columns: 1fr; }
   .stats { grid-template-columns: 1fr; }
   .hero { padding: 28px 24px; }
   .table-head { display: none; }

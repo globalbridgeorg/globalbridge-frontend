@@ -1,123 +1,84 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { ref, computed, onMounted } from 'vue'
 import axios from '@/services/axios'
 import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
-import PaisCard from '@/components/catalog/PaisCard.vue'
-import AgenciaCard from '@/components/catalog/AgenciaCard.vue'
 
 const REGIOES = [
-  { valor: 'asia', label: 'Ásia' },
-  { valor: 'europa', label: 'Europa' },
-  { valor: 'america_norte', label: 'América do Norte' },
-  { valor: 'america_sul', label: 'América do Sul' },
-  { valor: 'oceania', label: 'Oceania' },
-  { valor: 'africa', label: 'África' }
+  { valor: 'asia', label: 'Ásia', gradient: 'linear-gradient(135deg, #3d1247, #B01FB0)' },
+  { valor: 'europa', label: 'Europa', gradient: 'linear-gradient(135deg, #1d1d4a, #3972DE)' },
+  { valor: 'america_norte', label: 'América do Norte', gradient: 'linear-gradient(135deg, #4a0e1d, #B01FB0)' },
+  { valor: 'america_sul', label: 'América do Sul', gradient: 'linear-gradient(135deg, #4a3d0e, #F0651E)' },
+  { valor: 'oceania', label: 'Oceania', gradient: 'linear-gradient(135deg, #0e4d3d, #3D9A4B)' },
+  { valor: 'africa', label: 'África', gradient: 'linear-gradient(135deg, #7a2e0e, #F0651E)' }
 ]
 
-const route = useRoute()
-const router = useRouter()
-
-const paises = ref([])
-const renderKey = ref('inicial')
-const primeiraCarga = ref(true)
-const carregandoFiltro = ref(false)
+const contagens = ref({})
+const carregando = ref(true)
 const erro = ref(false)
 
-const regiaoAtiva = computed(() => route.query.regiao ?? '')
-
-function selecionarRegiao(valor) {
-  if (valor === regiaoAtiva.value) return
-  router.push({ path: '/destinos', query: valor ? { regiao: valor } : {} })
-}
-
-async function carregarPaises() {
+async function carregarContagens() {
+  carregando.value = true
   erro.value = false
-  const alvo = regiaoAtiva.value
   try {
-    const params = alvo ? { regiao: alvo } : {}
-    const { data } = await axios.get('/paises/', { params })
-    // só troca o conteúdo (e dispara a transição) quando o resultado já
-    // está pronto — a grade antiga fica parada na tela durante o fetch
-    // em vez de piscar um estado vazio no meio do caminho.
-    paises.value = Array.isArray(data) ? data : (data.results ?? [])
-    renderKey.value = alvo || 'todos'
+    const { data } = await axios.get('/paises/')
+    const paises = Array.isArray(data) ? data : (data.results ?? [])
+    const porRegiao = {}
+    for (const pais of paises) {
+      if (!pais.regiao) continue
+      porRegiao[pais.regiao] = (porRegiao[pais.regiao] ?? 0) + 1
+    }
+    contagens.value = porRegiao
   } catch (e) {
     console.error('Erro ao buscar destinos:', e)
     erro.value = true
   } finally {
-    primeiraCarga.value = false
-    carregandoFiltro.value = false
+    carregando.value = false
   }
 }
 
-watch(regiaoAtiva, () => {
-  carregandoFiltro.value = true
-  carregarPaises()
-})
+const regioesComContagem = computed(() =>
+  REGIOES.map((r) => ({ ...r, count: contagens.value[r.valor] ?? 0 }))
+)
 
-onMounted(carregarPaises)
+onMounted(carregarContagens)
 </script>
 
 <template>
   <div class="destinos-view gb-section">
     <div class="hero">
       <span class="hero-eyebrow">Explore o mapa</span>
-      <h1 class="gb-heading">Todos os <span class="accent">destinos</span></h1>
-      <p>Filtre por região pra achar o próximo passo — e conheça a agência em destaque de cada um.</p>
+      <h1 class="gb-heading">Por onde você <span class="accent">quer ir</span>?</h1>
+      <p>Escolha o continente pra ver os países disponíveis — e as agências parceiras de cada um.</p>
     </div>
 
-    <div class="region-filters" role="group" aria-label="Filtrar por região">
-      <button class="region-chip" :class="{ active: !regiaoAtiva }" @click="selecionarRegiao('')">Todos</button>
-      <button
-        v-for="regiao in REGIOES"
-        :key="regiao.valor"
-        class="region-chip"
-        :class="{ active: regiaoAtiva === regiao.valor }"
-        @click="selecionarRegiao(regiao.valor)"
-      >
-        {{ regiao.label }}
-      </button>
-    </div>
+    <div class="continentes">
+      <SectionEyebrow label="Continentes" />
 
-    <div class="destinos">
-      <SectionEyebrow :label="primeiraCarga ? 'Carregando' : `${paises.length} destino${paises.length === 1 ? '' : 's'} encontrado${paises.length === 1 ? '' : 's'}`" />
-
-      <div v-if="primeiraCarga" class="pais-skeleton" aria-hidden="true">
+      <div v-if="carregando" class="continente-skeleton" aria-hidden="true">
         <div v-for="n in 6" :key="n" class="skeleton-card"></div>
       </div>
 
       <div v-else-if="erro" class="estado-erro">
         <p>Não conseguimos carregar os destinos agora.</p>
-        <button class="btn-tentar-novamente" @click="carregarPaises">Tentar novamente</button>
+        <button class="btn-tentar-novamente" @click="carregarContagens">Tentar novamente</button>
       </div>
 
-      <p v-else-if="!paises.length" class="estado-vazio">
-        Ainda não há destinos cadastrados{{ regiaoAtiva ? ' pra essa região' : '' }}.
-      </p>
-
-      <Transition v-else name="filtro-fade" mode="out-in">
-        <div :key="renderKey" class="destinos-grid" :class="{ 'is-loading': carregandoFiltro }">
-          <article v-for="pais in paises" :key="pais.id" class="destino-par">
-            <PaisCard
-              :nome="pais.nome"
-              :regiao="pais.regiao"
-              :idioma="pais.idioma"
-              :custo-de-vida="pais.custo_de_vida"
-              :programas-count="pais.programas_count ?? 0"
-              :to="{ name: 'pais', params: { id: pais.id } }"
-            />
-            <AgenciaCard
-              v-if="pais.agencia_destaque"
-              :nome="pais.agencia_destaque.nome"
-              :descricao="pais.agencia_destaque.descricao"
-              :cidade="pais.agencia_destaque.cidade"
-              :nota-media="pais.agencia_destaque.nota_media"
-              :to="{ name: 'agencia', params: { id: pais.agencia_destaque.id } }"
-            />
+      <div v-else class="continentes-grid">
+        <router-link
+          v-for="regiao in regioesComContagem"
+          :key="regiao.valor"
+          :to="{ name: 'regiao', params: { regiao: regiao.valor } }"
+          class="continente-card-link"
+        >
+          <article class="continente-card">
+            <div class="art" :style="{ background: regiao.gradient }"></div>
+            <div class="body">
+              <h3 class="nome">{{ regiao.label }}</h3>
+              <span class="count">{{ regiao.count }} {{ regiao.count === 1 ? 'destino' : 'destinos' }}</span>
+            </div>
           </article>
-        </div>
-      </Transition>
+        </router-link>
+      </div>
     </div>
   </div>
 </template>
@@ -152,76 +113,76 @@ onMounted(carregarPaises)
   margin: 0;
 }
 
-.region-filters {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin: 28px 0 40px;
+.continentes {
+  padding-top: 40px;
 }
 
-.region-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+.continentes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.continente-card-link {
+  text-decoration: none;
+  display: block;
+}
+
+.continente-card {
   background: #fff;
   border: 1px solid var(--gb-purple-deep-16);
-  color: var(--gb-dark);
-  font-family: var(--gb-font-eyebrow);
-  font-weight: 700;
-  font-size: 12px;
-  letter-spacing: 0.04em;
-  padding: 9px 16px;
-  border-radius: var(--gb-radius-pill);
-  cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-}
-
-.region-chip:hover {
-  border-color: var(--gb-magenta);
-}
-
-.region-chip.active {
-  background: var(--gb-dark);
-  color: #fff;
-  border-color: var(--gb-dark);
-}
-
-.destinos-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 18px;
-  min-height: 60px;
-  transition: opacity 0.15s ease;
-}
-
-.destinos-grid.is-loading {
-  opacity: 0.5;
-  pointer-events: none;
-}
-
-.destino-par {
+  border-radius: var(--gb-radius-card);
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
-.filtro-fade-enter-active, .filtro-fade-leave-active {
-  transition: opacity 0.22s ease, transform 0.22s ease;
+.continente-card-link:hover .continente-card {
+  box-shadow: var(--gb-shadow-card);
+  border-color: var(--gb-magenta);
+  transform: translateY(-2px);
 }
 
-.filtro-fade-enter-from, .filtro-fade-leave-to {
-  opacity: 0;
-  transform: translateY(8px);
+.art {
+  height: 140px;
 }
 
-.pais-skeleton {
+.body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nome {
+  font-family: var(--gb-font-display);
+  font-weight: 900;
+  font-size: 1.3rem;
+  text-transform: uppercase;
+  color: var(--gb-dark);
+  margin: 0;
+}
+
+.count {
+  font-family: var(--gb-font-eyebrow);
+  font-weight: 700;
+  font-size: 12.5px;
+  color: var(--gb-ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.continente-skeleton {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 18px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 20px;
 }
 
 .skeleton-card {
-  height: 220px;
+  height: 210px;
   border-radius: var(--gb-radius-card);
   background: linear-gradient(90deg, rgba(46,10,46,0.06) 25%, rgba(46,10,46,0.1) 37%, rgba(46,10,46,0.06) 63%);
   background-size: 400% 100%;
@@ -235,16 +196,12 @@ onMounted(carregarPaises)
 
 @media (prefers-reduced-motion: reduce) {
   .skeleton-card { animation: none; }
-  .filtro-fade-enter-active, .filtro-fade-leave-active { transition: none; }
-}
-
-.estado-erro, .estado-vazio {
-  padding: 40px 0;
-  color: var(--gb-ink-soft);
-  font-size: 0.95rem;
 }
 
 .estado-erro {
+  padding: 40px 0;
+  color: var(--gb-ink-soft);
+  font-size: 0.95rem;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -269,15 +226,11 @@ onMounted(carregarPaises)
   background: rgba(46, 10, 46, 0.04);
 }
 
-@media (max-width: 1200px) {
-  .destinos-grid, .pais-skeleton { grid-template-columns: repeat(3, 1fr); }
-}
-
 @media (max-width: 900px) {
-  .destinos-grid, .pais-skeleton { grid-template-columns: repeat(2, 1fr); }
+  .continentes-grid, .continente-skeleton { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 560px) {
-  .destinos-grid, .pais-skeleton { grid-template-columns: 1fr; }
+  .continentes-grid, .continente-skeleton { grid-template-columns: 1fr; }
 }
 </style>
