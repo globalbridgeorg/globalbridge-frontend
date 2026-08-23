@@ -50,13 +50,19 @@ async function selectSection(key) {
   if (shell) {
     // mede a altura real do conteúdo novo liberando a altura travada por um instante
     // (com a altura antiga ainda fixada, scrollHeight só "estoura" quando o conteúdo novo
-    // é maior — quando é menor ele só devolve a altura antiga, e o encolher não anima)
+    // é maior — quando é menor ele só devolve a altura antiga, e o encolher não anima).
+    // Desliga a transição enquanto mede: sem isso, esse vai-e-vem no valor de height
+    // "consome" a transição de verdade e o encolher só dá um salto direto pro tamanho
+    // final, sem animar.
     const lockedHeight = shell.style.height
+    shell.style.transition = 'none'
     shell.style.height = 'auto'
     const endHeight = shell.scrollHeight
     shell.style.height = lockedHeight
+    void shell.offsetHeight
 
-    // força o reflow para o navegador registrar a altura de partida antes de animar para a nova
+    // religa a transição e força o reflow pra registrar a altura de partida antes de animar
+    shell.style.transition = ''
     void shell.offsetHeight
     shell.style.height = endHeight + 'px'
 

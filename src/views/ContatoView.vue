@@ -18,13 +18,19 @@ async function pick(v) {
 
   if (shell) {
     // mede a altura real liberando a altura travada por um instante
-    // (ver ProfileView.vue: com a altura antiga fixada, scrollHeight só
-    // "estoura" quando o conteúdo novo é maior, nunca quando é menor)
+    // (com a altura antiga fixada, scrollHeight só "estoura" quando o
+    // conteúdo novo é maior, nunca quando é menor). Desliga a transição
+    // enquanto mede: sem isso, esse vai-e-vem no valor de height "consome"
+    // a transição de verdade e o encolher só dá um salto direto pro
+    // tamanho final, sem animar.
     const lockedHeight = shell.style.height
+    shell.style.transition = 'none'
     shell.style.height = 'auto'
     const endHeight = shell.scrollHeight
     shell.style.height = lockedHeight
+    void shell.offsetHeight
 
+    shell.style.transition = ''
     void shell.offsetHeight
     shell.style.height = endHeight + 'px'
 
