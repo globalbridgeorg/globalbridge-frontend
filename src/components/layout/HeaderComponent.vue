@@ -35,7 +35,13 @@ const toggleMenu = () => {
     </div>
 
   <!-- nav mobile -->
-    <button class="mobile-menu-btn" @click="toggleMenu" aria-label="Menu">
+    <button
+      class="mobile-menu-btn"
+      @click="toggleMenu"
+      aria-label="Menu"
+      :aria-expanded="mobileMenuOpen"
+      aria-controls="mobile-nav"
+    >
       <span></span>
       <span></span>
       <span></span>
@@ -44,10 +50,10 @@ const toggleMenu = () => {
     <!-- nav desktop -->
     <nav class="navbar_links desktop-nav">
       <router-link to="/mapview">Meu destino</router-link>
-      <router-link to="/">Companhias</router-link>
-      <router-link to="/test">Contato</router-link>
+      <router-link to="/como-funciona">Como funciona</router-link>
+      <router-link to="/contato">Contato</router-link>
       <a @click.prevent="installPWA" class="install-link">
-        Baixar App
+        Instalar App
       </a>
     </nav>
 
@@ -62,10 +68,10 @@ const toggleMenu = () => {
 
     <!-- menu mobile -->
     <Transition name="mobile-menu">
-      <div v-if="mobileMenuOpen" class="mobile-nav">
-        <router-link to="/" @click="toggleMenu">Meu destino</router-link>
-        <router-link to="/" @click="toggleMenu">Companhias</router-link>
-        <router-link to="/test" @click="toggleMenu">Contato</router-link>
+      <div v-if="mobileMenuOpen" id="mobile-nav" class="mobile-nav">
+        <router-link to="/mapview" @click="toggleMenu">Meu destino</router-link>
+        <router-link to="/como-funciona" @click="toggleMenu">Como funciona</router-link>
+        <router-link to="/contato" @click="toggleMenu">Contato</router-link>
         <div class="buttonsmenu">
           <ButtonComponent 
             text="Instalar App" 
@@ -140,9 +146,11 @@ const toggleMenu = () => {
 .mobile-menu-btn {
   display: none;
   flex-direction: column;
-  justify-content: space-between;
-  width: 30px;
-  height: 21px;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 44px;
+  height: 44px;
   background: transparent;
   border: none;
   cursor: pointer;
@@ -150,7 +158,7 @@ const toggleMenu = () => {
 }
 
 .mobile-menu-btn span {
-  width: 100%;
+  width: 26px;
   height: 3px;
   background: #42023C;
   border-radius: 3px;

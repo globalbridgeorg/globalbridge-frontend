@@ -4,6 +4,8 @@ import TestView from '@/views/TestView.vue';
 import MapView from '@/views/MapView.vue';
 import LoginView from '@/views/LoginView.vue';
 import ProfileView from '@/views/ProfileView.vue';
+import ComoFuncionaView from '@/views/ComoFuncionaView.vue';
+import ContatoView from '@/views/ContatoView.vue';
 
 const routes = [
   {
@@ -31,6 +33,18 @@ const routes = [
     meta: { headerWidth: 'full' }
   },
   {
+    path: '/como-funciona',
+    name: 'como-funciona',
+    component: ComoFuncionaView,
+    meta: { headerWidth: 'full' }
+  },
+  {
+    path: '/contato',
+    name: 'contato',
+    component: ContatoView,
+    meta: { headerWidth: 'full' }
+  },
+  {
     path: '/test',
     name: 'test',
     component: TestView,
@@ -42,5 +56,4 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
 });
-
 export default router;

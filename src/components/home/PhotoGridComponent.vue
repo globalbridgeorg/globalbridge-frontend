@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import BadgeComponent from '@/components/common/BadgeComponent.vue'
+import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
 
 defineProps({
   imagesCol1: Array,
@@ -37,14 +37,12 @@ onUnmounted(() => {
 <template>
   <div class="main-layout-wrapper">
     <div class="info-side">
-      <BadgeComponent style="background-color: #e5e0cf;">
-        O céu é o limite
-      </BadgeComponent>
-      <h1 class="roboto-condensed">VOE ALÉM DOS SEUS LIMITES</h1>
-      <p style="padding-bottom: 30px;">
+      <SectionEyebrow label="Sobre a GlobalBridge" />
+      <h2 class="roboto-condensed">VOE ALÉM DOS SEUS LIMITES</h2>
+      <p class="paragrafo-espacado">
         A GlobalBridge conecta você às melhores oportunidades de intercâmbio, reunindo informações essenciais sobre países, custo de vida, cultura e possibilidades de estudo e trabalho.
       </p>
-      <p style="font-weight: 600; padding-bottom: 30px;">
+      <p class="paragrafo-espacado paragrafo-destaque">
         Compare destinos, entenda requisitos de visto e programas disponíveis, encontre agências verificadas com mais clareza e segurança.
       </p>
       <p>
@@ -56,10 +54,10 @@ onUnmounted(() => {
       <div class="gallery-mask">
         <div class="gallery-container">
           <div class="column col-left" ref="col1">
-            <img v-for="(img, i) in imagesCol1" :key="i" :src="img" alt="Gallery 1">
+            <img v-for="(img, i) in imagesCol1" :key="i" :src="img" alt="Cidade destino de intercâmbio">
           </div>
           <div class="column col-right" ref="col2">
-            <img v-for="(img, i) in imagesCol2" :key="i" :src="img" alt="Gallery 2">
+            <img v-for="(img, i) in imagesCol2" :key="i" :src="img" alt="Cidade destino de intercâmbio">
           </div>
         </div>
       </div>
@@ -91,10 +89,18 @@ onUnmounted(() => {
   padding-right: 50px;
 }
 
-.info-side h1 {
+.info-side h2 {
   line-height: 0.9;
   font-weight: 800;
   margin: 20px 0;
+}
+
+.paragrafo-espacado {
+  padding-bottom: 30px;
+}
+
+.paragrafo-destaque {
+  font-weight: 600;
 }
 
 .photo-section {
@@ -157,7 +163,7 @@ onUnmounted(() => {
 @media (max-width: 768px) {
   .main-layout-wrapper {
     flex-direction: column;
-    padding: 40px 5%;
+    padding: var(--gb-space-y) var(--gb-space-x);
     min-height: auto;
     gap: 40px;
   }

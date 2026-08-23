@@ -1,229 +1,227 @@
 <script setup>
-import { ref, onMounted, onBeforeUpdate, onBeforeUnmount, nextTick } from 'vue'
-import BadgeComponent from '@/components/common/BadgeComponent.vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
 import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+gsap.registerPlugin(ScrollTrigger)
 
 const items = [
   {
     label: 'Cultura',
-    color: '#9C2C8C',
+    color: '#7A0F74',
     text: 'Descubra como é o estilo de vida em cada país, seus costumes, tradições e a forma como estrangeiros são recebidos pela população local.',
     image: '/images/motoresCultura.png',
-    tag: 'Perto de o dia a dia'
+    alt: 'Cultura local em destino de intercâmbio',
+    tag: 'Perto do seu dia a dia'
   },
   {
     label: 'Idioma',
-    color: '#3B6EF5',
+    color: '#3972DE',
     text: 'Conheça os idiomas falados, o nível de proficiência necessário e as oportunidades para aprender ou aprimorar uma nova língua durante o intercâmbio.',
     image: '/images/MotoresIdiomas.png',
-    tag: 'Fala do idioma'
+    alt: 'Prática de idioma durante o intercâmbio',
+    tag: 'Fale o idioma de verdade'
   },
   {
     label: 'Ensino',
-    color: '#F5822D',
+    color: '#B4601F',
     text: 'Explore a qualidade das instituições, os tipos de cursos disponíveis e as opções de programas acadêmicos para estudantes internacionais.',
     image: '/images/motoresEnsino.png',
-    tag: 'Filas de ensino'
+    alt: 'Sala de aula em instituição de ensino',
+    tag: 'Ensino em foco'
   },
   {
     label: 'Oportunidade',
-    color: '#4CA855',
+    color: '#33803E',
     text: 'Veja as possibilidades de trabalho, estágios e outros programas que você pode estudar e trabalhar enquanto vive a experiência internacional.',
     image: '/images/motoresOportunidades.png',
-    tag: 'Filas de oportunidade'
+    alt: 'Oportunidade de trabalho durante o intercâmbio',
+    tag: 'Oportunidade em foco'
   }
 ]
 
-const cardsWrap = ref(null)
-const cardRefs = ref([])
+const tilesRef = ref([])
+let ctx
 
-const EXPANDED_FLEX = 4
-const COLLAPSED_FLEX = 1
-
-// evita refs "fantasma" de renders anteriores quando o v-for atualiza
-onBeforeUpdate(() => {
-  cardRefs.value = []
-})
-
-function activate(activeCard) {
-  if (!activeCard || !Array.isArray(cardRefs.value)) return
-
-  cardRefs.value.forEach(card => {
-    if (!card) return
-    const isActive = card === activeCard
-    const body = card.querySelector('.card-body')
-
-    // mata qualquer tween em andamento nesse card antes de criar um novo:
-    // evita que uma animação de abertura "atrasada" (delay 0.15) termine
-    // de rodar depois da hora quando o mouse passa rápido entre os cards
-    gsap.killTweensOf(card)
-    if (body) gsap.killTweensOf(body)
-
-    gsap.to(card, {
-      flexGrow: isActive ? EXPANDED_FLEX : COLLAPSED_FLEX,
+onMounted(() => {
+  ctx = gsap.context(() => {
+    gsap.from(tilesRef.value, {
+      y: 30,
+      opacity: 0,
       duration: 0.6,
+      stagger: 0.1,
       ease: 'power3.out',
-      overwrite: true
-    })
-
-    gsap.to(body, {
-      opacity: isActive ? 1 : 0,
-      duration: isActive ? 0.5 : 0.2,
-      delay: isActive ? 0.15 : 0,
-      ease: 'power1.out',
-      overwrite: true
+      scrollTrigger: { trigger: tilesRef.value[0], start: 'top 82%' }
     })
   })
-}
-
-onMounted(async () => {
-  // espera o DOM renderizar o v-for antes de mexer nos elementos
-  await nextTick()
-
-  cardRefs.value.forEach(card => {
-    if (card) gsap.set(card, { flexGrow: COLLAPSED_FLEX })
-  })
-
-  activate(cardRefs.value[0]) // Cultura aberto por padrão
 })
 
-onBeforeUnmount(() => {
-  // mata tweens em andamento pra não animar elementos já removidos do DOM
-  cardRefs.value.forEach(card => {
-    if (!card) return
-    gsap.killTweensOf(card)
-    const body = card.querySelector('.card-body')
-    if (body) gsap.killTweensOf(body)
-  })
-})
+onBeforeUnmount(() => ctx?.revert())
 </script>
 
 <template>
   <div class="container">
-    <div>
-      <BadgeComponent style="background-color: #e5e0cf;">
-        Procure sua oportunidade dos sonhos
-      </BadgeComponent>
-      <h2>NOSSOS MOTORES PRINCIPAIS</h2>
+    <SectionEyebrow label="Nossos motores" />
+
+    <div class="heading-row">
+      <h2 class="gb-heading">Nossos motores<br />principais</h2>
+      <p class="heading-desc">
+        Quatro lentes pra comparar um destino — cultura, idioma, ensino e
+        oportunidade lado a lado.
+      </p>
     </div>
 
-    <div class="cards-wrap" ref="cardsWrap" @mouseleave="activate(cardRefs[0])">
-      <div v-for="(item, index) in items" :key="item.label" class="card" :style="{ background: item.color }"
-        ref="cardRefs" @mouseenter="activate(cardRefs[index])">
-        <div class="card-label">{{ item.label }}</div>
-        <div class="card-body">
-          <div class="card-content">
-            <div class="card-text">{{ item.text }}</div>
-            <div class="card-tag">{{ item.tag }}</div>
-          </div>
-          <div class="card-image" :style="{ backgroundImage: `url(${item.image})` }"></div>
+    <div class="tiles">
+      <div
+        v-for="(item, index) in items"
+        :key="item.label"
+        class="tile"
+        :style="{ '--tile-color': item.color }"
+        :ref="el => (tilesRef[index] = el)"
+      >
+        <img class="tile-img" :src="item.image" :alt="item.alt" />
+        <div class="tile-tint"></div>
+        <div class="tile-scrim"></div>
+
+        <div class="tile-content">
+          <h3 class="tile-label">{{ item.label }}</h3>
+          <p class="tile-text">{{ item.text }}</p>
+          <span class="tile-tag">{{ item.tag }}</span>
         </div>
       </div>
     </div>
   </div>
 </template>
 
-
 <style scoped>
 .container {
   width: 100%;
-  max-width: 1440px;
-  margin: 0 auto;
-  box-sizing: border-box;
+  padding: var(--gb-space-y) 0;
+}
 
-  & h2 {
-    font-size: 2.2vw;
-    margin-top: 10px;
-    margin-bottom: 30px;
+.heading-row {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 24px 0 32px;
+}
+
+.heading-desc {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--gb-ink-soft);
+  max-width: 360px;
+  margin: 0;
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.tile {
+  position: relative;
+  border-radius: var(--gb-radius-card);
+  overflow: hidden;
+  border: 1px solid var(--gb-purple-deep-16);
+  cursor: pointer;
+  aspect-ratio: 4 / 5;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.tile:hover {
+  box-shadow: 0 16px 32px rgba(23, 17, 26, 0.16);
+  transform: translateY(-3px);
+}
+
+.tile:hover .tile-img {
+  transform: scale(1.06);
+}
+
+.tile-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.5s ease;
+}
+
+.tile-tint {
+  position: absolute;
+  inset: 0;
+  background: var(--tile-color);
+  mix-blend-mode: multiply;
+  opacity: 0.55;
+}
+
+.tile-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(23, 17, 26, 0) 40%, rgba(23, 17, 26, 0.78) 100%);
+}
+
+.tile-content {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 20px;
+}
+
+.tile-label {
+  font-family: var(--gb-font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 20px;
+  color: #fff;
+  margin: 0 0 8px;
+}
+
+.tile-text {
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.88);
+  margin: 0 0 10px;
+}
+
+.tile-tag {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(4px);
+  border-radius: var(--gb-radius-pill);
+  padding: 5px 12px;
+  font-family: var(--gb-font-eyebrow);
+  font-weight: 600;
+  font-size: 11px;
+  color: #fff;
+}
+
+@media (min-width: 640px) {
+  .tiles {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
-BadgeComponent {
-  font-size: 0.78vw;
-  padding: 10px 18px;
+@media (min-width: 768px) {
+  .heading-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
 }
 
-* {
-  box-sizing: border-box;
-}
+@media (min-width: 1024px) {
+  .tiles {
+    grid-template-columns: repeat(4, 1fr);
+    aspect-ratio: auto;
+    height: 460px;
+  }
 
-.cards-wrap {
-  display: flex;
-  gap: 20px;
-  width: 100%;
-  height: 600px;
-  margin: 0 auto;
-}
-
-.card {
-  position: relative;
-  flex: 1 1 0;
-  min-width: 160px;
-  border-radius: 20px;
-  overflow: hidden;
-  cursor: pointer;
-  padding: 24px 20px;
-  color: #fff;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-}
-
-.card-label {
-  font-weight: 700;
-  font-size: clamp(14px, 1.15vw, 18px);
-  /* reduzido e fluido, pra caber mesmo no card colapsado */
-  letter-spacing: 0.01em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  margin-bottom: 16px;
-  flex-shrink: 0;
-}
-
-.card-body {
-  opacity: 0;
-  display: flex;
-  flex-direction: row;
-  gap: 20px;
-  height: 100%;
-  min-width: 0;
-  /* permite os filhos encolherem dentro do flex, evitando overflow */
-}
-
-.card-content {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  flex: 1 1 40%;
-  min-width: 0;
-}
-
-.card-text {
-  font-size: 15px;
-  line-height: 1.5;
-}
-
-.card-image {
-  flex: 1 1 55%;
-  border-radius: 14px;
-  background-size: cover;
-  background-position: start;
-  min-height: 0;
-}
-
-.card-tag {
-  align-self: flex-start;
-  background: rgba(255, 255, 255, 0.25);
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 13px;
-  margin-top: auto;
-  white-space: nowrap;
-}
-
-@media (max-width: 1600px) {
-  .container {
-    max-width: 1225px;
+  .tile {
+    aspect-ratio: auto;
   }
 }
 </style>

@@ -3,10 +3,13 @@ import { ref, onMounted, nextTick } from "vue"
 import axios from '@/services/axios'
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
+import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
+import { palette } from '@/utils/palette'
 
 gsap.registerPlugin(ScrollTrigger)
 
 const paises = ref([])
+const carregando = ref(true)
 
 // Configuração dos gráficos - ADICIONE aqui novos indicadores que
 // vierem do backend, sem precisar mexer no template ou na animação.
@@ -14,6 +17,10 @@ const metricsConfig = [
   { key: "universidades", label: "Universidades", trackWidth: 60 },
   { key: "intercambistas", label: "Intercambistas", trackWidth: 100 }
 ]
+
+// Cores de destaque por posição no ranking (top 3 / meio / final), igual referência visual
+const rankColors = [palette.red, palette.magentaStrong, palette.red, palette.red, palette.red, palette.green, palette.green, palette.green]
+const corPorPosicao = (index) => rankColors[index % rankColors.length]
 
 // Refs dinâmicas (guardadas em objetos por id/chave, já que v-for não permite array de refs facilmente com múltiplos níveis)
 const paisRefs = ref({})
@@ -58,6 +65,7 @@ onMounted(async () => {
     paises.value = []
   }
 
+  carregando.value = false
   await nextTick()
   animarGraficos()
 })
@@ -71,8 +79,7 @@ const animarGraficos = () => {
       scrollTrigger: {
         trigger: paisEl,
         start: "top 80%",
-        end: "bottom top", // necessário para o onLeaveBack funcionar corretamente
-        toggleActions: "restart ",
+        once: true, // anima só na primeira vez que entra na tela, nunca reinicia ao rolar de novo
       }
     })
 
@@ -125,27 +132,48 @@ const animarGraficos = () => {
 
 <template>
   <div class="container">
-    <span class="best">o melhor para você</span>
-    <h2>PAÍSES MAIS PROCURADOS</h2>
+    <SectionEyebrow label="Dados de 2026" />
 
+    <div class="heading-row">
+      <h2 class="gb-heading">Países mais<br />procurados</h2>
+      <p class="heading-desc">
+        Ranking dos destinos com maior procura na plataforma nos últimos doze
+        meses. As barras mostram o desempenho de cada indicador comparado aos
+        demais países da lista.
+      </p>
+    </div>
+
+    <div class="table-head">
+      <span class="col-rank">#</span>
+      <span class="col-pais">País</span>
+      <span class="col-indicadores">Indicadores</span>
+      <span class="col-programas">Programas</span>
+    </div>
+
+    <div v-if="carregando" class="pais-skeleton" aria-hidden="true">
+      <div v-for="n in 3" :key="n" class="skeleton-row"></div>
+    </div>
+
+    <p v-else-if="!paises.length" class="estado-vazio">
+      Ainda não temos dados de procura suficientes pra montar esse ranking.
+      Volte em breve — ou <router-link to="/mapview">explore o mapa</router-link>
+      pra ver todos os países disponíveis.
+    </p>
+
+    <template v-else>
     <div
-      v-for="pais in paises"
+      v-for="(pais, index) in paises"
       :key="pais.id"
       class="pais"
+      :style="{ '--rank-color': corPorPosicao(index) }"
       :ref="el => setPaisRef(el, pais.id)"
     >
+      <span class="rank-numero">
+        {{ String(index + 1).padStart(2, '0') }}
+      </span>
+
       <div class="esquerda">
         <h3 class="nome">{{ pais.nome.toUpperCase() }}</h3>
-
-        <div class="programas">
-          <span
-            class="programas-numero"
-            :ref="el => setProgramasRef(el, pais.id)"
-          >0</span>
-          <span class="programas-label">
-            programas<br />disponíveis
-          </span>
-        </div>
       </div>
 
       <div class="direita">
@@ -172,7 +200,18 @@ const animarGraficos = () => {
         </div>
         </div>
       </div>
+
+      <div class="programas">
+        <span
+          class="programas-numero"
+          :ref="el => setProgramasRef(el, pais.id)"
+        >0</span>
+        <span class="programas-label">
+          programas<br />disponíveis
+        </span>
+      </div>
     </div>
+    </template>
   </div>
 </template>
 
@@ -182,25 +221,26 @@ const animarGraficos = () => {
     justify-content: center;
     align-items: center;
     width: 100%;
-    max-width: 1440px;
-    margin: 0 auto;
-    padding: 40px 0;
-    box-sizing: border-box;
+    padding: var(--gb-space-y) 0;
 }
 
-span.best {
-    font-size: 12px;
-    color: #66635C;
-    background-color: #E5E0CF;
-    padding: 6px 12px;
-    border-radius: 10px;
-    display: inline-block;
+.heading-row {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 24px 0 32px;
 }
 
-h2 {
-    margin-top: 12px;
-    font-size: 24px;
-    margin-bottom: 40px;
+.heading-desc {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--gb-ink-soft);
+  max-width: 480px;
+  margin: 0;
+}
+
+.table-head {
+  display: none;
 }
 
 .pais {
@@ -209,8 +249,57 @@ h2 {
     justify-content: center;
     align-items: flex-start;
     padding: 30px 0;
-    border-top: 1px solid #d3a58f;
-    gap: 20px;
+    border-top: 1px solid var(--gb-purple-deep-18);
+    gap: 16px;
+    position: relative;
+}
+
+.pais-skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 30px 0;
+}
+
+.skeleton-row {
+    height: 88px;
+    border-radius: var(--gb-radius-card);
+    background: linear-gradient(90deg, rgba(46, 10, 46, 0.06) 25%, rgba(46, 10, 46, 0.1) 37%, rgba(46, 10, 46, 0.06) 63%);
+    background-size: 400% 100%;
+    animation: gb-skeleton-shimmer 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .skeleton-row {
+        animation: none;
+    }
+}
+
+@keyframes gb-skeleton-shimmer {
+    0% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.estado-vazio {
+    padding: 40px 0;
+    border-top: 1px solid var(--gb-purple-deep-18);
+    color: var(--gb-ink-soft);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    max-width: 52ch;
+}
+
+.estado-vazio a {
+    color: var(--gb-magenta);
+    font-weight: 600;
+}
+
+.rank-numero {
+  font-family: var(--gb-font-eyebrow);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  color: var(--rank-color);
 }
 
 .esquerda {
@@ -218,44 +307,27 @@ h2 {
 }
 
 .nome {
-    font-size: 28px;
-    color: #6e1c00;
+    font-family: var(--gb-font-display);
+    font-weight: 900;
+    font-size: 24px;
     margin: 0;
-}
-
-/* --- Programas disponíveis (número grande) --- */
-.programas {
-    margin-top: 20px;
-}
-
-.programas-numero {
-    display: block;
-    font-size: 42px;
-    font-weight: 800;
-    color: #c0431f;
-    line-height: 1;
-}
-
-.programas-label {
-    display: block;
-    font-size: 13px;
-    color: #9b4c26;
-    font-weight: 600;
-    margin-top: 6px;
+    color: var(--rank-color);
 }
 
 .direita {
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 25px;
+    gap: 16px;
 }
 
 .grafico p {
-    margin-bottom: 8px;
-    font-weight: bold;
-    color: #6e1c00;
-    font-size: 14px;
+    margin-bottom: 6px;
+    font-weight: 700;
+    color: var(--gb-dark);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
 }
 
 .linha {
@@ -264,140 +336,138 @@ h2 {
 }
 
 .barra {
-    display: flex; /* novo: alinha preenchido + número na mesma linha */
+    display: flex;
     align-items: center;
     flex: none;
-    height: 28px;
-    background: none;
+    height: 10px;
+    background: rgba(46, 10, 46, 0.08);
     border-radius: 20px;
-    overflow: visible; /* precisa ser visible agora, senão o número fica cortado se a barra crescer perto do limite */
+    overflow: visible;
 }
 
 .preenchido {
     height: 100%;
     width: 0%;
     border-radius: 20px;
-    background: #FFAE91;
-    flex-shrink: 0; /* garante que o preenchido não encolha pra "abrir espaço" pro número */
+    flex-shrink: 0;
+    background: var(--rank-color);
 }
 
 .linha span {
-    font-weight: bold;
-    color: #9b4c26;
-    font-size: 14px;
-    margin-left: 8px; /* espacinho entre a ponta da barra e o número */
-    white-space: nowrap; /* evita quebra de linha do número */
+    font-weight: 700;
+    color: var(--gb-dark);
+    font-size: 13px;
+    margin-left: 10px;
+    white-space: nowrap;
+}
+
+.programas {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  color: var(--rank-color);
+}
+
+.programas-numero {
+    display: block;
+    font-family: var(--gb-font-display);
+    font-size: 42px;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.programas-label {
+    display: block;
+    font-size: 11px;
+    color: var(--gb-ink-faint);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
 }
 
 /* Tablet */
 @media (min-width: 768px) {
-    span.best {
-        font-size: 13px;
-        padding: 8px 16px;
-    }
-
-    h2 {
-        font-size: 32px;
-        margin-bottom: 60px;
+    .heading-row {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: flex-end;
     }
 
     .pais {
         flex-direction: row;
-        gap: 30px;
+        align-items: center;
+        gap: 24px;
+    }
+
+    .rank-numero {
+      font-size: 14px;
+      width: 24px;
+      flex-shrink: 0;
     }
 
     .esquerda {
-        width: 35%;
+        width: 22%;
     }
 
     .nome {
-        font-size: 32px;
-    }
-
-    .programas-numero {
-        font-size: 52px;
+        font-size: 28px;
     }
 
     .direita {
-        width: 65%;
-        gap: 20px;
+        width: 48%;
+        gap: 14px;
     }
 
-    .grafico p {
-        font-size: 15px;
+    .programas {
+      width: 22%;
+      flex-direction: column;
+      align-items: flex-end;
+      text-align: right;
     }
 
-    .barra {
-        height: 32px;
-    }
-
-    .linha span {
-        font-size: 15px;
+    .programas-numero {
+        font-size: 44px;
     }
 }
 
 /* Desktop */
 @media (min-width: 1024px) {
-    span.best {
-        font-size: 0.78vw;
-        padding: 10px 18px;
+    .table-head {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      padding: 0 0 16px;
+      font-family: var(--gb-font-eyebrow);
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gb-ink-faint);
     }
 
-    h2 {
-        font-size: 2vw;
-        margin-bottom: 80px;
-    }
+    .col-rank { width: 24px; }
+    .col-pais { width: 22%; }
+    .col-indicadores { width: 48%; }
+    .col-programas { width: 22%; text-align: right; margin-left: auto; }
 
     .pais {
-        padding: 40px 0;
-        gap: 40px;
-    }
-
-    .esquerda {
-        width: 30%;
+        padding: 32px 0;
     }
 
     .nome {
-        font-size: 2.5rem;
+        font-size: 2rem;
     }
 
     .programas-numero {
-        font-size: 3.5vw;
+        font-size: 3vw;
     }
 
     .direita {
-        width: 70%;
-        margin-right: 100px;
-        gap: 25px;
-    }
-
-    .grafico p {
-        font-size: 16px;
+        gap: 20px;
     }
 
     .barra {
-        height: 30px;
+        height: 12px;
     }
-
-    .linha {
-        gap: 15px;
-    }
-
-    .linha span {
-        font-size: 16px;
-    }
-}
-
-/* Desktop Grande */
-@media (min-width: 1440px) {
-    .pais {
-        gap: 50px;
-    }
-}
-
-@media (max-width: 1600px) {
-  .container {
-    max-width: 1225px;
-  }
 }
 </style>

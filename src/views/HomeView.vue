@@ -1,4 +1,7 @@
 <script setup>
+import { onMounted } from "vue"
+import { useRoute } from "vue-router"
+import { scrollToTarget } from "@/utils/lenis"
 import VideoComponent from "@/components/home/VideoComponent.vue";
 import ButtonComponent from "@/components/common/ButtonComponent.vue";
 import PhotoGrid from '@/components/home/PhotoGridComponent.vue'
@@ -6,6 +9,11 @@ import Landing from '@/components/home/LandingComponent.vue';
 import Paises from '@/components/home/PaisesComponent.vue';
 import FaqComponent from "@/components/home/FaqComponent.vue";
 import MotorComponent from "@/components/home/MotorComponent.vue";
+import CustoComponent from "@/components/home/CustoComponent.vue";
+import FormatoComponent from "@/components/home/FormatoComponent.vue";
+import PassosComponent from "@/components/home/PassosComponent.vue";
+import TimelineComponent from "@/components/home/TimelineComponent.vue";
+import TestemunhosComponent from "@/components/home/TestemunhosComponent.vue";
 
 const fotosEsquerda = [
   '/images/imagemgb1.png',
@@ -20,6 +28,14 @@ const fotosDireita = [
   '/images/imagemgb1.png',
   '/images/imagemgb2.png'
 ]
+
+const route = useRoute()
+
+onMounted(() => {
+  if (!route.hash) return
+  // espera o layout (vídeo, fontes, imagens) assentar antes de calcular a posição do alvo
+  setTimeout(() => scrollToTarget(route.hash), 400)
+})
 </script>
 
 <template>
@@ -33,21 +49,34 @@ const fotosDireita = [
     <PhotoGrid :imagesCol1="fotosEsquerda" :imagesCol2="fotosDireita" />
   </section>
 
-  <section>
-    <Landing src="/videos/video-landing.mp4" />
-
+  <section class="gb-section">
+    <Landing />
   </section>
 
-  <section>
+  <section class="gb-section">
     <MotorComponent />
   </section>
 
-  <section> 
+  <section class="gb-section">
+    <Paises />
+  </section>
+
+  <section class="gb-section">
     <FaqComponent />
   </section>
-  
+
+  <section class="gb-section">
+    <CustoComponent />
+    <FormatoComponent />
+  </section>
+
+  <section class="gb-section">
+    <PassosComponent />
+    <TimelineComponent />
+  </section>
+
   <section>
-    <Paises />
+    <TestemunhosComponent />
   </section>
 </template>
 
