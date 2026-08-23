@@ -164,4 +164,12 @@ onBeforeUnmount(() => ctx?.revert())
   }
 }
 
+/* .gb-section não tem padding próprio — mesmo respiro de 16px usado no
+   resto do site no celular. */
+@media (max-width: 768px) {
+  .inner.gb-section {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
 </style>

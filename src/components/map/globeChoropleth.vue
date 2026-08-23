@@ -16,7 +16,12 @@ async function getWorldData() {
 
 // ─── Refs & estado ──────────────────────────────────────────────────────────
 const globeEl = ref(null)
-const panelCollapsed = ref(false)
+// No celular o painel de filtros começa fechado (é um overlay que desliza por
+// cima do globo, não uma coluna fixa ao lado como no desktop).
+const panelCollapsed = ref(window.matchMedia('(max-width: 768px)').matches)
+// Painel de agências no celular: começa "espiando" (peek) embaixo do globo;
+// tocar no cabeçalho expande pra ver a lista inteira.
+const agenciesExpanded = ref(false)
 const isLoading = ref(true)
 
 let globe = null
@@ -324,6 +329,16 @@ onBeforeUnmount(() => {
     </div>
   </Transition>
 
+  <!-- Botão flutuante e fundo escurecido: só existem visualmente no celular
+       (ver media query no <style>), onde o painel de filtros vira um overlay
+       que desliza por cima do globo em vez de uma coluna fixa ao lado. -->
+  <button class="mobile-filter-toggle" @click="panelCollapsed = !panelCollapsed" :aria-label="panelCollapsed ? 'Abrir filtros' : 'Fechar filtros'">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#17111A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16" /><path d="M7 12h10" /><path d="M10 18h4" /></svg>
+    <span>Filtros</span>
+    <span v-if="totalActiveFilters > 0" class="badge">{{ totalActiveFilters }}</span>
+  </button>
+  <div v-if="!panelCollapsed" class="filter-backdrop" @click="panelCollapsed = true"></div>
+
   <aside class="filter-panel" :class="{ collapsed: panelCollapsed }">
     <button class="collapse-btn" @click="panelCollapsed = !panelCollapsed" :aria-label="panelCollapsed ? 'Expandir filtros' : 'Recolher filtros'">
       <svg width="14" height="14" viewBox="0 0 16 16" fill="none" :style="{ transform: panelCollapsed ? 'rotate(180deg)' : 'none' }">
@@ -360,13 +375,16 @@ onBeforeUnmount(() => {
     </div>
   </aside>
 
-  <aside class="agencies-panel">
-    <div class="panel-heading">
+  <aside class="agencies-panel" :class="{ expanded: agenciesExpanded }">
+    <!-- No celular esse painel é uma folha que "espia" embaixo do globo;
+         tocar no cabeçalho expande pra ver a lista inteira (no desktop o
+         clique não muda nada visualmente, já mostra tudo). -->
+    <div class="panel-heading" @click="agenciesExpanded = !agenciesExpanded">
       <span class="panel-eyebrow">{{ filteredAgencies.length }} encontrada{{ filteredAgencies.length === 1 ? '' : 's' }}</span>
       <h2 class="panel-title">Agências</h2>
       <div v-if="selectedCountry" class="country-badge">
         <span>{{ selectedCountry.nomePt }}</span>
-        <button class="country-badge-clear" @click="clearSelectedCountry" aria-label="Ver agências de todos os países">✕</button>
+        <button class="country-badge-clear" @click.stop="clearSelectedCountry" aria-label="Ver agências de todos os países">✕</button>
       </div>
     </div>
     <div class="agencies-list">
@@ -747,5 +765,117 @@ onBeforeUnmount(() => {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateX(-50%) translateY(6px); }
   to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* ── Mobile ──────────────────────────────────────────────────────────────
+   No desktop os dois painéis são colunas fixas de 300/320px lado a lado
+   com o globo. Isso não cabe num celular, então aqui: o painel de filtros
+   vira um overlay que desliza da esquerda (aberto por um botão flutuante,
+   com fundo escurecido atrás), e o painel de agências vira uma folha que
+   "espia" embaixo do globo — toca no cabeçalho pra expandir. */
+.mobile-filter-toggle,
+.filter-backdrop {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-filter-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: fixed;
+    top: 88px;
+    left: 12px;
+    z-index: 60;
+    background: #fff;
+    border: 1px solid var(--gb-purple-deep-16);
+    border-radius: var(--gb-radius-pill);
+    padding: 10px 16px;
+    font-family: var(--gb-font-eyebrow);
+    font-weight: 700;
+    font-size: 11.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--gb-dark);
+    box-shadow: 0 4px 16px rgba(23, 17, 26, 0.14);
+    cursor: pointer;
+  }
+  .mobile-filter-toggle .badge {
+    background: var(--gb-magenta);
+    color: #fff;
+    font-size: 10.5px;
+    font-weight: 700;
+    border-radius: 999px;
+    min-width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+  }
+
+  .filter-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(23, 17, 26, 0.45);
+    z-index: 99;
+  }
+
+  .filter-panel {
+    width: 86vw;
+    max-width: 340px;
+    height: auto;
+    top: 0;
+    bottom: 74px;
+    box-shadow: 8px 0 30px rgba(0, 0, 0, 0.25);
+  }
+  .filter-panel.collapsed {
+    transform: translateX(-100%);
+  }
+  .collapse-btn {
+    /* substituído pelo botão flutuante + fundo escurecido no celular */
+    display: none;
+  }
+
+  .agencies-panel {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 74px;
+    width: 100%;
+    height: 38vh;
+    max-height: 38vh;
+    border-left: none;
+    border-top: 1px solid var(--gb-purple-deep-16);
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.25);
+    transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1), max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 90;
+  }
+  .agencies-panel.expanded {
+    height: 80vh;
+    max-height: 80vh;
+  }
+  .agencies-panel .panel-heading {
+    position: relative;
+    padding: 22px 20px 14px;
+    cursor: pointer;
+  }
+  .agencies-panel .panel-heading::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 4px;
+    border-radius: 3px;
+    background: var(--gb-purple-deep-16);
+  }
+
+  .active-badge {
+    bottom: calc(38vh + 74px + 14px);
+  }
 }
 </style>

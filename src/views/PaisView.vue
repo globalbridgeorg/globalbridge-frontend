@@ -423,4 +423,12 @@ onBeforeUnmount(() => ctx?.revert())
   .stats { grid-template-columns: 1fr; }
   .hero { padding: 32px 24px; }
 }
+
+/* Header deixou de ser fixed no celular (ver App.vue) — não precisa mais
+   do respiro de 120px pra não ficar embaixo dele. */
+@media (max-width: 768px) {
+  .pais-view {
+    padding: 16px 16px 72px;
+  }
+}
 </style>

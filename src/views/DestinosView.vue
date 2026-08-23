@@ -233,4 +233,12 @@ onMounted(carregarContagens)
 @media (max-width: 560px) {
   .continentes-grid, .continente-skeleton { grid-template-columns: 1fr; }
 }
+
+/* O header não é mais fixed no celular (ver App.vue), então não precisa
+   mais desse respiro artificial pra não ficar embaixo dele. */
+@media (max-width: 768px) {
+  .destinos-view {
+    padding: 16px 16px 72px;
+  }
+}
 </style>

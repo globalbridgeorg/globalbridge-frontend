@@ -1,6 +1,7 @@
 <script setup>
 import HeaderComponent from "@/components/layout/HeaderComponent.vue";
 import FooterComponent from "@/components/layout/FooterComponent.vue";
+import MobileTabBar from "@/components/layout/MobileTabBar.vue";
 import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { initSmoothScroll } from '@/utils/lenis'
@@ -27,6 +28,7 @@ onMounted(() => {
       </router-view>
     </div>
     <FooterComponent v-if="shouldShowFooter" />
+    <MobileTabBar />
   </main>
 </template>
 
@@ -46,6 +48,26 @@ header {
 .page-viewport {
   position: relative;
   overflow-x: clip;
+}
+
+/* No celular o header deixa de flutuar sobre o conteúdo (era fixed,
+   igual no PC) e passa a rolar junto com a página — a barra de abas
+   fixa (MobileTabBar) é que garante acesso rápido à navegação agora.
+   Por isso reserva espaço embaixo pra ela não cobrir o rodapé/conteúdo. */
+@media (max-width: 768px) {
+  header {
+    /* "relative" em vez de "static": continua ocupando espaço no fluxo
+       normal (não flutua sobre o conteúdo como no PC), mas mantém o
+       z-index funcionando — sem isso, elementos fixed de tela cheia
+       (como o globo do /mapview) pintariam por cima do header. */
+    position: relative;
+    height: auto;
+    box-shadow: none;
+  }
+
+  main {
+    padding-bottom: 74px;
+  }
 }
 
 /* Corte C — Zoom com foco: a página atual estica levemente e desfoca,

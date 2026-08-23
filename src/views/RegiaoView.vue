@@ -427,4 +427,12 @@ onBeforeUnmount(() => ctx?.revert())
   .table-head { display: none; }
   .comp-row { grid-template-columns: 1fr; gap: 4px; }
 }
+
+/* Header deixou de ser fixed no celular (ver App.vue) — não precisa mais
+   do respiro de 120px pra não ficar embaixo dele. */
+@media (max-width: 768px) {
+  .regiao-view {
+    padding: 16px 16px 72px;
+  }
+}
 </style>

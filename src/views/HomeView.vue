@@ -90,4 +90,15 @@ onMounted(() => {
   justify-self: center;
   width: 100%;
 }
+
+/* Da seção "Sobre a GlobalBridge" (Landing) em diante, cada seção some
+   colada na borda no celular — .gb-section não tem padding próprio (só
+   define max-width). Mesmo respiro padrão usado no resto do site: 16px,
+   igual ao hero em vídeo lá em cima. */
+@media (max-width: 768px) {
+  .gb-section {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
 </style>

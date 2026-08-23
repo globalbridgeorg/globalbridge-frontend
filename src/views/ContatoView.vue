@@ -663,4 +663,18 @@ async function pick(v) {
     transition: none;
   }
 }
+
+/* Header deixou de ser fixed no celular (ver App.vue) — não precisa mais
+   do respiro de 120px pra não ficar embaixo dele. Padding padrão de
+   celular igual ao do hero em vídeo da home: 16px de respiro. */
+@media (max-width: 768px) {
+  .contato {
+    padding-top: 16px;
+  }
+
+  .gb-section {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
 </style>

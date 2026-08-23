@@ -685,4 +685,12 @@ onMounted(carregarPerfil)
     text-align: center;
   }
 }
+
+/* Header deixou de ser fixed no celular (ver App.vue) — não precisa mais
+   do respiro de 120px pra não ficar embaixo dele. */
+@media (max-width: 768px) {
+  .perfil-publico-view {
+    padding: 16px 16px 90px;
+  }
+}
 </style>

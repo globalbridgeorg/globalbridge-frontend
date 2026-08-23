@@ -191,7 +191,9 @@ onUnmounted(() => {
 /* mobile */
 @media (max-width: 768px) {
   .video-container {
-    padding: 90px 16px 16px 16px;
+    /* Header não é mais fixed no celular (ver App.vue), então não
+       precisa mais reservar 90px de respiro pra não ficar embaixo dele. */
+    padding: 16px;
     box-sizing: border-box;
     min-height: 60vh;
   }

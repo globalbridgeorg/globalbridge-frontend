@@ -685,4 +685,12 @@ onBeforeUnmount(() => ctx?.revert())
   .hero-actions a { flex: 1; }
   .catalogo-grid, .review-cards { grid-template-columns: 1fr; }
 }
+
+/* Header deixou de ser fixed no celular (ver App.vue) — não precisa mais
+   do respiro de 120px pra não ficar embaixo dele. */
+@media (max-width: 768px) {
+  .agencia-view {
+    padding: 16px 16px 72px;
+  }
+}
 </style>

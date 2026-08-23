@@ -509,4 +509,18 @@ const paraAgencias = [
 .gb-heading.on-dark {
   color: white;
 }
+
+/* Header deixou de ser fixed no celular (ver App.vue) — não precisa mais
+   do respiro de 120px pra não ficar embaixo dele. Padding padrão de
+   celular igual ao do hero em vídeo da home: 16px de respiro. */
+@media (max-width: 768px) {
+  .hero {
+    padding-top: 16px;
+  }
+
+  .gb-section {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
 </style>
