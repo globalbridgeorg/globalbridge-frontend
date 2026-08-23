@@ -21,7 +21,7 @@ onMounted(() => {
     />
     <div class="page-viewport">
       <router-view v-slot="{ Component, route: currentRoute }">
-        <transition name="page-depth">
+        <transition name="page-focus">
           <component :is="Component" :key="currentRoute.path" />
         </transition>
       </router-view>
@@ -48,33 +48,36 @@ header {
   overflow-x: clip;
 }
 
-/* Corte B — Deslizar com profundidade: a página que sai recua e some
-   à distância; a nova entra por cima, um pouco maior, até encaixar. */
-:deep(.page-depth-enter-active) {
-  transition: transform 0.32s ease, opacity 0.32s ease;
+/* Corte C — Zoom com foco: a página atual estica levemente e desfoca,
+   como se a câmera passasse por ela; a nova entra logo atrás, um pouco
+   menor, ganhando nitidez até encaixar. */
+:deep(.page-focus-enter-active) {
+  transition: transform 0.34s ease 0.05s, filter 0.34s ease 0.05s, opacity 0.34s ease 0.05s;
 }
 
-:deep(.page-depth-leave-active) {
-  transition: transform 0.28s ease, opacity 0.28s ease;
+:deep(.page-focus-leave-active) {
+  transition: transform 0.26s ease, filter 0.26s ease, opacity 0.26s ease;
   position: absolute;
   inset: 0;
   width: 100%;
   z-index: 1;
 }
 
-:deep(.page-depth-enter-from) {
-  transform: translateX(34px) scale(1.02);
+:deep(.page-focus-enter-from) {
+  transform: scale(0.97);
+  filter: blur(7px);
   opacity: 0;
 }
 
-:deep(.page-depth-leave-to) {
-  transform: translateX(-34px) scale(0.96);
+:deep(.page-focus-leave-to) {
+  transform: scale(1.045);
+  filter: blur(7px);
   opacity: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :deep(.page-depth-enter-active),
-  :deep(.page-depth-leave-active) {
+  :deep(.page-focus-enter-active),
+  :deep(.page-focus-leave-active) {
     transition: none !important;
   }
 }
