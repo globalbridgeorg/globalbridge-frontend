@@ -49,6 +49,7 @@ const toggleMenu = () => {
 
     <!-- nav desktop -->
     <nav class="navbar_links desktop-nav">
+      <router-link to="/destinos">Destinos</router-link>
       <router-link to="/mapview">Meu destino</router-link>
       <router-link to="/como-funciona">Como funciona</router-link>
       <router-link to="/contato">Contato</router-link>
@@ -69,6 +70,7 @@ const toggleMenu = () => {
     <!-- menu mobile -->
     <Transition name="mobile-menu">
       <div v-if="mobileMenuOpen" id="mobile-nav" class="mobile-nav">
+        <router-link to="/destinos" @click="toggleMenu">Destinos</router-link>
         <router-link to="/mapview" @click="toggleMenu">Meu destino</router-link>
         <router-link to="/como-funciona" @click="toggleMenu">Como funciona</router-link>
         <router-link to="/contato" @click="toggleMenu">Contato</router-link>

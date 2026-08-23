@@ -7,6 +7,7 @@ import ProfileView from '@/views/ProfileView.vue';
 import ComoFuncionaView from '@/views/ComoFuncionaView.vue';
 import ContatoView from '@/views/ContatoView.vue';
 import DestinosView from '@/views/DestinosView.vue';
+import RegiaoView from '@/views/RegiaoView.vue';
 import PaisView from '@/views/PaisView.vue';
 import AgenciaView from '@/views/AgenciaView.vue';
 
@@ -57,6 +58,12 @@ const routes = [
     path: '/destinos',
     name: 'destinos',
     component: DestinosView,
+    meta: { headerWidth: 'full' }
+  },
+  {
+    path: '/regiao/:regiao',
+    name: 'regiao',
+    component: RegiaoView,
     meta: { headerWidth: 'full' }
   },
   {

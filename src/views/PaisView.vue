@@ -93,7 +93,7 @@ onBeforeUnmount(() => ctx?.revert())
       <nav class="breadcrumb" aria-label="Caminho de navegação">
         <router-link to="/destinos">Destinos</router-link>
         <span>/</span>
-        <router-link v-if="pais.regiao" :to="{ path: '/destinos', query: { regiao: pais.regiao } }">{{ regiaoLabel }}</router-link>
+        <router-link v-if="pais.regiao" :to="{ name: 'regiao', params: { regiao: pais.regiao } }">{{ regiaoLabel }}</router-link>
         <span v-if="pais.regiao">/</span>
         <span class="current">{{ pais.nome }}</span>
       </nav>
