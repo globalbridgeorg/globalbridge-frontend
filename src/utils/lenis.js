@@ -34,3 +34,15 @@ export const scrollToTarget = (target, options = {}) => {
     el.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 }
+
+// Volta pro topo instantaneamente ao trocar de página. Precisa passar pelo
+// Lenis (em vez de window.scrollTo) porque ele mantém seu próprio estado de
+// scroll e recoloca a página onde estava a cada frame, sobrescrevendo
+// qualquer scrollTo nativo.
+export const resetScroll = () => {
+  if (lenisInstance) {
+    lenisInstance.scrollTo(0, { immediate: true })
+  } else {
+    window.scrollTo(0, 0)
+  }
+}

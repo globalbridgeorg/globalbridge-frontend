@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { resetScroll } from '@/utils/lenis';
 import HomeView from '../views/HomeView.vue';
 import TestView from '@/views/TestView.vue';
 import MapView from '@/views/MapView.vue';
@@ -84,4 +85,14 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
 });
+
+// Trocar de página sempre volta pro topo; um link com âncora (#id) ou uma
+// troca de filtro na mesma rota (ex.: query de região em /destinos) mantém
+// a posição, já que aí o scroll é tratado por quem disparou a navegação.
+router.afterEach((to, from) => {
+  if (to.path !== from.path && !to.hash) {
+    resetScroll()
+  }
+})
+
 export default router;
