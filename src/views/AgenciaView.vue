@@ -113,9 +113,13 @@ function animarEntrada() {
 }
 
 onMounted(async () => {
-  await carregarAgencia()
+  // Espera pelo menos o tempo da transição de troca de página terminar
+  // antes de medir posições pro ScrollTrigger — ele mira no próprio
+  // elemento raiz da página, que a transição ainda está escalando/
+  // desfocando nesse meio-tempo; medir antes disso acabar deixa a
+  // animação de entrada com posições erradas.
+  await Promise.all([carregarAgencia(), new Promise((r) => setTimeout(r, 260))])
   if (!erro.value) {
-    await new Promise((r) => requestAnimationFrame(r))
     animarEntrada()
   }
 })
