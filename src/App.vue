@@ -55,7 +55,7 @@ header {
   transition: transform 0.34s ease 0.05s, filter 0.34s ease 0.05s, opacity 0.34s ease 0.05s;
 }
 
-:deep(.page-focus-leave-active) {
+:deep(.page-viewport > .page-focus-leave-active) {
   transition: transform 0.26s ease, filter 0.26s ease, opacity 0.26s ease;
   position: absolute;
   inset: 0;
@@ -81,7 +81,7 @@ header {
   transition: none;
 }
 
-:deep(.page-focus-noenter-leave-active) {
+:deep(.page-viewport > .page-focus-noenter-leave-active) {
   transition: transform 0.26s ease, filter 0.26s ease, opacity 0.26s ease;
   position: absolute;
   inset: 0;
