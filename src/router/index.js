@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { sweeping, prefersReducedMotion } from '@/composables/usePageTransition';
 import HomeView from '../views/HomeView.vue';
 import TestView from '@/views/TestView.vue';
 import MapView from '@/views/MapView.vue';
@@ -56,5 +57,38 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
 });
+
+// Corte diagonal entre páginas: uma faixa escura cobre a tela por um
+// instante enquanto a rota troca por baixo, e some do outro lado.
+let sweepOffTimeout = null
+
+function skipWipe(to, from) {
+  const isInitialLoad = from.name === undefined
+  const isSamePageHash = to.path === from.path
+  return isInitialLoad || isSamePageHash || prefersReducedMotion()
+}
+
+router.beforeEach((to, from) => {
+  if (skipWipe(to, from)) return true
+
+  if (sweepOffTimeout) {
+    clearTimeout(sweepOffTimeout)
+    sweepOffTimeout = null
+  }
+  sweeping.value = true
+
+  return new Promise((resolve) => {
+    setTimeout(resolve, 240)
+  })
+})
+
+router.afterEach((to, from) => {
+  if (skipWipe(to, from)) return
+
+  sweepOffTimeout = setTimeout(() => {
+    sweeping.value = false
+    sweepOffTimeout = null
+  }, 230)
+})
 
 export default router;

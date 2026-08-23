@@ -1,6 +1,7 @@
 <script setup>
 import HeaderComponent from "@/components/layout/HeaderComponent.vue";
 import FooterComponent from "@/components/layout/FooterComponent.vue";
+import PageWipeOverlay from "@/components/layout/PageWipeOverlay.vue";
 import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { initSmoothScroll } from '@/utils/lenis'
@@ -16,7 +17,8 @@ onMounted(() => {
 
 <template>
   <main>
-    <HeaderComponent 
+    <PageWipeOverlay />
+    <HeaderComponent
     class="header"
     />
     <router-view />
