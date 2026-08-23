@@ -4,6 +4,7 @@ import Globe from 'globe.gl'
 import * as d3 from 'd3'
 import * as topojson from 'topojson-client'
 import universitiesByCountry from '@/stores/universitiesByCountry'
+import axios from '@/services/axios'
 
 // ─── Cache de módulo: só faz fetch uma vez por sessão ───────────────────────
 let _worldCache = null
@@ -31,52 +32,81 @@ let countriesFeatures = []
 const openSections = reactive({ emprego: true, universidade: false, idioma: false, cultura: false })
 const activeFilters = reactive({ emprego: [], universidade: [], idioma: [], cultura: [] })
 
-// ─── Dados estáticos ────────────────────────────────────────────────────────
-const filters = [
-  { id: 'emprego', label: 'Emprego', options: [{ value: 'tech', label: 'Tecnologia', count: '4.2k' },{ value: 'saude', label: 'Saúde', count: '1.8k' },{ value: 'engenharia', label: 'Engenharia', count: '2.1k' },{ value: 'financas', label: 'Finanças', count: '900' },{ value: 'educacao', label: 'Educação', count: '3.4k' },{ value: 'artes', label: 'Artes & Design', count: '650' }] },
-  { id: 'universidade', label: 'Universidade', options: [{ value: 'top100', label: 'Top 100 Mundial' },{ value: 'bolsas', label: 'Oferece Bolsas' },{ value: 'intercambio', label: 'Intercâmbio' },{ value: 'publicas', label: 'Públicas' },{ value: 'privadas', label: 'Privadas' },{ value: 'ead', label: 'EAD / Online' }] },
-  { id: 'idioma', label: 'Idioma', options: [{ value: 'ingles', label: 'Inglês' },{ value: 'espanhol', label: 'Espanhol' },{ value: 'frances', label: 'Francês' },{ value: 'alemao', label: 'Alemão' },{ value: 'mandarin', label: 'Mandarim' },{ value: 'japones', label: 'Japonês' },{ value: 'portugues', label: 'Português' }] },
-  { id: 'cultura', label: 'Cultura', options: [{ value: 'gastronomia', label: 'Gastronomia' },{ value: 'musica', label: 'Música' },{ value: 'esportes', label: 'Esportes' },{ value: 'religiao', label: 'Diversidade Religiosa' },{ value: 'festivais', label: 'Festivais' },{ value: 'natureza', label: 'Natureza & Aventura' }] }
-]
-
-const agencies = [
-  { id: 1, name: 'Japan Express', stars: 5, description: 'Especializada em intercâmbio no Japão com suporte completo em português, visto e moradia.', location: 'Tokyo, Japão', tags: { idioma: ['japones'], universidade: ['intercambio', 'bolsas'] } },
-  { id: 2, name: 'Living Japan', stars: 4, description: 'Programas de imersão cultural e linguística em diversas cidades japonesas.', location: 'Osaka, Japão', tags: { idioma: ['japones'], cultura: ['gastronomia', 'festivais'] } },
-  { id: 3, name: 'MEXT', stars: 3, description: 'Bolsas governamentais japonesas para graduação e pós-graduação no exterior.', location: 'Kyoto, Japão', tags: { universidade: ['top100', 'bolsas', 'publicas'], idioma: ['japones'] } },
-  { id: 4, name: 'EF Education', stars: 5, description: 'Cursos de idiomas em mais de 50 países com certificação internacional reconhecida.', location: 'Londres, Reino Unido', tags: { idioma: ['ingles', 'frances', 'alemao'], universidade: ['intercambio'] } },
-  { id: 5, name: 'Campus France', stars: 4, description: 'Agência oficial francesa para estudantes internacionais com bolsas e vistos.', location: 'Paris, França', tags: { idioma: ['frances'], universidade: ['top100', 'bolsas', 'publicas'] } },
-  { id: 6, name: 'DAAD Brasil', stars: 5, description: 'Serviço Alemão de Intercâmbio Acadêmico com bolsas para universidades alemãs.', location: 'Berlim, Alemanha', tags: { idioma: ['alemao'], universidade: ['top100', 'bolsas', 'publicas'] } },
-  { id: 7, name: 'Study USA', stars: 4, description: 'Intercâmbio nos EUA: high school, college e programas de trabalho.', location: 'Nova York, EUA', tags: { idioma: ['ingles'], universidade: ['top100', 'intercambio', 'privadas'], emprego: ['tech', 'financas'] } },
-  { id: 8, name: 'Ibero Intercâmbio', stars: 3, description: 'Programas na Espanha e América Latina com foco em cultura e gastronomia.', location: 'Madrid, Espanha', tags: { idioma: ['espanhol'], cultura: ['gastronomia', 'festivais', 'musica'] } }
-]
-
-const countryMeta = {
-  'United States of America': { emprego: ['tech','financas','saude','engenharia','educacao','artes'], idioma: ['ingles'], cultura: ['gastronomia','musica','esportes','festivais'], universidade: ['top100','privadas','intercambio'] },
-  'United Kingdom': { emprego: ['tech','financas','saude','educacao'], idioma: ['ingles'], cultura: ['musica','festivais','gastronomia'], universidade: ['top100','intercambio'] },
-  'Canada': { emprego: ['tech','saude','engenharia','educacao'], idioma: ['ingles','frances'], cultura: ['natureza','esportes'], universidade: ['top100','intercambio','bolsas'] },
-  'Australia': { emprego: ['tech','saude','engenharia'], idioma: ['ingles'], cultura: ['natureza','esportes'], universidade: ['intercambio','bolsas'] },
-  'Germany': { emprego: ['engenharia','tech','saude'], idioma: ['alemao'], cultura: ['festivais','gastronomia','musica'], universidade: ['top100','publicas','bolsas'] },
-  'France': { emprego: ['artes','educacao','financas'], idioma: ['frances'], cultura: ['gastronomia','festivais','musica'], universidade: ['top100','bolsas','publicas'] },
-  'Japan': { emprego: ['tech','engenharia'], idioma: ['japones'], cultura: ['gastronomia','festivais','musica'], universidade: ['top100','intercambio'] },
-  'China': { emprego: ['tech','engenharia','financas'], idioma: ['mandarin'], cultura: ['gastronomia','festivais'], universidade: ['top100','publicas'] },
-  'India': { emprego: ['tech','engenharia','educacao'], idioma: ['ingles'], cultura: ['festivais','gastronomia','religiao'], universidade: ['publicas','privadas'] },
-  'Brazil': { emprego: ['engenharia','educacao','artes'], idioma: ['portugues'], cultura: ['musica','esportes','festivais','gastronomia'], universidade: ['publicas','privadas','ead'] },
-  'Portugal': { emprego: ['educacao','artes'], idioma: ['portugues'], cultura: ['gastronomia','musica','festivais'], universidade: ['bolsas','intercambio'] },
-  'Spain': { emprego: ['artes','educacao'], idioma: ['espanhol'], cultura: ['gastronomia','festivais','musica'], universidade: ['intercambio','bolsas'] },
-  'Mexico': { emprego: ['engenharia','educacao'], idioma: ['espanhol'], cultura: ['gastronomia','festivais','musica'], universidade: ['publicas','privadas'] },
-  'Argentina': { emprego: ['educacao','artes'], idioma: ['espanhol'], cultura: ['esportes','gastronomia','musica'], universidade: ['publicas'] },
-  'Netherlands': { emprego: ['tech','financas','engenharia'], idioma: ['ingles'], cultura: ['festivais'], universidade: ['top100','intercambio'] },
-  'Sweden': { emprego: ['tech','engenharia','saude'], idioma: ['ingles'], cultura: ['natureza'], universidade: ['top100','bolsas','publicas'] },
-  'Norway': { emprego: ['engenharia','saude'], idioma: ['ingles'], cultura: ['natureza'], universidade: ['bolsas','publicas'] },
-  'Switzerland': { emprego: ['financas','saude','tech'], idioma: ['alemao','frances'], universidade: ['top100'], cultura: [] },
-  'South Korea': { emprego: ['tech','engenharia'], idioma: ['ingles'], cultura: ['musica','gastronomia'], universidade: ['top100','intercambio'] },
-  'New Zealand': { emprego: ['saude','educacao'], idioma: ['ingles'], cultura: ['natureza','esportes'], universidade: ['intercambio','bolsas'] },
-  'Ireland': { emprego: ['tech','financas'], idioma: ['ingles'], cultura: ['musica','festivais'], universidade: ['intercambio'] },
-  'Singapore': { emprego: ['tech','financas','engenharia'], idioma: ['ingles'], universidade: ['top100'], cultura: [] },
-  'Finland': { emprego: ['tech','educacao'], idioma: ['ingles'], cultura: ['natureza'], universidade: ['top100','bolsas','publicas'] },
-  'Denmark': { emprego: ['tech','saude','engenharia'], idioma: ['ingles'], cultura: ['natureza'], universidade: ['bolsas','publicas'] },
-  'Italy': { emprego: ['artes','educacao'], idioma: ['ingles'], cultura: ['gastronomia','musica','festivais'], universidade: ['top100','intercambio'] }
+// ─── Categorias do painel de filtros ────────────────────────────────────────
+// Os rótulos ficam aqui (são fixos), mas os países/agências e a contagem de
+// cada opção vêm da API — nada abaixo é mais mock.
+const FILTER_LABELS = {
+  emprego: { label: 'Emprego', options: { tech: 'Tecnologia', saude: 'Saúde', engenharia: 'Engenharia', financas: 'Finanças', educacao: 'Educação', artes: 'Artes & Design' } },
+  universidade: { label: 'Universidade', options: { top100: 'Top 100 Mundial', bolsas: 'Oferece Bolsas', intercambio: 'Intercâmbio', publicas: 'Públicas', privadas: 'Privadas', ead: 'EAD / Online' } },
+  idioma: { label: 'Idioma', options: { ingles: 'Inglês', espanhol: 'Espanhol', frances: 'Francês', alemao: 'Alemão', mandarin: 'Mandarim', japones: 'Japonês', portugues: 'Português' } },
+  cultura: { label: 'Cultura', options: { gastronomia: 'Gastronomia', musica: 'Música', esportes: 'Esportes', religiao: 'Diversidade Religiosa', festivais: 'Festivais', natureza: 'Natureza & Aventura' } }
 }
+
+// ─── Dados reais (país/agência) ─────────────────────────────────────────────
+const agencies = ref([])
+const countryMeta = ref({})
+const nomePtPorNomeIngles = ref({})
+const carregandoDados = ref(true)
+const selectedCountry = ref(null) // { nomeIngles, nomePt }
+
+function agruparTagsPorCategoria(tags) {
+  const grupos = {}
+  for (const tag of tags ?? []) {
+    if (!grupos[tag.categoria]) grupos[tag.categoria] = []
+    grupos[tag.categoria].push(tag.valor)
+  }
+  return grupos
+}
+
+async function carregarDadosDoMapa() {
+  carregandoDados.value = true
+  try {
+    const [resPaises, resAgencias] = await Promise.all([
+      axios.get('/paises/'),
+      axios.get('/agencia/')
+    ])
+    const paises = Array.isArray(resPaises.data) ? resPaises.data : (resPaises.data.results ?? [])
+    const agenciasApi = Array.isArray(resAgencias.data) ? resAgencias.data : (resAgencias.data.results ?? [])
+
+    const meta = {}
+    const nomesPt = {}
+    for (const pais of paises) {
+      if (!pais.nome_ingles) continue
+      meta[pais.nome_ingles] = agruparTagsPorCategoria(pais.tags)
+      nomesPt[pais.nome_ingles] = pais.nome
+    }
+    countryMeta.value = meta
+    nomePtPorNomeIngles.value = nomesPt
+
+    agencies.value = agenciasApi.map((a) => ({
+      id: a.id,
+      name: a.nome,
+      stars: Math.round(a.nota_media ?? 0),
+      description: a.descricao,
+      location: a.cidade && a.pais ? `${a.cidade}, ${a.pais}` : (a.pais ?? ''),
+      paisNomeIngles: a.pais_nome_ingles,
+      tags: agruparTagsPorCategoria(a.tags)
+    }))
+  } catch (e) {
+    console.error('Erro ao buscar dados do mapa:', e)
+  } finally {
+    carregandoDados.value = false
+    updateCountryMatches()
+    refreshGlobe()
+  }
+}
+
+const filters = computed(() =>
+  Object.entries(FILTER_LABELS).map(([id, { label, options }]) => ({
+    id,
+    label,
+    options: Object.entries(options).map(([value, optLabel]) => ({
+      value,
+      label: optLabel,
+      count: agencies.value.filter((a) => (a.tags?.[id] ?? []).includes(value)).length
+    }))
+  }))
+)
 
 let colorScale
 
@@ -86,8 +116,12 @@ const totalActiveFilters = computed(() =>
 )
 
 const filteredAgencies = computed(() => {
-  if (totalActiveFilters.value === 0) return agencies
-  return agencies.filter(agency => {
+  let lista = agencies.value
+  if (selectedCountry.value) {
+    lista = lista.filter((agency) => agency.paisNomeIngles === selectedCountry.value.nomeIngles)
+  }
+  if (totalActiveFilters.value === 0) return lista
+  return lista.filter(agency => {
     for (const [cat, selected] of Object.entries(activeFilters)) {
       if (selected.length === 0) continue
       const values = agency.tags?.[cat] ?? []
@@ -97,10 +131,14 @@ const filteredAgencies = computed(() => {
   })
 })
 
+function clearSelectedCountry() {
+  selectedCountry.value = null
+}
+
 // ─── Lógica de filtros ───────────────────────────────────────────────────────
 function countryMatchesFilters(name) {
   if (totalActiveFilters.value === 0) return true
-  const meta = countryMeta[name]
+  const meta = countryMeta.value[name]
   if (!meta) return false
   for (const [cat, selected] of Object.entries(activeFilters)) {
     if (selected.length === 0) continue
@@ -152,6 +190,10 @@ function clearFilters() {
 
 // ─── Lifecycle ───────────────────────────────────────────────────────────────
 onMounted(async () => {
+  // 0. Busca países/agências reais em paralelo — não bloqueia o globo, só o
+  //    painel de filtros e a lista de agências (ficam vazios até chegar).
+  carregarDadosDoMapa()
+
   // 1. Busca dados (usa cache se já foi carregado antes)
   const world = await getWorldData()
   const countries = topojson.feature(world, world.objects.countries)
@@ -209,6 +251,11 @@ onMounted(async () => {
         .onPolygonClick(d => {
           const [lng, lat] = d3.geoCentroid(d)
           globe.pointOfView({ lat, lng, altitude: 1.4 }, 1000)
+          const nomeIngles = d.properties.name
+          selectedCountry.value = {
+            nomeIngles,
+            nomePt: nomePtPorNomeIngles.value[nomeIngles] ?? nomeIngles
+          }
         })
 
       // Remove tela de loading após polígonos carregarem
@@ -317,8 +364,13 @@ onBeforeUnmount(() => {
     <div class="panel-heading">
       <span class="panel-eyebrow">{{ filteredAgencies.length }} encontrada{{ filteredAgencies.length === 1 ? '' : 's' }}</span>
       <h2 class="panel-title">Agências</h2>
+      <div v-if="selectedCountry" class="country-badge">
+        <span>{{ selectedCountry.nomePt }}</span>
+        <button class="country-badge-clear" @click="clearSelectedCountry" aria-label="Ver agências de todos os países">✕</button>
+      </div>
     </div>
     <div class="agencies-list">
+      <p v-if="carregandoDados" class="agencies-loading">Carregando agências...</p>
       <div v-for="agency in filteredAgencies" :key="agency.id" class="agency-card">
         <div class="agency-header">
           <span class="agency-name">{{ agency.name }}</span>
@@ -335,10 +387,12 @@ onBeforeUnmount(() => {
             </svg>
             {{ agency.location }}
           </span>
-          <button class="agency-btn">Acessar</button>
+          <router-link :to="{ name: 'agencia', params: { id: agency.id } }" class="agency-btn">Acessar</router-link>
         </div>
       </div>
-      <p v-if="filteredAgencies.length === 0" class="no-agencies">Nenhuma agência para os filtros selecionados.</p>
+      <p v-if="!carregandoDados && filteredAgencies.length === 0" class="no-agencies">
+        {{ selectedCountry ? `Ainda não há agências cadastradas em ${selectedCountry.nomePt}.` : 'Nenhuma agência para os filtros selecionados.' }}
+      </p>
     </div>
   </aside>
 
@@ -624,6 +678,8 @@ onBeforeUnmount(() => {
   cursor: pointer;
   text-transform: uppercase;
   white-space: nowrap;
+  text-decoration: none;
+  display: inline-block;
 }
 .agency-btn:hover { background: var(--gb-magenta); }
 .no-agencies {
@@ -631,6 +687,44 @@ onBeforeUnmount(() => {
   color: var(--gb-ink-faint);
   text-align: center;
   padding: 20px 0;
+}
+.agencies-loading {
+  font-size: 12px;
+  color: var(--gb-ink-faint);
+  text-align: center;
+  padding: 20px 0;
+}
+.country-badge {
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--gb-pink);
+  color: var(--gb-magenta-strong);
+  font-family: var(--gb-font-eyebrow);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 5px 6px 5px 12px;
+  border-radius: var(--gb-radius-pill);
+}
+.country-badge-clear {
+  background: rgba(122, 15, 116, 0.14);
+  border: none;
+  color: var(--gb-magenta-strong);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  font-size: 10px;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.country-badge-clear:hover {
+  background: rgba(122, 15, 116, 0.24);
 }
 
 .active-badge {
