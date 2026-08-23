@@ -443,6 +443,7 @@ async function pick(v) {
   position: relative;
   z-index: 1;
   flex: 1;
+  white-space: nowrap;
   border: none;
   background: transparent;
   padding: 9px 20px;
