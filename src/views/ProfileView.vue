@@ -400,7 +400,7 @@ onMounted(() => {
 <style scoped>
 .profile-page {
   min-height: 100vh;
-  background: var(--gb-cream);
+  background: white;
 }
 
 .top-banner {
