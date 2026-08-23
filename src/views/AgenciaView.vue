@@ -18,6 +18,11 @@ const erro = ref(false)
 const getStoredToken = () => localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
 const estaLogado = computed(() => !!getStoredToken())
 
+function iniciaisDe(nome) {
+  if (!nome) return ''
+  return nome.split(' ').slice(0, 2).map((p) => p[0]).join('').toUpperCase()
+}
+
 const novaNota = ref(0)
 const novoComentario = ref('')
 const enviandoAvaliacao = ref(false)
@@ -90,6 +95,7 @@ function animarEntrada() {
       duration: 0.6,
       stagger: 0.1,
       ease: 'power2.out',
+      clearProps: 'transform,opacity',
       scrollTrigger: { trigger: '.agencia-view', start: 'top 70%' }
     })
     gsap.utils.toArray('.reveal-grid').forEach((grid) => {
@@ -99,6 +105,7 @@ function animarEntrada() {
         duration: 0.5,
         stagger: 0.08,
         ease: 'power2.out',
+        clearProps: 'transform,opacity',
         scrollTrigger: { trigger: grid, start: 'top 85%' }
       })
     })
@@ -218,9 +225,13 @@ onBeforeUnmount(() => ctx?.revert())
               <template v-for="n in 5" :key="n"><span aria-hidden="true">{{ n <= avaliacao.nota ? '★' : '☆' }}</span></template>
             </span>
             <p class="review-text">{{ avaliacao.comentario }}</p>
-            <div class="review-autor">
+            <router-link :to="{ name: 'perfil-publico', params: { id: avaliacao.autor_id } }" class="review-autor">
+              <span class="review-avatar">
+                <img v-if="avaliacao.autor_foto" :src="avaliacao.autor_foto" :alt="avaliacao.autor" />
+                <span v-else aria-hidden="true">{{ iniciaisDe(avaliacao.autor) }}</span>
+              </span>
               <strong>{{ avaliacao.autor }}</strong>
-            </div>
+            </router-link>
           </article>
         </div>
         <p v-else class="estado-vazio">Essa agência ainda não recebeu avaliações.</p>
@@ -512,13 +523,44 @@ onBeforeUnmount(() => ctx?.revert())
 }
 
 .review-autor {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   padding-top: 12px;
   border-top: 1px solid var(--gb-purple-deep-16);
+  text-decoration: none;
+}
+
+.review-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--gb-magenta), var(--gb-purple-deep));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--gb-font-display);
+  font-weight: 900;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.review-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .review-autor strong {
   font-size: 0.85rem;
   color: var(--gb-dark);
+  transition: color 0.15s ease;
+}
+
+.review-autor:hover strong {
+  color: var(--gb-magenta);
 }
 
 .estado-vazio {

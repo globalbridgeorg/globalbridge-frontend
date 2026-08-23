@@ -13,10 +13,21 @@ const estrelas = computed(() => {
   const nota = Math.round(props.notaMedia ?? 0)
   return Array.from({ length: 5 }, (_, i) => i < nota)
 })
+
+const iniciais = computed(() => {
+  if (!props.nome) return ''
+  return props.nome
+    .split(' ')
+    .slice(0, 2)
+    .map((p) => p[0])
+    .join('')
+    .toUpperCase()
+})
 </script>
 
 <template>
   <article class="agencia-card">
+    <div class="agencia-photo" aria-hidden="true">{{ iniciais }}</div>
     <div class="agencia-header">
       <span class="agencia-nome">{{ nome }}</span>
       <span
@@ -44,7 +55,7 @@ const estrelas = computed(() => {
   background: #fff;
   border: 1px solid var(--gb-purple-deep-16);
   border-radius: var(--gb-radius-card);
-  padding: 20px;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -55,6 +66,34 @@ const estrelas = computed(() => {
   box-shadow: var(--gb-shadow-card);
   border-color: var(--gb-magenta);
   transform: translateY(-2px);
+}
+
+.agencia-photo {
+  height: 84px;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--gb-magenta), var(--gb-purple-deep));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--gb-font-display);
+  font-weight: 900;
+  font-size: 22px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.agencia-header,
+.agencia-desc,
+.agencia-footer {
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.agencia-desc {
+  flex: 1;
+}
+
+.agencia-footer {
+  margin-bottom: 20px;
 }
 
 .agencia-header {

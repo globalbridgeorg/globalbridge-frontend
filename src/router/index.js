@@ -11,6 +11,7 @@ import DestinosView from '@/views/DestinosView.vue';
 import RegiaoView from '@/views/RegiaoView.vue';
 import PaisView from '@/views/PaisView.vue';
 import AgenciaView from '@/views/AgenciaView.vue';
+import PerfilPublicoView from '@/views/PerfilPublicoView.vue';
 
 const routes = [
   {
@@ -77,6 +78,12 @@ const routes = [
     path: '/agencias/:id',
     name: 'agencia',
     component: AgenciaView,
+    meta: { headerWidth: 'full' }
+  },
+  {
+    path: '/usuarios/:id',
+    name: 'perfil-publico',
+    component: PerfilPublicoView,
     meta: { headerWidth: 'full' }
   },
 ];
