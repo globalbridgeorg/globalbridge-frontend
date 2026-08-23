@@ -225,7 +225,7 @@ onBeforeUnmount(() => ctx?.revert())
               <template v-for="n in 5" :key="n"><span aria-hidden="true">{{ n <= avaliacao.nota ? '★' : '☆' }}</span></template>
             </span>
             <p class="review-text">{{ avaliacao.comentario }}</p>
-            <router-link :to="{ name: 'perfil-publico', params: { id: avaliacao.autor_id } }" class="review-autor">
+            <router-link :to="{ name: 'perfil-publico', params: { username: avaliacao.autor_username } }" class="review-autor">
               <span class="review-avatar">
                 <img v-if="avaliacao.autor_foto" :src="avaliacao.autor_foto" :alt="avaliacao.autor" />
                 <span v-else aria-hidden="true">{{ iniciaisDe(avaliacao.autor) }}</span>

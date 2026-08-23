@@ -82,14 +82,9 @@ const iniciais = computed(() => {
 }
 
 .agencia-header,
-.agencia-desc,
 .agencia-footer {
   margin-left: 20px;
   margin-right: 20px;
-}
-
-.agencia-desc {
-  flex: 1;
 }
 
 .agencia-footer {
@@ -125,10 +120,11 @@ const iniciais = computed(() => {
 }
 
 .agencia-desc {
+  flex: 1;
+  margin: 0 20px;
   font-size: 12.5px;
   color: var(--gb-ink-soft);
   line-height: 1.6;
-  margin: 0;
 }
 
 .agencia-footer {

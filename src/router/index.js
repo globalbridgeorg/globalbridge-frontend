@@ -81,7 +81,7 @@ const routes = [
     meta: { headerWidth: 'full' }
   },
   {
-    path: '/usuarios/:id',
+    path: '/usuarios/:username',
     name: 'perfil-publico',
     component: PerfilPublicoView,
     meta: { headerWidth: 'full' }

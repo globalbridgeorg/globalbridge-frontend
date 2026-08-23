@@ -1,9 +1,10 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import axios from '@/services/axios'
 
 const route = useRoute()
+const router = useRouter()
 const perfil = ref(null)
 const carregando = ref(true)
 const erro = ref(false)
@@ -21,12 +22,30 @@ const iniciais = computed(() => {
 
 const foto = computed(() => perfil.value?.foto_url || perfil.value?.avatar_url || null)
 
+const getStoredToken = () => localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
+
 async function carregarPerfil() {
   carregando.value = true
   erro.value = false
   precisaLogin.value = false
+
+  // Se o username da URL é o meu, isso É o meu perfil — pula direto pra
+  // /profile (a página privada) em vez de mostrar a versão pública de mim.
+  if (getStoredToken()) {
+    try {
+      const { data: eu } = await axios.get('/usuarios/me/')
+      if (eu.username === route.params.username) {
+        router.replace({ name: 'profile' })
+        return
+      }
+    } catch (e) {
+      // token inválido/expirado — segue o fluxo normal, o fetch abaixo
+      // vai lidar com o 401 se o perfil também exigir login.
+    }
+  }
+
   try {
-    const { data } = await axios.get(`/usuarios/${route.params.id}/`)
+    const { data } = await axios.get(`/usuarios/u/${route.params.username}/`)
     perfil.value = data
   } catch (e) {
     if (e.response?.status === 401) {
