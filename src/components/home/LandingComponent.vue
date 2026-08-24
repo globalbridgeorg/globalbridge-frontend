@@ -38,14 +38,15 @@ onMounted(() => {
       }
     })
 
-    tl.from(cardPinkRef.value, { y: 40, opacity: 0, duration: 0.7, ease: 'power3.out' })
-      .from(cardBlueRef.value, { y: 40, opacity: 0, duration: 0.7, ease: 'power3.out' }, '-=0.5')
+    tl.from(cardPinkRef.value, { y: 40, opacity: 0, duration: 0.7, ease: 'power3.out', clearProps: 'transform,opacity' })
+      .from(cardBlueRef.value, { y: 40, opacity: 0, duration: 0.7, ease: 'power3.out', clearProps: 'transform,opacity' }, '-=0.5')
 
     gsap.from(destinoRef.value, {
       opacity: 0,
       x: -30,
       duration: 0.8,
       ease: 'power3.out',
+      clearProps: 'transform,opacity',
       scrollTrigger: { trigger: destinoRef.value, start: 'top 80%' }
     })
 
@@ -54,6 +55,7 @@ onMounted(() => {
       x: 30,
       duration: 0.8,
       ease: 'power3.out',
+      clearProps: 'transform,opacity',
       scrollTrigger: { trigger: opcoesRef.value, start: 'top 80%' }
     })
 
@@ -63,6 +65,7 @@ onMounted(() => {
       duration: 0.5,
       stagger: 0.08,
       ease: 'power2.out',
+      clearProps: 'transform,opacity',
       scrollTrigger: { trigger: opcoesRef.value, start: 'top 75%' }
     })
   }, sectionRef.value)

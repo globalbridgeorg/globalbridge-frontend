@@ -54,6 +54,7 @@ onMounted(() => {
       duration: 0.5,
       stagger: 0.1,
       ease: 'power2.out',
+      clearProps: 'transform,opacity',
       scrollTrigger: { trigger: etapasWrapRef.value, start: 'top 80%' }
     })
 
@@ -63,6 +64,7 @@ onMounted(() => {
       duration: 0.4,
       stagger: 0.06,
       ease: 'power2.out',
+      clearProps: 'transform,opacity',
       scrollTrigger: { trigger: checklistRef.value, start: 'top 80%' }
     })
   })

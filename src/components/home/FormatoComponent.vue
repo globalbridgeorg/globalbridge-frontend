@@ -27,6 +27,7 @@ onMounted(() => {
       duration: 0.5,
       stagger: 0.06,
       ease: 'power2.out',
+      clearProps: 'transform,opacity',
       scrollTrigger: { trigger: rowsRef.value, start: 'top 82%' }
     })
   }, rowsRef.value)

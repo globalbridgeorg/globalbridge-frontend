@@ -35,13 +35,21 @@ export const scrollToTarget = (target, options = {}) => {
   }
 }
 
-// Volta pro topo suavemente ao trocar de página. Precisa passar pelo Lenis
-// (em vez de window.scrollTo) porque ele mantém seu próprio estado de
-// scroll e recoloca a página onde estava a cada frame, sobrescrevendo
-// qualquer scrollTo nativo.
+// Volta pro topo ao trocar de página. Precisa passar pelo Lenis (em vez de
+// window.scrollTo) porque ele mantém seu próprio estado de scroll e
+// recoloca a página onde estava a cada frame, sobrescrevendo qualquer
+// scrollTo nativo.
+//
+// A duração aqui (0.32s) é praticamente a mesma da transição de zoom com
+// blur em App.vue (~0.2-0.36s) de propósito: antes esse scroll rolava
+// sozinho em 0.9s, bem mais devagar que o blur/fade — a transição visual
+// terminava rápido e a página continuava "subindo" por conta própria por
+// baixo, descolada dela, o que parecia travamento em vez de uma
+// transição só. Casando as duas durações, o "subir" acontece junto com o
+// blur e some no mesmo instante que ele, como uma coisa só.
 export const resetScroll = () => {
   if (lenisInstance) {
-    lenisInstance.scrollTo(0, { duration: 0.9, easing: (t) => 1 - Math.pow(1 - t, 3) })
+    lenisInstance.scrollTo(0, { duration: 0.32, easing: (t) => 1 - Math.pow(1 - t, 3) })
   } else {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }

@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { resetScroll } from '@/utils/lenis';
 import HomeView from '../views/HomeView.vue';
 import TestView from '@/views/TestView.vue';
@@ -100,6 +101,17 @@ router.afterEach((to, from) => {
   if (to.path !== from.path && !to.hash) {
     resetScroll()
   }
+
+  // Cada página registra suas próprias animações de entrada (gsap.from
+  // com scrollTrigger) no onMounted. Numa SPA, se o ScrollTrigger calcular
+  // a posição de um trigger enquanto a página anterior ainda existe no DOM
+  // (ou enquanto a transição de troca de página ainda está distorcendo o
+  // layout com scale/blur), a posição fica errada — e como o cálculo não
+  // se refaz sozinho, o elemento pode ficar preso invisível/deslocado até
+  // um F5. Esse refresh, um pouco depois da troca de rota (dá tempo da
+  // nova página montar e da transição de entrada assentar), recalcula
+  // tudo do zero.
+  setTimeout(() => ScrollTrigger.refresh(), 350)
 })
 
 export default router;

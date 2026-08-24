@@ -52,6 +52,7 @@ onMounted(() => {
       duration: 0.6,
       stagger: 0.1,
       ease: 'power3.out',
+      clearProps: 'transform,opacity',
       scrollTrigger: { trigger: tilesRef.value[0], start: 'top 82%' }
     })
   })

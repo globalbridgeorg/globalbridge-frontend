@@ -38,6 +38,7 @@ onMounted(() => {
       duration: 0.6,
       stagger: 0.14,
       ease: 'power3.out',
+      clearProps: 'transform,opacity',
       scrollTrigger: { trigger: cardsRef.value[0], start: 'top 82%' }
     })
   })
