@@ -14,6 +14,12 @@ const headerClass = computed(() => {
   return route.meta?.headerWidth === 'compact' ? 'header-compact' : 'header-full'
 })
 
+// O login é uma cena de tela cheia própria (o fundo de prédios preenche
+// o viewport todo) — nela o header volta a flutuar por cima no celular,
+// em vez de ocupar espaço no fluxo como no resto do site, senão sobra
+// uma tarja em branco no topo da cena (ver LoginView.vue).
+const flutuanteNoMobile = computed(() => route.name === 'login')
+
 const isLoggedIn = computed(() => {
   route.fullPath
   const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
@@ -36,7 +42,7 @@ const toggleMenu = () => {
 </script>
 
 <template>
-  <header class="navbar" :class="headerClass">
+  <header class="navbar" :class="[headerClass, { flutuante: flutuanteNoMobile }]">
     <div class="navbar_logo">
       <router-link to="/">
         <img src="/logogb.png" alt="GlobalBridge">
@@ -395,6 +401,16 @@ const toggleMenu = () => {
     left: auto;
     transform: none;
     margin: 12px 12px 0;
+  }
+
+  /* Login: volta a flutuar por cima da cena (ver flutuanteNoMobile) em
+     vez de ocupar espaço no fluxo — a cena de fundo preenche a tela
+     inteira atrás dela. */
+  .navbar.flutuante {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 12px auto 0;
   }
 }
 

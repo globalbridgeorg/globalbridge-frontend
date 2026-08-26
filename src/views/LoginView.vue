@@ -463,8 +463,12 @@ onBeforeUnmount(() => {
    prédios finos e alongados. Com aspect-ratio a altura sempre acompanha
    a largura real na proporção certa, em qualquer tamanho de tela. */
 .skyline { position: absolute; left: 0; bottom: 0; width: 300%; animation: scroll linear infinite; }
-.skyline-back { aspect-ratio: 2880 / 300; opacity: 0.5; animation-duration: 80s; }
-.skyline-front { aspect-ratio: 2880 / 340; animation-duration: 42s; animation-direction: reverse; }
+/* Altura ~30% maior que o desenho original (300/340 -> 390/442), de
+   propósito — deixa mais prédio visível sem mexer na largura (que
+   precisa continuar em sincronia com o -33.3333% do @keyframes scroll
+   logo abaixo, senão o loop de repetição desalinha). */
+.skyline-back { aspect-ratio: 2880 / 390; opacity: 0.5; animation-duration: 80s; }
+.skyline-front { aspect-ratio: 2880 / 442; animation-duration: 42s; animation-direction: reverse; }
 
 @keyframes scroll {
   from { transform: translateX(0); }
