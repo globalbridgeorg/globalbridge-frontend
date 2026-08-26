@@ -151,20 +151,21 @@ onBeforeUnmount(() => ctx?.revert())
             :idioma="pais.idioma"
             :custo-de-vida="pais.custo_de_vida"
             :programas-count="pais.programas_count ?? 0"
+            :imagem="pais.imagem_url"
             :to="{ name: 'pais', params: { id: pais.id } }"
           />
         </div>
 
-        <div class="comparativo">
-          <div class="table-head">
-            <span>País</span><span>Custo de vida</span><span>Idioma</span><span>Universidades</span><span>Intercambistas</span>
+        <div class="comparativo" role="table" aria-label="Comparativo de destinos da região">
+          <div class="table-head" role="row">
+            <span role="columnheader">País</span><span role="columnheader">Custo de vida</span><span role="columnheader">Idioma</span><span role="columnheader">Universidades</span><span role="columnheader">Intercambistas</span>
           </div>
-          <div v-for="pais in paises" :key="`comp-${pais.id}`" class="comp-row">
-            <span class="pais-nome">{{ pais.nome }}</span>
-            <span>{{ pais.custo_de_vida }}</span>
-            <span>{{ pais.idioma }}</span>
-            <span>{{ pais.universidades }}</span>
-            <span>{{ pais.intercambistas.toLocaleString('pt-BR') }}</span>
+          <div v-for="pais in paises" :key="`comp-${pais.id}`" class="comp-row" role="row">
+            <span class="pais-nome" role="cell">{{ pais.nome }}</span>
+            <span role="cell">{{ pais.custo_de_vida }}</span>
+            <span role="cell">{{ pais.idioma }}</span>
+            <span role="cell">{{ pais.universidades }}</span>
+            <span role="cell">{{ pais.intercambistas.toLocaleString('pt-BR') }}</span>
           </div>
         </div>
       </section>

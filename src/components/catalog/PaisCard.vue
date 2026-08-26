@@ -15,6 +15,7 @@ const props = defineProps({
   custoDeVida: { type: String, default: '' },
   programasCount: { type: Number, default: 0 },
   artGradient: { type: String, default: 'linear-gradient(135deg, var(--gb-purple-deep), var(--gb-magenta))' },
+  imagem: { type: String, default: '' },
   to: { type: [String, Object], default: null }
 })
 </script>
@@ -22,6 +23,7 @@ const props = defineProps({
 <template>
   <article class="pais-card">
     <div class="art" :style="{ background: artGradient }">
+      <img v-if="imagem" :src="imagem" :alt="`Bandeira de ${nome}`" class="art-flag" loading="lazy" />
       <span v-if="regiao" class="region-tag">{{ REGIAO_LABELS[regiao] ?? regiao }}</span>
     </div>
     <div class="body">
@@ -59,6 +61,18 @@ const props = defineProps({
 .art {
   height: 118px;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.art-flag {
+  width: 56px;
+  height: 38px;
+  object-fit: cover;
+  border-radius: 5px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .region-tag {

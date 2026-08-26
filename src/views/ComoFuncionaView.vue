@@ -56,7 +56,7 @@ const paraAgencias = [
       <SectionEyebrow label="Como funciona" />
       <h1 class="gb-heading hero-heading">Três decisões,<br />um caminho claro</h1>
       <p class="hero-desc">Onde ir, o que cursar e com quem falar — cada passo do intercâmbio pela GlobalBridge cabe numa dessas três frentes.</p>
-      <p class="hero-proof">Explore nossa seleção com <strong>mais de 40 países</strong> ao redor do mundo e compare qual combina com o seu perfil.</p>
+      <p class="hero-proof">Explore nossa seleção com <strong>mais de 20 países</strong> ao redor do mundo e compare qual combina com o seu perfil.</p>
       <router-link to="/mapview" class="cta-link">
         <ButtonComponent text="Explorar o mapa" class="btn-dark" />
       </router-link>
@@ -70,7 +70,7 @@ const paraAgencias = [
           <div class="tile-scrim"></div>
           <div class="tile-content">
             <p class="tile-numero">{{ tile.numero }}</p>
-            <h3 class="tile-label">{{ tile.label }}</h3>
+            <h2 class="tile-label">{{ tile.label }}</h2>
             <p class="tile-text">{{ tile.text }}</p>
           </div>
         </div>
@@ -78,11 +78,11 @@ const paraAgencias = [
 
       <div class="detalhes">
         <div>
-          <h4>O que pesa na escolha</h4>
+          <h2>O que pesa na escolha</h2>
           <div class="pills"><span>custo de vida</span><span>idioma</span><span>visto</span></div>
         </div>
         <div>
-          <h4>Tipos de programa</h4>
+          <h2>Tipos de programa</h2>
           <div class="legenda">
             <div class="legenda-item"><span class="legenda-linha" style="background:var(--gb-magenta-strong)"></span>Universidade · 12 meses</div>
             <div class="legenda-item"><span class="legenda-linha" style="background:var(--gb-magenta)"></span>Idioma · 6 meses</div>
@@ -90,7 +90,7 @@ const paraAgencias = [
           </div>
         </div>
         <div>
-          <h4>Confiança de quem já foi</h4>
+          <h2>Confiança de quem já foi</h2>
           <div class="avaliacao">
             <span class="estrelas">★★★★☆</span>
             <span class="nota-texto">média de 4,2 em 1.088 agências</span>
@@ -101,11 +101,11 @@ const paraAgencias = [
       <div class="fork">
         <div class="fork-panel light">
           <p class="fork-tag">Na plataforma</p>
-          <h3>O que você encontra por aqui</h3>
+          <h2>O que você encontra por aqui</h2>
           <div class="feature-list">
             <div v-for="f in features" :key="f.titulo" class="feature-item">
               <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7" /></svg>
-              <div><h4>{{ f.titulo }}</h4><p>{{ f.texto }}</p></div>
+              <div><h3>{{ f.titulo }}</h3><p>{{ f.texto }}</p></div>
             </div>
           </div>
           <router-link to="/mapview" class="cta-link">
@@ -115,11 +115,11 @@ const paraAgencias = [
 
         <div id="agencias" class="fork-panel dark">
           <p class="fork-tag">Pra agências e instituições parceiras</p>
-          <h3 class="on-dark">Receba estudantes verificados</h3>
+          <h2 class="on-dark">Receba estudantes verificados</h2>
           <div class="biz-list">
             <div v-for="b in paraAgencias" :key="b.titulo" class="biz-item">
               <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7" /></svg>
-              <div><h4>{{ b.titulo }}</h4><p>{{ b.texto }}</p></div>
+              <div><h3>{{ b.titulo }}</h3><p>{{ b.texto }}</p></div>
             </div>
           </div>
           <a href="mailto:contato@globalbridge.com?subject=Login%20business" class="cta-link">
@@ -297,7 +297,7 @@ const paraAgencias = [
   }
 }
 
-.detalhes h4 {
+.detalhes h2 {
   margin: 0 0 10px;
   font-family: var(--gb-font-eyebrow);
   font-weight: 700;
@@ -402,7 +402,7 @@ const paraAgencias = [
   color: var(--gb-pink);
 }
 
-.fork-panel h3 {
+.fork-panel h2 {
   font-family: var(--gb-font-display);
   font-weight: 900;
   text-transform: uppercase;
@@ -411,7 +411,7 @@ const paraAgencias = [
   color: var(--gb-dark);
 }
 
-.fork-panel h3.on-dark {
+.fork-panel h2.on-dark {
   color: #fff;
 }
 
@@ -446,8 +446,8 @@ const paraAgencias = [
   margin-top: 2px;
 }
 
-.feature-item h4,
-.biz-item h4 {
+.feature-item h3,
+.biz-item h3 {
   margin: 0 0 3px;
   font-family: var(--gb-font-display);
   font-weight: 900;
@@ -456,7 +456,7 @@ const paraAgencias = [
   color: var(--gb-dark);
 }
 
-.biz-item h4 {
+.biz-item h3 {
   color: #fff;
 }
 

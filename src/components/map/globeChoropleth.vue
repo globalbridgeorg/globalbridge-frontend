@@ -345,30 +345,44 @@ onBeforeUnmount(() => {
         <path d="M10 3L5 8L10 13" stroke="#17111A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
       </svg>
     </button>
-    <div class="panel-inner">
+    <div class="panel-inner" data-lenis-prevent>
       <div class="panel-heading">
         <span class="panel-eyebrow">Explorar por</span>
         <h2 class="panel-title">Filtros</h2>
       </div>
 
       <div class="filter-section" v-for="section in filters" :key="section.id">
-        <div class="section-header" @click="toggleSection(section.id)">
+        <button
+          type="button"
+          class="section-header"
+          @click="toggleSection(section.id)"
+          :aria-expanded="openSections[section.id]"
+          :aria-controls="`filtro-opcoes-${section.id}`"
+        >
           <span class="section-label">{{ section.label }}</span>
           <span class="section-count" v-if="activeFilters[section.id]?.length">{{ activeFilters[section.id].length }}</span>
-          <svg class="section-arrow" :class="{ open: openSections[section.id] }" width="12" height="12" viewBox="0 0 16 16" fill="none">
+          <svg class="section-arrow" :class="{ open: openSections[section.id] }" width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <path d="M4 6L8 10L12 6" stroke="#757067" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
-        </div>
-        <div class="section-options" :class="{ open: openSections[section.id] }">
-          <div v-for="opt in section.options" :key="opt.value" class="option-item" :class="{ active: activeFilters[section.id]?.includes(opt.value) }" @click="toggleFilter(section.id, opt.value)">
-            <span class="option-check">
+        </button>
+        <div :id="`filtro-opcoes-${section.id}`" class="section-options" :class="{ open: openSections[section.id] }">
+          <button
+            v-for="opt in section.options"
+            :key="opt.value"
+            type="button"
+            class="option-item"
+            :class="{ active: activeFilters[section.id]?.includes(opt.value) }"
+            :aria-pressed="activeFilters[section.id]?.includes(opt.value)"
+            @click="toggleFilter(section.id, opt.value)"
+          >
+            <span class="option-check" aria-hidden="true">
               <svg v-if="activeFilters[section.id]?.includes(opt.value)" width="10" height="10" viewBox="0 0 12 12" fill="none">
                 <path d="M2 6L4.8 8.8L10 3" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
             </span>
             <span class="option-text">{{ opt.label }}</span>
             <span class="option-count" v-if="opt.count">{{ opt.count }}</span>
-          </div>
+          </button>
         </div>
       </div>
       <button class="clear-btn" @click="clearFilters">Limpar filtros</button>
@@ -379,7 +393,16 @@ onBeforeUnmount(() => {
     <!-- No celular esse painel é uma folha que "espia" embaixo do globo;
          tocar no cabeçalho expande pra ver a lista inteira (no desktop o
          clique não muda nada visualmente, já mostra tudo). -->
-    <div class="panel-heading" @click="agenciesExpanded = !agenciesExpanded">
+    <div
+      class="panel-heading"
+      role="button"
+      tabindex="0"
+      :aria-expanded="agenciesExpanded"
+      aria-label="Expandir ou recolher a lista de agências"
+      @click="agenciesExpanded = !agenciesExpanded"
+      @keydown.enter="agenciesExpanded = !agenciesExpanded"
+      @keydown.space.prevent="agenciesExpanded = !agenciesExpanded"
+    >
       <span class="panel-eyebrow">{{ filteredAgencies.length }} encontrada{{ filteredAgencies.length === 1 ? '' : 's' }}</span>
       <h2 class="panel-title">Agências</h2>
       <div v-if="selectedCountry" class="country-badge">
@@ -387,13 +410,13 @@ onBeforeUnmount(() => {
         <button class="country-badge-clear" @click.stop="clearSelectedCountry" aria-label="Ver agências de todos os países">✕</button>
       </div>
     </div>
-    <div class="agencies-list">
+    <div class="agencies-list" data-lenis-prevent>
       <p v-if="carregandoDados" class="agencies-loading">Carregando agências...</p>
       <div v-for="agency in filteredAgencies" :key="agency.id" class="agency-card">
         <div class="agency-header">
           <span class="agency-name">{{ agency.name }}</span>
-          <span class="agency-stars">
-            <span v-for="i in 5" :key="i" class="star" :class="{ filled: i <= agency.stars }">★</span>
+          <span class="agency-stars" role="img" :aria-label="`${agency.stars} de 5 estrelas`">
+            <span v-for="i in 5" :key="i" class="star" :class="{ filled: i <= agency.stars }" aria-hidden="true">{{ i <= agency.stars ? '★' : '☆' }}</span>
           </span>
         </div>
         <p class="agency-desc">{{ agency.description }}</p>
@@ -529,7 +552,12 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   gap: 10px;
+  width: 100%;
   padding: 16px 8px;
+  background: none;
+  border: none;
+  font: inherit;
+  text-align: left;
   cursor: pointer;
 }
 .section-header:hover .section-label { color: var(--gb-magenta); }
@@ -567,7 +595,12 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   gap: 10px;
+  width: 100%;
   padding: 9px 8px 9px 4px;
+  background: none;
+  border: none;
+  font: inherit;
+  text-align: left;
   cursor: pointer;
   border-radius: 8px;
 }

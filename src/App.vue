@@ -9,6 +9,18 @@ import { initSmoothScroll } from '@/utils/lenis'
 const route = useRoute()
 
 const shouldShowFooter = computed(() => !['mapview', 'profile', 'login', 'test'].includes(route.name))
+// No desktop o header é fixed e flutua por cima da cena do login sem
+// empurrar nada — isso continua igual. No celular ele deixou de ser fixed
+// (ver media query abaixo) e passou a ocupar espaço real no fluxo da
+// página; o login/cadastro é uma cena de tela cheia própria (100vh, sem
+// nav), então nesse caso o header em fluxo empurrava o conteúdo pra baixo
+// e sobrava scroll vertical. Por isso essa classe só some o header via
+// CSS dentro da media query mobile, sem afetar o desktop.
+const ocultarHeaderMobile = computed(() => route.name === 'login')
+// MobileTabBar já se esconde nessas rotas — sem isso o <main> reservava
+// 74px de espaço embaixo pra uma barra que não estava lá, sobrando um
+// vão vazio (e mais scroll) no celular.
+const shouldShowTabBar = computed(() => !['login', 'test'].includes(route.name))
 
 onMounted(() => {
   initSmoothScroll()
@@ -16,7 +28,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <main>
+  <main :class="{ 'sem-tabbar': !shouldShowTabBar, 'sem-header-mobile': ocultarHeaderMobile }">
     <HeaderComponent
     class="header"
     />
@@ -28,7 +40,7 @@ onMounted(() => {
       </router-view>
     </div>
     <FooterComponent v-if="shouldShowFooter" />
-    <MobileTabBar />
+    <MobileTabBar v-if="shouldShowTabBar" />
   </main>
 </template>
 
@@ -67,6 +79,14 @@ header {
 
   main {
     padding-bottom: 74px;
+  }
+
+  main.sem-tabbar {
+    padding-bottom: 0;
+  }
+
+  main.sem-header-mobile .header {
+    display: none;
   }
 }
 

@@ -6,12 +6,22 @@
   box-sizing: border-box;
 }
 
+html {
+  background: #FFFFFF;
+}
+
 body {
   overflow-x: hidden;
+  background: #FFFFFF;
 }
 
 :root {
   font-family: 'Montserrat', sans-serif;
+  /* Site é só de tema claro (sem dark mode implementado) — declarar isso
+     evita que o navegador use estilo escuro nativo (scrollbar, campos,
+     área de overscroll no celular) quando o sistema operacional está em
+     modo escuro, o que criava um contraste feio de preto puro. */
+  color-scheme: light;
 
   /* Design tokens — rework v2 (Figma "Rato petista") */
   --gb-cream: #FBF6E7;
@@ -33,6 +43,9 @@ body {
   --gb-ink-soft: #55505A;
   --gb-mauve-muted: #6B4E64;
   --gb-accent-light: #FF7DEE;
+  /* Roxo escuro usado em texto sobre fundo claro (nav, botão fantasma) —
+     existia solto como #42023C em 3 lugares antes de virar token. */
+  --gb-plum: #42023C;
 
   --gb-font-eyebrow: 'Archivo Narrow', sans-serif;
   --gb-font-display: 'Archivo', sans-serif;
@@ -106,7 +119,7 @@ body {
 
 .swap-btn.btn-ghost-light {
   background: #fff;
-  color: #42023C;
+  color: var(--gb-plum);
 }
 
 .swap-btn.btn-outline-light {

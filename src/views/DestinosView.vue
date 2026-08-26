@@ -3,13 +3,34 @@ import { ref, computed, onMounted } from 'vue'
 import axios from '@/services/axios'
 import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
 
+// Mapa em projeção ortográfica de cada continente (Wikimedia Commons, uso
+// livre) por cima do gradiente — antes disso era só cor sólida, sem
+// nenhuma imagem representando o continente de verdade.
 const REGIOES = [
-  { valor: 'asia', label: 'Ásia', gradient: 'linear-gradient(135deg, #3d1247, #B01FB0)' },
-  { valor: 'europa', label: 'Europa', gradient: 'linear-gradient(135deg, #1d1d4a, #3972DE)' },
-  { valor: 'america_norte', label: 'América do Norte', gradient: 'linear-gradient(135deg, #4a0e1d, #B01FB0)' },
-  { valor: 'america_sul', label: 'América do Sul', gradient: 'linear-gradient(135deg, #4a3d0e, #F0651E)' },
-  { valor: 'oceania', label: 'Oceania', gradient: 'linear-gradient(135deg, #0e4d3d, #3D9A4B)' },
-  { valor: 'africa', label: 'África', gradient: 'linear-gradient(135deg, #7a2e0e, #F0651E)' }
+  {
+    valor: 'asia', label: 'Ásia', gradient: 'linear-gradient(135deg, #3d1247, #B01FB0)',
+    imagem: 'https://commons.wikimedia.org/wiki/Special:FilePath/Asia_(orthographic_projection).svg?width=500'
+  },
+  {
+    valor: 'europa', label: 'Europa', gradient: 'linear-gradient(135deg, #1d1d4a, #3972DE)',
+    imagem: 'https://commons.wikimedia.org/wiki/Special:FilePath/Europe_orthographic_Caucasus_Urals_boundary_(with_borders).svg?width=500'
+  },
+  {
+    valor: 'america_norte', label: 'América do Norte', gradient: 'linear-gradient(135deg, #4a0e1d, #B01FB0)',
+    imagem: 'https://commons.wikimedia.org/wiki/Special:FilePath/North_America_(orthographic_projection).svg?width=500'
+  },
+  {
+    valor: 'america_sul', label: 'América do Sul', gradient: 'linear-gradient(135deg, #4a3d0e, #F0651E)',
+    imagem: 'https://commons.wikimedia.org/wiki/Special:FilePath/South_America_(orthographic_projection).svg?width=500'
+  },
+  {
+    valor: 'oceania', label: 'Oceania', gradient: 'linear-gradient(135deg, #0e4d3d, #3D9A4B)',
+    imagem: 'https://commons.wikimedia.org/wiki/Special:FilePath/Oceania_(orthographic_projection).svg?width=500'
+  },
+  {
+    valor: 'africa', label: 'África', gradient: 'linear-gradient(135deg, #7a2e0e, #F0651E)',
+    imagem: 'https://commons.wikimedia.org/wiki/Special:FilePath/Africa_(orthographic_projection).svg?width=500'
+  }
 ]
 
 const contagens = ref({})
@@ -71,9 +92,11 @@ onMounted(carregarContagens)
           class="continente-card-link"
         >
           <article class="continente-card">
-            <div class="art" :style="{ background: regiao.gradient }"></div>
+            <div class="art" :style="{ background: regiao.gradient }">
+              <img :src="regiao.imagem" :alt="regiao.label" class="art-img" loading="lazy" />
+            </div>
             <div class="body">
-              <h3 class="nome">{{ regiao.label }}</h3>
+              <h2 class="nome">{{ regiao.label }}</h2>
               <span class="count">{{ regiao.count }} {{ regiao.count === 1 ? 'destino' : 'destinos' }}</span>
             </div>
           </article>
@@ -147,6 +170,18 @@ onMounted(carregarContagens)
 
 .art {
   height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.art-img {
+  width: 68%;
+  height: 68%;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.25));
+  opacity: 0.92;
 }
 
 .body {

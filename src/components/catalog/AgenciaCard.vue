@@ -29,14 +29,14 @@ const iniciais = computed(() => {
   <article class="agencia-card">
     <div class="agencia-photo" aria-hidden="true">{{ iniciais }}</div>
     <div class="agencia-header">
-      <span class="agencia-nome">{{ nome }}</span>
+      <h3 class="agencia-nome">{{ nome }}</h3>
       <span
         v-if="notaMedia !== null"
         class="agencia-stars"
         role="img"
         :aria-label="`${Math.round(notaMedia)} de 5 estrelas`"
       >
-        <span v-for="(preenchida, i) in estrelas" :key="i" class="star" :class="{ filled: preenchida }" aria-hidden="true">★</span>
+        <span v-for="(preenchida, i) in estrelas" :key="i" class="star" :class="{ filled: preenchida }" aria-hidden="true">{{ preenchida ? '★' : '☆' }}</span>
       </span>
     </div>
     <p class="agencia-desc">{{ descricao }}</p>
@@ -104,6 +104,7 @@ const iniciais = computed(() => {
   font-size: 15px;
   color: var(--gb-dark);
   text-transform: uppercase;
+  margin: 0;
 }
 
 .agencia-stars {

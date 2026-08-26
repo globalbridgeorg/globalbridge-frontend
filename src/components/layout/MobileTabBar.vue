@@ -1,12 +1,14 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
+import { useContaAtual } from '@/composables/useContaAtual'
 
 // Barra de abas fixa, só em telas de celular (ver media query no <style>).
 // Ao contrário do header, que agora rola junto com a página no mobile,
 // essa barra fica sempre visível — é o jeito rápido de trocar de seção
 // sem precisar abrir o menu hambúrguer.
 const route = useRoute()
+const { estado: conta, carregarConta } = useContaAtual()
 
 const isLoggedIn = computed(() => {
   route.fullPath
@@ -14,7 +16,14 @@ const isLoggedIn = computed(() => {
   return !!token
 })
 
-const perfilLink = computed(() => (isLoggedIn.value ? '/profile' : '/login'))
+watchEffect(() => { if (isLoggedIn.value) carregarConta() })
+
+// Mesma lógica do HeaderComponent — conta business vai pro painel dela,
+// não pro perfil de estudante.
+const perfilLink = computed(() => {
+  if (!isLoggedIn.value) return '/login'
+  return conta.tipo === 'agencia' ? '/business' : '/profile'
+})
 
 // Em rotas de tela cheia (login/cadastro) a barra atrapalha mais do que
 // ajuda — o /mapview já tem seu próprio layout mobile (globo + folha de
@@ -43,6 +52,7 @@ const ativa = (aba) => {
       :to="aba.to"
       class="tab"
       :class="{ on: ativa(aba) }"
+      :aria-current="ativa(aba) ? 'page' : undefined"
     >
       <span class="icon" aria-hidden="true">
         <svg v-if="aba.label === 'Início'" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5" /><path d="M5.5 9.5V20h13V9.5" /></svg>
@@ -98,6 +108,22 @@ const ativa = (aba) => {
     font-size: 10px;
     letter-spacing: 0.06em;
     text-transform: uppercase;
+    position: relative;
+  }
+
+  /* A aba ativa não pode depender só da cor — quem não distingue
+     magenta de cinza precisa de outro sinal. Um traço embaixo do
+     rótulo cobre isso sem competir visualmente com o ícone. */
+  .tab.on .label::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -4px;
+    transform: translateX(-50%);
+    width: 12px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--gb-magenta);
   }
 
   .tab.on {

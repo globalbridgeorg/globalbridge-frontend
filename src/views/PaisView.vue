@@ -8,8 +8,11 @@ import { prefersReducedMotion } from '@/composables/usePageTransition'
 import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
 import ProgramaCard from '@/components/catalog/ProgramaCard.vue'
 import AgenciaCard from '@/components/catalog/AgenciaCard.vue'
+import { useFavoritos } from '@/composables/useFavoritos'
 
 gsap.registerPlugin(ScrollTrigger)
+
+const { estaLogado, carregarFavoritos, isFavorito, toggleFavorito } = useFavoritos()
 
 const REGIAO_LABELS = {
   asia: 'Ásia',
@@ -26,6 +29,10 @@ const carregando = ref(true)
 const erro = ref(false)
 
 const regiaoLabel = computed(() => pais.value ? (REGIAO_LABELS[pais.value.regiao] ?? pais.value.regiao) : '')
+const favoritado = computed(() => pais.value ? isFavorito('pais', pais.value.id) : false)
+function handleFavoritar() {
+  if (pais.value) toggleFavorito('pais', pais.value.id)
+}
 
 async function carregarPais() {
   carregando.value = true
@@ -74,7 +81,7 @@ onMounted(async () => {
   // elemento raiz da página, que a transição ainda está escalando/
   // desfocando nesse meio-tempo; medir antes disso acabar deixa a
   // animação de entrada com posições erradas.
-  await Promise.all([carregarPais(), new Promise((r) => setTimeout(r, 260))])
+  await Promise.all([carregarPais(), carregarFavoritos(), new Promise((r) => setTimeout(r, 260))])
   if (!erro.value) {
     animarEntrada()
   }
@@ -109,7 +116,24 @@ onBeforeUnmount(() => ctx?.revert())
       </nav>
 
       <section class="hero reveal-section">
-        <span class="hero-eyebrow">Destino{{ regiaoLabel ? ` · ${regiaoLabel}` : '' }}</span>
+        <div class="hero-top">
+          <span class="hero-eyebrow">Destino{{ regiaoLabel ? ` · ${regiaoLabel}` : '' }}</span>
+          <div class="hero-top-right">
+            <img v-if="pais.imagem_url" :src="pais.imagem_url" :alt="`Bandeira de ${pais.nome}`" class="hero-flag" loading="lazy" />
+            <button
+              v-if="estaLogado"
+              class="fav-btn"
+              :class="{ active: favoritado }"
+              :aria-pressed="favoritado"
+              :aria-label="favoritado ? 'Remover dos favoritos' : 'Salvar nos favoritos'"
+              @click="handleFavoritar"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" :fill="favoritado ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 21s-7.5-4.6-10-9.1C.5 8.2 2.3 4.5 6 4c2.1-.3 3.9.9 6 3 2.1-2.1 3.9-3.3 6-3 3.7.5 5.5 4.2 4 7.9-2.5 4.5-10 9.1-10 9.1z" />
+              </svg>
+            </button>
+          </div>
+        </div>
         <h1 class="hero-title">{{ pais.nome }}</h1>
         <p class="hero-desc">{{ pais.descricao }}</p>
         <div class="hero-pills">
@@ -215,6 +239,14 @@ onBeforeUnmount(() => ctx?.revert())
   color: #fff;
 }
 
+.hero-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
 .hero-eyebrow {
   font-family: var(--gb-font-eyebrow);
   font-weight: 700;
@@ -222,8 +254,46 @@ onBeforeUnmount(() => ctx?.revert())
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--gb-pink);
-  display: block;
-  margin-bottom: 12px;
+}
+
+.hero-flag {
+  width: 40px;
+  height: 28px;
+  object-fit: cover;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
+}
+
+.hero-top-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fav-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.fav-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.fav-btn.active {
+  color: var(--gb-magenta);
+  border-color: var(--gb-magenta);
+  background: rgba(176, 31, 176, 0.16);
 }
 
 .hero-title {

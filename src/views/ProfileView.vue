@@ -5,8 +5,10 @@ import axios from '@/services/axios'
 import PhotoComponent from '@/components/profile/PhotoComponent.vue'
 import NotificationBanner from '@/components/profile/NotificationBanner.vue'
 import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
+import { useAuth } from '@/composables/useAuth'
 
 const router = useRouter()
+const { logout } = useAuth()
 const loading = ref(true)
 const error = ref('')
 const profile = ref({
@@ -108,15 +110,32 @@ const twoFa = ref(false)
 function savePassword() { pwSaved.value = true }
 function toggleTwoFa() { twoFa.value = !twoFa.value }
 
-// ---- Favoritos (sem endpoint de favoritos ainda — só nesta sessão) ----
-const favorites = reactive([
-  { id: 'ie', name: 'Irlanda', code: 'IE', color: '#3972DE', uni: '12 parceiras', saved: '3 semanas atrás' },
-  { id: 'ca', name: 'Canadá', code: 'CA', color: '#7A0F74', uni: '20 parceiras', saved: '1 mês atrás' },
-  { id: 'au', name: 'Austrália', code: 'AU', color: '#33803E', uni: '8 parceiras', saved: '2 meses atrás' }
-])
-function removeFavorite(id) {
+// ---- Favoritos (persistidos de verdade em /favoritos/) ----
+const favorites = reactive([])
+const favoritesLoading = ref(true)
+
+async function fetchFavorites() {
+  favoritesLoading.value = true
+  try {
+    const { data } = await axios.get('/favoritos/')
+    favorites.splice(0, favorites.length, ...data)
+  } catch (e) {
+    console.error('Erro ao buscar favoritos:', e)
+  } finally {
+    favoritesLoading.value = false
+  }
+}
+
+async function removeFavorite(id) {
   const idx = favorites.findIndex((f) => f.id === id)
-  if (idx !== -1) favorites.splice(idx, 1)
+  if (idx === -1) return
+  const removido = favorites.splice(idx, 1)[0]
+  try {
+    await axios.delete(`/favoritos/${id}/`)
+  } catch (e) {
+    console.error('Erro ao remover favorito:', e)
+    favorites.splice(idx, 0, removido)
+  }
 }
 
 // ---- Avaliações (o backend só tem avaliação de agência hoje — isto aqui é só demonstrativo) ----
@@ -146,6 +165,7 @@ const showWelcome = ref(false)
 function closeWelcome() { showWelcome.value = false }
 
 const getAuthToken = () => localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
+
 
 const fetchProfile = async () => {
   const token = getAuthToken()
@@ -193,6 +213,7 @@ const fetchProfile = async () => {
 
 onMounted(() => {
   fetchProfile()
+  fetchFavorites()
   try {
     if (!sessionStorage.getItem('seenProfileWelcome')) {
       showWelcome.value = true
@@ -220,7 +241,7 @@ onMounted(() => {
             @avatar-updated="(url) => (profile.avatar_url = url)"
           />
           <div class="who">
-            <h2>{{ profile.name || 'Usuário' }}</h2>
+            <h1>{{ profile.name || 'Usuário' }}</h1>
             <p>{{ profile.email || 'email@exemplo.com' }}</p>
           </div>
         </div>
@@ -249,41 +270,46 @@ onMounted(() => {
                 <span class="side-meta">{{ sidebarMeta[item.key] }}</span>
               </div>
             </button>
+
+            <button type="button" class="side-logout" @click="logout">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+              Sair da conta
+            </button>
           </div>
 
           <div>
             <div class="panel-shell" ref="panelShell">
             <div v-if="section === 'perfil'" class="panel" key="perfil">
-              <h3>Dados pessoais</h3>
+              <h2>Dados pessoais</h2>
               <p class="panel-sub">Informações da sua conta e do seu perfil público</p>
               <div class="field-row">
-                <div class="field"><label>Nome completo</label><input v-model="editForm.name" type="text" /></div>
-                <div class="field"><label>E-mail</label><input :value="profile.email" type="email" disabled /></div>
-                <div class="field"><label>Telefone</label><input v-model="editForm.telefone" type="text" placeholder="(11) 90000-0000" /></div>
-                <div class="field"><label>Cidade / Estado</label><input v-model="editForm.cidade" type="text" placeholder="Sua cidade" /></div>
+                <div class="field"><label for="perfil-nome">Nome completo</label><input id="perfil-nome" v-model="editForm.name" type="text" autocomplete="name" /></div>
+                <div class="field"><label for="perfil-email">E-mail</label><input id="perfil-email" :value="profile.email" type="email" disabled /></div>
+                <div class="field"><label for="perfil-telefone">Telefone</label><input id="perfil-telefone" v-model="editForm.telefone" type="tel" autocomplete="tel" placeholder="(11) 90000-0000" /></div>
+                <div class="field"><label for="perfil-cidade">Cidade / Estado</label><input id="perfil-cidade" v-model="editForm.cidade" type="text" autocomplete="address-level2" placeholder="Sua cidade" /></div>
               </div>
               <div class="field" style="margin-bottom:16px;">
-                <label>Sobre você</label>
-                <textarea v-model="editForm.sobre" rows="3" placeholder="Conte um pouco sobre seus planos de intercâmbio..."></textarea>
+                <label for="perfil-sobre">Sobre você</label>
+                <textarea id="perfil-sobre" v-model="editForm.sobre" rows="3" placeholder="Conte um pouco sobre seus planos de intercâmbio..."></textarea>
               </div>
               <button class="btn-save" :disabled="savingProfile" @click="saveProfile">{{ savingProfile ? 'Salvando...' : 'Salvar alterações' }}</button>
               <span v-if="profileSaved" class="saved-flash">Perfil atualizado ✓</span>
             </div>
 
             <div v-else-if="section === 'seguranca'" class="panel" key="seguranca">
-              <h3>Segurança</h3>
+              <h2>Segurança</h2>
               <p class="panel-sub">Senha, autenticação e dispositivos conectados</p>
-              <div class="field" style="margin-bottom:14px; max-width:360px;"><label>Senha atual</label><input type="password" placeholder="••••••••" /></div>
+              <div class="field" style="margin-bottom:14px; max-width:360px;"><label for="seg-senha-atual">Senha atual</label><input id="seg-senha-atual" type="password" autocomplete="current-password" placeholder="••••••••" /></div>
               <div class="field-row">
-                <div class="field"><label>Nova senha</label><input type="password" placeholder="Crie uma nova senha" /></div>
-                <div class="field"><label>Confirmar nova senha</label><input type="password" placeholder="Digite novamente" /></div>
+                <div class="field"><label for="seg-senha-nova">Nova senha</label><input id="seg-senha-nova" type="password" autocomplete="new-password" placeholder="Crie uma nova senha" /></div>
+                <div class="field"><label for="seg-senha-confirmar">Confirmar nova senha</label><input id="seg-senha-confirmar" type="password" autocomplete="new-password" placeholder="Digite novamente" /></div>
               </div>
               <button class="btn-save" @click="savePassword">Atualizar senha</button>
               <span v-if="pwSaved" class="saved-flash">Senha atualizada ✓</span>
 
               <div class="toggle-row" style="margin-top:20px;">
                 <div><div class="toggle-label">Verificação em duas etapas</div><div class="toggle-sub">Adiciona uma etapa de confirmação por e-mail no login</div></div>
-                <button class="toggle-sw" :class="{ on: twoFa }" @click="toggleTwoFa"></button>
+                <button class="toggle-sw" :class="{ on: twoFa }" :aria-pressed="twoFa" aria-label="Verificação em duas etapas" @click="toggleTwoFa"></button>
               </div>
 
               <div class="session-row" style="margin-top:8px;">
@@ -297,27 +323,38 @@ onMounted(() => {
             </div>
 
             <div v-else-if="section === 'favoritos'" class="panel" key="favoritos">
-              <h3>Favoritos</h3>
-              <p class="panel-sub">Destinos que você salvou para comparar depois</p>
-              <table class="fav-table">
-                <tr><th>País</th><th>Universidades parceiras</th><th>Salvo em</th><th></th></tr>
-                <tr v-for="fav in favorites" :key="fav.id">
-                  <td><div class="fav-country"><span class="fav-dot" :style="{ background: fav.color }">{{ fav.code }}</span>{{ fav.name }}</div></td>
-                  <td>{{ fav.uni }}</td>
-                  <td>{{ fav.saved }}</td>
-                  <td><button class="fav-remove" @click="removeFavorite(fav.id)"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke-width="1.8" stroke-linecap="round"/></svg></button></td>
-                </tr>
+              <h2>Favoritos</h2>
+              <p class="panel-sub">Países e agências que você salvou para comparar depois</p>
+              <table v-if="favorites.length" class="fav-table">
+                <thead>
+                  <tr><th>Destino</th><th>Detalhe</th><th>Salvo em</th><th><span class="sr-only">Remover</span></th></tr>
+                </thead>
+                <tbody>
+                  <tr v-for="fav in favorites" :key="fav.id">
+                    <td>
+                      <div class="fav-country">
+                        <span class="fav-dot" :style="{ background: fav.tipo === 'pais' ? 'var(--gb-blue)' : 'var(--gb-magenta-strong)' }">{{ fav.tipo === 'pais' ? 'P' : 'A' }}</span>
+                        <router-link
+                          :to="fav.tipo === 'pais' ? { name: 'pais', params: { id: fav.objeto_id } } : { name: 'agencia', params: { id: fav.objeto_id } }"
+                        >{{ fav.nome }}</router-link>
+                      </div>
+                    </td>
+                    <td>{{ fav.subtitulo || '—' }}</td>
+                    <td>{{ new Date(fav.criado_em).toLocaleDateString('pt-BR') }}</td>
+                    <td><button class="fav-remove" :aria-label="`Remover ${fav.nome} dos favoritos`" @click="removeFavorite(fav.id)"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke-width="1.8" stroke-linecap="round"/></svg></button></td>
+                  </tr>
+                </tbody>
               </table>
-              <p v-if="!favorites.length" class="panel-empty">Você ainda não salvou nenhum destino.</p>
+              <p v-else-if="!favoritesLoading" class="panel-empty">Você ainda não salvou nenhum país ou agência.</p>
             </div>
 
             <div v-else-if="section === 'avaliacoes'" class="panel" key="avaliacoes">
-              <h3>Avaliações</h3>
+              <h2>Avaliações</h2>
               <p class="panel-sub">Experiências que você compartilhou com outros estudantes</p>
               <div v-for="(rev, i) in reviews" :key="i" class="review-item">
                 <div class="review-top"><span class="review-country">{{ rev.country }}</span><span class="review-date">{{ rev.date }}</span></div>
-                <div class="review-stars">
-                  <svg v-for="n in 5" :key="n" viewBox="0 0 24 24" :class="{ empty: n > rev.rating }"><path d="M12 17.3l-5.3 3 1.4-6-4.6-4 6-.5L12 4l2.5 5.8 6 .5-4.6 4 1.4 6z"/></svg>
+                <div class="review-stars" role="img" :aria-label="`${rev.rating} de 5 estrelas`">
+                  <svg v-for="n in 5" :key="n" viewBox="0 0 24 24" :class="{ empty: n > rev.rating }" aria-hidden="true"><path d="M12 17.3l-5.3 3 1.4-6-4.6-4 6-.5L12 4l2.5 5.8 6 .5-4.6 4 1.4 6z"/></svg>
                 </div>
                 <p class="review-text">{{ rev.text }}</p>
               </div>
@@ -326,27 +363,27 @@ onMounted(() => {
             </div>
 
             <div v-else-if="section === 'preferencias'" class="panel" key="preferencias">
-              <h3>Preferências</h3>
+              <h2>Preferências</h2>
               <p class="panel-sub">Personalize as recomendações de intercâmbio</p>
               <div class="pref-group">
                 <span class="pref-group-label">Idioma de interesse</span>
                 <div class="chip-row">
-                  <button v-for="opt in idiomaOptions" :key="opt" class="chip" :class="{ picked: idioma === opt }" @click="idioma = opt">{{ opt }}</button>
+                  <button v-for="opt in idiomaOptions" :key="opt" type="button" class="chip" :class="{ picked: idioma === opt }" :aria-pressed="idioma === opt" @click="idioma = opt">{{ opt }}</button>
                 </div>
               </div>
               <div class="pref-group">
                 <span class="pref-group-label">Tipo de programa</span>
                 <div class="chip-row">
-                  <button v-for="opt in programaOptions" :key="opt" class="chip" :class="{ picked: programa === opt }" @click="programa = opt">{{ opt }}</button>
+                  <button v-for="opt in programaOptions" :key="opt" type="button" class="chip" :class="{ picked: programa === opt }" :aria-pressed="programa === opt" @click="programa = opt">{{ opt }}</button>
                 </div>
               </div>
               <div class="toggle-row">
                 <div class="toggle-label">Notificações por e-mail</div>
-                <button class="toggle-sw" :class="{ on: notifEmail }" @click="notifEmail = !notifEmail"></button>
+                <button class="toggle-sw" :class="{ on: notifEmail }" :aria-pressed="notifEmail" aria-label="Notificações por e-mail" @click="notifEmail = !notifEmail"></button>
               </div>
               <div class="toggle-row">
                 <div class="toggle-label">Notificações por WhatsApp</div>
-                <button class="toggle-sw" :class="{ on: notifWhats }" @click="notifWhats = !notifWhats"></button>
+                <button class="toggle-sw" :class="{ on: notifWhats }" :aria-pressed="notifWhats" aria-label="Notificações por WhatsApp" @click="notifWhats = !notifWhats"></button>
               </div>
             </div>
             </div>
@@ -505,6 +542,30 @@ onMounted(() => {
   background: var(--gb-dark);
 }
 
+.side-logout {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 6px;
+  padding: 11px 10px;
+  border-radius: 8px;
+  border: none;
+  border-top: 1px solid var(--gb-purple-deep-16);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  font-size: 0.86rem;
+  color: #dc2626;
+  transition: background 0.15s ease;
+}
+
+.side-logout:hover {
+  background: rgba(220, 38, 38, 0.06);
+}
+
 .side-thumb {
   width: 34px;
   height: 34px;
@@ -571,6 +632,7 @@ onMounted(() => {
   padding: 26px 28px;
 }
 
+.panel h2,
 .panel h3 {
   font-family: var(--gb-font-display);
   font-weight: 900;

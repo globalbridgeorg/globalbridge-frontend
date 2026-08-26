@@ -6,6 +6,7 @@ import axios from '@/services/axios'
 const router = useRouter()
 
 const showRegister = ref(false)
+const loginMode = ref('estudante')
 const loading = ref(false)
 const errorField = ref('')
 const errorMessage = ref('')
@@ -26,6 +27,10 @@ const steps = [
 ]
 
 const loginForm = reactive({ email: '', password: '', keepLogged: false })
+const codigoModo = ref(false)
+const codigoEnviado = ref(false)
+const codigoValor = ref('')
+const codigoLoading = ref(false)
 const registerData = reactive({ email: '', verificationCode: '', name: '', password: '', confirmPassword: '' })
 
 const currentStep = computed(() => steps[step.value - 1] || steps[0])
@@ -98,11 +103,66 @@ async function handleLogin() {
     if (loginForm.keepLogged) { localStorage.setItem('access_token', access); localStorage.setItem('refresh_token', refresh) }
     else { sessionStorage.setItem('access_token', access); sessionStorage.setItem('refresh_token', refresh) }
     successMessage.value = 'Login realizado com sucesso!'
-    router.push({ name: 'profile' })
+
+    // Conta business (tipo=agencia) tem um painel próprio — decide pra
+    // onde mandar depois de logar com base no que a conta realmente é,
+    // não em qual aba a pessoa escolheu (a aba é só uma dica visual).
+    await irERedirecionarPosLogin()
   } catch (err) {
     if (err.response?.status === 401) setError('login.email', 'E-mail ou senha inválidos')
     else setError('login.email', 'Erro ao conectar com o servidor')
   } finally { loading.value = false }
+}
+
+function irERedirecionarPosLogin() {
+  return axios.get('/usuarios/me/').then(({ data: eu }) => {
+    router.push({ name: eu.tipo === 'agencia' ? 'business' : 'profile' })
+  }).catch(() => router.push({ name: 'profile' }))
+}
+
+function ativarCodigoModo() {
+  clearError()
+  codigoModo.value = true
+  codigoEnviado.value = false
+  codigoValor.value = ''
+}
+
+function voltarParaSenha() {
+  clearError()
+  codigoModo.value = false
+  codigoEnviado.value = false
+  codigoValor.value = ''
+}
+
+async function solicitarCodigo() {
+  clearError()
+  if (!loginForm.email) return setError('login.email', 'Informe seu e-mail')
+  loading.value = true
+  try {
+    await axios.post('/auth/codigo/solicitar/', { email: loginForm.email })
+    codigoEnviado.value = true
+    successMessage.value = 'Se esse e-mail tiver conta, o código chega em instantes.'
+  } catch (e) {
+    setError('login.email', 'Erro ao enviar o código')
+  } finally {
+    loading.value = false
+  }
+}
+
+async function confirmarCodigo() {
+  clearError()
+  if (!codigoValor.value) return setError('login.codigo', 'Informe o código recebido')
+  codigoLoading.value = true
+  try {
+    const { data } = await axios.post('/auth/codigo/verificar/', { email: loginForm.email, codigo: codigoValor.value })
+    if (loginForm.keepLogged) { localStorage.setItem('access_token', data.access); localStorage.setItem('refresh_token', data.refresh) }
+    else { sessionStorage.setItem('access_token', data.access); sessionStorage.setItem('refresh_token', data.refresh) }
+    await irERedirecionarPosLogin()
+  } catch (e) {
+    setError('login.codigo', 'Código inválido ou expirado')
+  } finally {
+    codigoLoading.value = false
+  }
 }
 
 async function handleRegister() {
@@ -237,26 +297,71 @@ onBeforeUnmount(() => {
       :class="{ 'slide-left': showRegister, 'step-forward': stepDirection === 'forward', 'step-back': stepDirection === 'back', 'mount-in': justMounted, 'card-exit': cardPhase === 'exiting', 'card-enter': cardPhase === 'entering' }"
     >
       <div v-if="!showRegister" class="card-content">
+        <div class="mode-toggle">
+          <div class="mode-toggle-thumb" :class="{ right: loginMode === 'agencia' }"></div>
+          <button type="button" class="mode-opt" :class="{ active: loginMode === 'estudante' }" @click="loginMode = 'estudante'">Sou estudante</button>
+          <button type="button" class="mode-opt" :class="{ active: loginMode === 'agencia' }" @click="loginMode = 'agencia'">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V8l6-4v16"/><path d="M10 20V10l8 3v7"/><path d="M3 20h18"/></svg>
+            Sou agência
+          </button>
+        </div>
+
         <div v-if="successMessage" class="field-success">{{ successMessage }}</div>
 
         <div class="form-group">
-          <label>E-mail</label>
+          <label for="login-email">{{ loginMode === 'agencia' ? 'E-mail institucional' : 'E-mail' }}</label>
           <div v-if="errorField === 'login.email'" class="field-error">{{ errorMessage }}</div>
-          <input type="email" v-model="loginForm.email" placeholder="seu@email.com" @input="clearErrorForField('login.email')">
+          <input id="login-email" type="email" autocomplete="email" v-model="loginForm.email" placeholder="seu@email.com" @input="clearErrorForField('login.email')">
         </div>
-        <div class="form-group">
-          <label>Senha</label>
-          <div v-if="errorField === 'login.password'" class="field-error">{{ errorMessage }}</div>
-          <input type="password" v-model="loginForm.password" placeholder="••••••••" @input="clearErrorForField('login.password')">
-        </div>
-        <div class="checkbox-group">
-          <input type="checkbox" id="keepLogged" v-model="loginForm.keepLogged">
-          <label for="keepLogged">Manter conectado</label>
-        </div>
-        <button class="btn-primary" @click="handleLogin">Entrar</button>
-        <div class="create-account-link">
+
+        <template v-if="!codigoModo">
+          <div class="form-group">
+            <label for="login-senha">Senha</label>
+            <div v-if="errorField === 'login.password'" class="field-error">{{ errorMessage }}</div>
+            <input id="login-senha" type="password" autocomplete="current-password" v-model="loginForm.password" placeholder="••••••••" @input="clearErrorForField('login.password')">
+          </div>
+          <div class="checkbox-group">
+            <input type="checkbox" id="keepLogged" v-model="loginForm.keepLogged">
+            <label for="keepLogged">Manter conectado</label>
+          </div>
+          <button class="btn-primary" @click="handleLogin">{{ loginMode === 'agencia' ? 'Entrar como agência' : 'Entrar' }}</button>
+          <div class="login-extra-links">
+            <router-link to="/esqueci-senha">Esqueceu a senha?</router-link>
+            <button class="link-inline" @click="ativarCodigoModo">Entrar com código por e-mail</button>
+          </div>
+        </template>
+
+        <template v-else-if="!codigoEnviado">
+          <div class="checkbox-group">
+            <input type="checkbox" id="keepLogged2" v-model="loginForm.keepLogged">
+            <label for="keepLogged2">Manter conectado</label>
+          </div>
+          <button class="btn-primary" :disabled="loading" @click="solicitarCodigo">{{ loading ? 'Enviando...' : 'Enviar código' }}</button>
+          <div class="login-extra-links">
+            <button class="link-inline" @click="voltarParaSenha">Entrar com senha</button>
+          </div>
+        </template>
+
+        <template v-else>
+          <div class="form-group">
+            <label for="login-codigo">Código recebido por e-mail</label>
+            <div v-if="errorField === 'login.codigo'" class="field-error">{{ errorMessage }}</div>
+            <input id="login-codigo" type="text" inputmode="numeric" autocomplete="one-time-code" v-model="codigoValor" placeholder="000000" maxlength="6" @keyup.enter="confirmarCodigo" @input="clearErrorForField('login.codigo')">
+          </div>
+          <button class="btn-primary" :disabled="codigoLoading" @click="confirmarCodigo">{{ codigoLoading ? 'Confirmando...' : 'Confirmar e entrar' }}</button>
+          <div class="login-extra-links">
+            <button class="link-inline" @click="solicitarCodigo">Reenviar código</button>
+            <button class="link-inline" @click="voltarParaSenha">Entrar com senha</button>
+          </div>
+        </template>
+
+        <div v-if="loginMode === 'estudante'" class="create-account-link">
           <span>Não possui uma conta?</span>
           <button class="link-button" @click="goToRegister">Criar conta</button>
+        </div>
+        <div v-else class="create-account-link">
+          <span>Sua agência ainda não tem conta business?</span>
+          <router-link class="link-button" to="/business/solicitar">Solicitar verificação</router-link>
         </div>
       </div>
 
@@ -269,6 +374,9 @@ onBeforeUnmount(() => {
               type="button"
               class="dot"
               :class="{ active: step === i + 1, completed: step > i + 1 }"
+              :aria-current="step === i + 1 ? 'step' : undefined"
+              :aria-label="`Etapa ${i + 1}: ${s.label}`"
+              :disabled="i + 1 > step"
               @click="goToStep(i + 1)"
             ></button>
           </div>
@@ -285,9 +393,10 @@ onBeforeUnmount(() => {
           :key="field"
           class="form-group"
         >
-          <label>{{ currentStep.labels[index] }}</label>
+          <label :for="`register-${field}`">{{ currentStep.labels[index] }}</label>
           <div v-if="errorField === `register.${field}`" class="field-error">{{ errorMessage }}</div>
           <input
+            :id="`register-${field}`"
             :type="currentStep.types[index]"
             v-model="registerData[field]"
             :placeholder="currentStep.placeholders[index]"
@@ -322,18 +431,10 @@ onBeforeUnmount(() => {
 
 <style scoped>
 
-html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  width: 100%;
-  overflow: hidden;
-}
-
 .page-container {
   position: relative;
   width: 100%;
-  height: 100vh;
+  height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -353,9 +454,17 @@ html, body {
 
 .stars { position: absolute; inset: 0; opacity: 0.5; }
 
+/* Altura em aspect-ratio (não em % da tela) — cada <svg> usa
+   preserveAspectRatio="none" pra esticar o desenho até preencher a
+   largura de 300%, então a altura do elemento PRECISA acompanhar essa
+   mesma proporção do viewBox (2880x300 / 2880x340). Antes a altura era
+   um % fixo da tela: numa tela estreita e alta (celular), a largura
+   encolhia bem mais que a altura, esticando o desenho e deixando os
+   prédios finos e alongados. Com aspect-ratio a altura sempre acompanha
+   a largura real na proporção certa, em qualquer tamanho de tela. */
 .skyline { position: absolute; left: 0; bottom: 0; width: 300%; animation: scroll linear infinite; }
-.skyline-back { height: 70%; opacity: 0.5; animation-duration: 80s; }
-.skyline-front { height: 80%; animation-duration: 42s; animation-direction: reverse; }
+.skyline-back { aspect-ratio: 2880 / 300; opacity: 0.5; animation-duration: 80s; }
+.skyline-front { aspect-ratio: 2880 / 340; animation-duration: 42s; animation-direction: reverse; }
 
 @keyframes scroll {
   from { transform: translateX(0); }
@@ -415,6 +524,12 @@ html, body {
 }
 
 .card-content { height: 100%; display: flex; flex-direction: column; justify-content: center; }
+
+.mode-toggle { position: relative; display: grid; grid-template-columns: 1fr 1fr; background: rgba(46, 10, 46, 0.06); border-radius: 12px; padding: 4px; margin-bottom: 24px; }
+.mode-toggle-thumb { position: absolute; top: 4px; left: 4px; width: calc(50% - 6px); height: calc(100% - 8px); background: var(--gb-dark); border-radius: 9px; transition: transform 0.25s cubic-bezier(.4,0,.2,1); }
+.mode-toggle-thumb.right { transform: translateX(calc(100% + 4px)); }
+.mode-opt { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; border: none; background: none; font-family: var(--gb-font-eyebrow); font-weight: 700; font-size: 12px; letter-spacing: 0.02em; text-transform: uppercase; color: var(--gb-ink-faint); cursor: pointer; transition: color 0.2s ease; }
+.mode-opt.active { color: #fff; }
 .form-group { margin-bottom: 20px; }
 .form-group label { display: block; margin-bottom: 8px; font-family: var(--gb-font-eyebrow); font-weight: 700; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gb-ink-faint); }
 .form-group input { width: 100%; padding: 12px 14px; border: 1px solid var(--gb-purple-deep-16); border-radius: 10px; font-size: 14px; font-family: var(--gb-font-display); transition: border-color 0.2s ease, box-shadow 0.2s ease; background: #fff; color: var(--gb-dark); }
@@ -425,6 +540,9 @@ html, body {
 .btn-primary { width: 100%; background: var(--gb-dark); color: #fff; border: none; padding: 13px; border-radius: 10px; font-family: var(--gb-font-eyebrow); font-weight: 700; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer; transition: background 0.2s ease, transform 0.1s ease; }
 .btn-primary:hover { background: var(--gb-magenta); }
 .btn-primary:active { transform: scale(0.98); }
+.login-extra-links { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; }
+.login-extra-links a, .login-extra-links .link-inline { background: none; border: none; padding: 0; color: var(--gb-magenta); font-size: 12.5px; font-weight: 600; cursor: pointer; text-decoration: underline; }
+.login-extra-links a:hover, .login-extra-links .link-inline:hover { color: #7A0F74; }
 .create-account-link { text-align: center; margin-top: 20px; }
 .create-account-link span { color: var(--gb-ink-soft); font-size: 13px; }
 .link-button { background: none; border: none; color: var(--gb-magenta); font-weight: 600; cursor: pointer; font-size: 13px; text-decoration: underline; margin-left: 5px; }
@@ -457,4 +575,24 @@ html, body {
 .field-success { display: block; margin-bottom: 16px; color: #15803d; font-size: 13px; font-weight: 700; }
 
 @keyframes errorShake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-3px); } 50% { transform: translateX(3px); } 75% { transform: translateX(-2px); } }
+
+/* A transição de login→cadastro desloca o card 25vw pro lado pra abrir
+   espaço pro "CRIAR UMA CONTA" (.side-text) — isso pressupõe uma tela
+   larga. No celular não tem espaço lateral: o texto lateral só some e o
+   card passa a só trocar de conteúdo no lugar (fade + leve deslocamento
+   vertical, sem o deslocamento horizontal). */
+@media (max-width: 768px) {
+  .page-container {
+    padding: 16px;
+  }
+
+  .main-card {
+    padding: 28px 22px;
+    --card-shift: 0vw !important;
+  }
+
+  .side-text {
+    display: none;
+  }
+}
 </style>

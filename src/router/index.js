@@ -13,6 +13,12 @@ import RegiaoView from '@/views/RegiaoView.vue';
 import PaisView from '@/views/PaisView.vue';
 import AgenciaView from '@/views/AgenciaView.vue';
 import PerfilPublicoView from '@/views/PerfilPublicoView.vue';
+import BusinessView from '@/views/BusinessView.vue';
+import SolicitarBusinessView from '@/views/SolicitarBusinessView.vue';
+import AnaliseBusinessView from '@/views/AnaliseBusinessView.vue';
+import EsqueciSenhaView from '@/views/EsqueciSenhaView.vue';
+import RedefinirSenhaView from '@/views/RedefinirSenhaView.vue';
+import PainelBusinessView from '@/views/PainelBusinessView.vue';
 
 const routes = [
   {
@@ -31,6 +37,18 @@ const routes = [
     path: '/login',
     name: 'login',
     component: LoginView,
+    meta: { headerWidth: 'full' }
+  },
+  {
+    path: '/esqueci-senha',
+    name: 'esqueci-senha',
+    component: EsqueciSenhaView,
+    meta: { headerWidth: 'full' }
+  },
+  {
+    path: '/redefinir-senha',
+    name: 'redefinir-senha',
+    component: RedefinirSenhaView,
     meta: { headerWidth: 'full' }
   },
   {
@@ -85,6 +103,30 @@ const routes = [
     path: '/usuarios/:username',
     name: 'perfil-publico',
     component: PerfilPublicoView,
+    meta: { headerWidth: 'full' }
+  },
+  {
+    path: '/business',
+    name: 'business',
+    component: PainelBusinessView,
+    meta: { headerWidth: 'full' }
+  },
+  {
+    path: '/business/editar',
+    name: 'business-editor',
+    component: BusinessView,
+    meta: { headerWidth: 'full' }
+  },
+  {
+    path: '/business/solicitar',
+    name: 'business-solicitar',
+    component: SolicitarBusinessView,
+    meta: { headerWidth: 'full' }
+  },
+  {
+    path: '/business/analise',
+    name: 'business-analise',
+    component: AnaliseBusinessView,
     meta: { headerWidth: 'full' }
   },
 ];

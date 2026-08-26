@@ -1,15 +1,17 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watchEffect } from 'vue'
 import ButtonComponent from '@/components/common/ButtonComponent.vue'
 import { usePWA } from '@/composables/usePWA'
+import { useContaAtual } from '@/composables/useContaAtual'
 import { useRoute } from 'vue-router'
 
 const { isInstallable, installPWA } = usePWA()
 const mobileMenuOpen = ref(false)
 const route = useRoute()
+const { estado: conta, carregarConta } = useContaAtual()
 
 const headerClass = computed(() => {
-  return route.meta?.headerWidth === 'compact' ? 'header-compact' : 'header-full' 
+  return route.meta?.headerWidth === 'compact' ? 'header-compact' : 'header-full'
 })
 
 const isLoggedIn = computed(() => {
@@ -18,8 +20,15 @@ const isLoggedIn = computed(() => {
   return !!token
 })
 
+watchEffect(() => { if (isLoggedIn.value) carregarConta() })
+
 const buttonText = computed(() => isLoggedIn.value ? 'Perfil' : 'Entrar')
-const buttonLink = computed(() => isLoggedIn.value ? '/profile' : '/login')
+// Conta business (tipo=agencia) tem painel próprio — manda pra lá em vez
+// do perfil de estudante, que não sabe nada sobre agência.
+const buttonLink = computed(() => {
+  if (!isLoggedIn.value) return '/login'
+  return conta.tipo === 'agencia' ? '/business' : '/profile'
+})
 
 const toggleMenu = () => {
   mobileMenuOpen.value = !mobileMenuOpen.value
@@ -54,9 +63,9 @@ const toggleMenu = () => {
       <router-link to="/mapview">Meu destino</router-link>
       <router-link to="/como-funciona">Como funciona</router-link>
       <router-link to="/contato">Contato</router-link>
-      <a @click.prevent="installPWA" class="install-link">
+      <button type="button" @click="installPWA" class="install-link">
         Instalar App
-      </a>
+      </button>
     </nav>
 
     <router-link :to="buttonLink" 
@@ -77,7 +86,7 @@ const toggleMenu = () => {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12" /><path d="M18 6L6 18" /></svg>
         </button>
 
-        <div class="mobile-nav-inner">
+        <div class="mobile-nav-inner" data-lenis-prevent>
           <span class="mobile-nav-eyebrow">Navegar</span>
 
           <nav class="mobile-nav-links">
@@ -100,10 +109,10 @@ const toggleMenu = () => {
           </nav>
 
           <div class="mobile-nav-bottom">
-            <a class="mobile-nav-sub" href="#" @click.prevent="installPWA">
+            <button type="button" class="mobile-nav-sub" @click="installPWA">
               <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="rgba(251,246,231,0.65)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12" /><path d="M8 11l4 4 4-4" /><path d="M4 19h16" /></svg>
               Instalar o app
-            </a>
+            </button>
             <a class="mobile-nav-sub" href="mailto:contato@globalbridge.com">
               <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="rgba(251,246,231,0.65)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v12H4z" /><path d="M4 7l8 6 8-6" /></svg>
               contato@globalbridge.com
@@ -128,7 +137,7 @@ const toggleMenu = () => {
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
-  height: 75 px;
+  height: 75px;
   background: #ffffff;
   border-radius: 15px;
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
@@ -159,16 +168,25 @@ const toggleMenu = () => {
   gap: 20px;
 }
 
-.desktop-nav a {
+.desktop-nav a,
+.desktop-nav .install-link {
   text-decoration: none;
-  color: #42023C;
+  color: var(--gb-plum);
   font-size: 14px;
   font-weight: 600;
   padding: 8px 10px;
   transition: all 0.2s ease;
 }
 
-.desktop-nav a:hover {
+.install-link {
+  background: none;
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.desktop-nav a:hover,
+.desktop-nav .install-link:hover {
   background: #f0ede6;
   border-radius: 20px;
   transform: scale(1.05);
@@ -191,7 +209,7 @@ const toggleMenu = () => {
 .mobile-menu-btn span {
   width: 26px;
   height: 3px;
-  background: #42023C;
+  background: var(--gb-plum);
   border-radius: 3px;
   transition: all 0.3s ease;
 }
@@ -336,8 +354,6 @@ const toggleMenu = () => {
 .header-compact {
   max-width: 1200px;
 }
-
-.header- 
 
 .mobile-menu-enter-active,
 .mobile-menu-leave-active {

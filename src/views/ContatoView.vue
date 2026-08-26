@@ -66,7 +66,7 @@ async function pick(v) {
         <h2 class="gb-heading historia-heading">Uma decisão que não devia depender de sorte</h2>
         <p>O GlobalBridge nasceu de uma frustração bem concreta: decidir um intercâmbio dependia de planilha solta, grupo de WhatsApp, e agência que às vezes nem respondia. Cada informação vinha de um lugar diferente, e comparar dois países de verdade era quase impossível.</p>
         <p>Um grupo de ex-intercambistas e desenvolvedores decidiu construir o que gostaria de ter tido na época: <strong>um lugar único</strong> pra comparar destinos com os mesmos critérios, ver avaliação real de quem já passou por cada agência, e falar direto com quem organiza o programa — sem intermediário escondendo informação.</p>
-        <p>Hoje a plataforma conecta estudantes a mais de 40 países e a agências parceiras verificadas, mas o objetivo continua o mesmo do primeiro dia: tirar a decisão do intercâmbio da mão do achismo — dos dois lados da mesa.</p>
+        <p>Hoje a plataforma conecta estudantes a mais de 20 países e a agências parceiras verificadas, mas o objetivo continua o mesmo do primeiro dia: tirar a decisão do intercâmbio da mão do achismo — dos dois lados da mesa.</p>
       </div>
     </section>
 
@@ -129,12 +129,12 @@ async function pick(v) {
 
       <div class="form-shell" ref="formShell">
         <div class="form-grid">
-          <div class="field"><label>Nome</label><input type="text" placeholder="Seu nome" /></div>
-          <div class="field"><label>E-mail</label><input type="email" placeholder="seu@email.com" /></div>
-          <div v-if="publico === 'agencia'" class="field full"><label>Nome da agência</label><input type="text" placeholder="Nome da sua agência ou instituição" /></div>
+          <div class="field"><label for="contato-nome">Nome</label><input id="contato-nome" type="text" autocomplete="name" placeholder="Seu nome" /></div>
+          <div class="field"><label for="contato-email">E-mail</label><input id="contato-email" type="email" autocomplete="email" placeholder="seu@email.com" /></div>
+          <div v-if="publico === 'agencia'" class="field full"><label for="contato-agencia">Nome da agência</label><input id="contato-agencia" type="text" placeholder="Nome da sua agência ou instituição" /></div>
           <div class="field full">
-            <label>Assunto</label>
-            <select>
+            <label for="contato-assunto">Assunto</label>
+            <select id="contato-assunto">
               <option>Dúvida sobre destino ou programa</option>
               <option>Problema com uma agência</option>
               <option>Cadastro de programas</option>
@@ -143,7 +143,7 @@ async function pick(v) {
               <option>Sugestão pra plataforma</option>
             </select>
           </div>
-          <div class="field full"><label>Mensagem</label><textarea rows="4" placeholder="Conte com detalhes o que você precisa"></textarea></div>
+          <div class="field full"><label for="contato-mensagem">Mensagem</label><textarea id="contato-mensagem" rows="4" placeholder="Conte com detalhes o que você precisa"></textarea></div>
           <div class="form-actions">
             <button class="btn btn-dark" type="button">Enviar mensagem</button>
             <p class="form-note">Respondemos pelo e-mail que você deixar aqui.</p>
@@ -156,21 +156,21 @@ async function pick(v) {
       <div class="canal">
         <div class="canal-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v12H4z" /><path d="M4 7l8 6 8-6" /></svg></div>
         <div>
-          <h4>E-mail</h4>
+          <h3>E-mail</h3>
           <a href="mailto:contato@globalbridge.com">contato@globalbridge.com</a>
         </div>
       </div>
       <div class="canal">
         <div class="canal-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="4" /><circle cx="12" cy="12" r="3.2" /><circle cx="16.2" cy="7.8" r="0.6" fill="currentColor" /></svg></div>
         <div>
-          <h4>Instagram</h4>
+          <h3>Instagram</h3>
           <p>@globalbridge <span class="soon">(em breve)</span></p>
         </div>
       </div>
       <div class="canal">
         <div class="canal-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3" /><path d="M8 11v5M8 8.2v.1M12 16v-3.2c0-1.2 1-2 2-2s2 .8 2 2V16" /></svg></div>
         <div>
-          <h4>LinkedIn</h4>
+          <h3>LinkedIn</h3>
           <p>GlobalBridge <span class="soon">(em breve)</span></p>
         </div>
       </div>
@@ -180,19 +180,19 @@ async function pick(v) {
       <div class="eyebrow"><span class="eyebrow-label">Perguntas frequentes</span></div>
       <div class="heading-row"><h2 class="gb-heading">Antes de escrever</h2></div>
       <div class="faq-item">
-        <h4>Preciso ter conta pra falar com vocês?</h4>
+        <h3>Preciso ter conta pra falar com vocês?</h3>
         <p>Não. O formulário e o e-mail funcionam pra qualquer pessoa, com ou sem cadastro na plataforma.</p>
       </div>
       <div class="faq-item">
-        <h4>Sou uma agência, como faço pra me cadastrar?</h4>
+        <h3>Sou uma agência, como faço pra me cadastrar?</h3>
         <p>Use o formulário acima com "Sou agência" selecionado e assunto "Cadastro de programas" — nosso time entra em contato com os próximos passos da verificação.</p>
       </div>
       <div class="faq-item">
-        <h4>Tive um problema com uma agência parceira, o que eu faço?</h4>
+        <h3>Tive um problema com uma agência parceira, o que eu faço?</h3>
         <p>Conte pra gente com o máximo de detalhe no formulário (assunto "Problema com uma agência") — isso também entra na avaliação da agência na plataforma.</p>
       </div>
       <div class="faq-item">
-        <h4>Encontrei um erro ou tenho uma ideia pra plataforma</h4>
+        <h3>Encontrei um erro ou tenho uma ideia pra plataforma</h3>
         <p>Manda pelo formulário com o assunto "Sugestão pra plataforma" — feedback de quem usa é o que mais ajuda a gente a melhorar.</p>
       </div>
     </section>
@@ -589,7 +589,7 @@ async function pick(v) {
   stroke: var(--gb-magenta-strong);
 }
 
-.canal h4 {
+.canal h3 {
   margin: 0 0 4px;
   font-family: var(--gb-font-display);
   font-weight: 900;
@@ -624,7 +624,7 @@ async function pick(v) {
   padding: 20px 0;
 }
 
-.faq-item h4 {
+.faq-item h3 {
   margin: 0 0 8px;
   font-family: var(--gb-font-display);
   font-weight: 900;

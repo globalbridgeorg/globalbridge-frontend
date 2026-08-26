@@ -1,10 +1,12 @@
 <script setup>
 import ButtonComponent from '@/components/common/ButtonComponent.vue'
-import { computed, onMounted, onBeforeUnmount, ref } from 'vue'
+import { computed, onMounted, onBeforeUnmount, ref, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
+import { useContaAtual } from '@/composables/useContaAtual'
 import gsap from 'gsap'
 
 const route = useRoute()
+const { estado: conta, carregarConta } = useContaAtual()
 
 const isLoggedIn = computed(() => {
   route.fullPath
@@ -12,8 +14,14 @@ const isLoggedIn = computed(() => {
   return !!token
 })
 
+watchEffect(() => { if (isLoggedIn.value) carregarConta() })
+
 const buttonText = computed(() => isLoggedIn.value ? 'Perfil' : 'Entrar')
-const buttonLink = computed(() => isLoggedIn.value ? '/profile' : '/login')
+// Mesma lógica do HeaderComponent — conta business vai pro painel dela.
+const buttonLink = computed(() => {
+  if (!isLoggedIn.value) return '/login'
+  return conta.tipo === 'agencia' ? '/business' : '/profile'
+})
 const buttonmapview = '/mapview'
 
 const marqueeTrackRef = ref(null)

@@ -117,10 +117,10 @@ onBeforeUnmount(() => {
       </div>
 
       <div class="opcoes" ref="opcoesRef">
-        <span class="opcoes-badge">+40 países</span>
+        <span class="opcoes-badge">+20 países</span>
         <h2 class="opcoes-title">NOSSAS OPÇÕES</h2>
         <p class="opcoes-desc">
-          Explore nossa seleção com mais de 40 países ao redor do mundo. Compare
+          Explore nossa seleção com mais de 20 países ao redor do mundo. Compare
           destinos e descubra qual combina com seu perfil, planeje sua experiência
           internacional com mais segurança e confiança com base em:
         </p>
@@ -137,7 +137,7 @@ onBeforeUnmount(() => {
         <div class="opcoes-footer">
           <span class="opcoes-updated">Seleção atualizada 2026</span>
           <router-link to="/mapview">
-            <ButtonComponent text="Ver os 40 países" iconType="tertiary" class="btn-dark" />
+            <ButtonComponent text="Ver os 20+ países" iconType="tertiary" class="btn-dark" />
           </router-link>
         </div>
       </div>
