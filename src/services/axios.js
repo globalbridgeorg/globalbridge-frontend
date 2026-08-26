@@ -20,7 +20,7 @@ const getBaseUrl = () => {
     if (envUrl) {
       return envUrl.endsWith('/api') ? envUrl : `${envUrl}/api`
     }
-    return 'https://globalbridge-backend-production.up.railway.app/api'
+    return 'https://globalbridge-backend-production-9c02.up.railway.app/api'
   }
 
   // Local development uses relative API path so Vite proxy can forward to the local backend.
