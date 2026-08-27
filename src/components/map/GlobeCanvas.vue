@@ -16,7 +16,7 @@ const props = defineProps({
   // de universidades, sem relação com dado real da plataforma).
   agencyCounts: { type: Object, default: () => ({}) }
 })
-const emit = defineEmits(['ready', 'country-click'])
+const emit = defineEmits(['ready', 'error', 'country-click'])
 
 // ─── Cache de módulo: só faz fetch uma vez por sessão ───────────────────────
 let _worldCache = null
@@ -100,6 +100,18 @@ watch(() => [props.activeFilters, props.countryMeta, props.agencyCounts], () => 
 }, { deep: true })
 
 onMounted(async () => {
+  try {
+    await montarGlobo()
+  } catch (e) {
+    // Sem isso, qualquer falha aqui (CDN externo fora do ar, WebGL
+    // bloqueado, etc.) deixava a tela de "Carregando mapa..." girando pra
+    // sempre — nada nunca chamava emit('ready') pra tirar ela dali.
+    console.error('Erro ao montar o globo 3D:', e)
+    emit('error', e)
+  }
+})
+
+async function montarGlobo() {
   // 1. Busca dados (usa cache se já foi carregado antes)
   const world = await getWorldData()
   const countries = topojson.feature(world, world.objects.countries)
@@ -141,22 +153,30 @@ onMounted(async () => {
     initFrame2 = requestAnimationFrame(() => {
       initFrame2 = null
       if (!globe) return
-      globe
-        .polygonsData(countries.features)
-        .polygonAltitude(getPolygonAltitude)
-        .polygonCapColor(d => d.properties.matchesFilter ? colorScale(d.properties.agencias) : 'rgba(20,5,30,0.35)')
-        .polygonSideColor(() => 'rgba(128,0,128,0.25)')
-        .polygonStrokeColor(() => '#2d004b')
-        .polygonLabel(d => `<b>${d.properties.name}</b><br/>${d.properties.agencias} agência${d.properties.agencias === 1 ? '' : 's'}`)
-        .onPolygonHover(d => { hoverD = d; refreshGlobe() })
-        .onPolygonClick(d => {
-          const [lng, lat] = d3.geoCentroid(d)
-          globe.pointOfView({ lat, lng, altitude: 1.4 }, 1000)
-          emit('country-click', d.properties.name)
-        })
+      try {
+        globe
+          .polygonsData(countries.features)
+          .polygonAltitude(getPolygonAltitude)
+          .polygonCapColor(d => d.properties.matchesFilter ? colorScale(d.properties.agencias) : 'rgba(20,5,30,0.35)')
+          .polygonSideColor(() => 'rgba(128,0,128,0.25)')
+          .polygonStrokeColor(() => '#2d004b')
+          .polygonLabel(d => `<b>${d.properties.name}</b><br/>${d.properties.agencias} agência${d.properties.agencias === 1 ? '' : 's'}`)
+          .onPolygonHover(d => { hoverD = d; refreshGlobe() })
+          .onPolygonClick(d => {
+            const [lng, lat] = d3.geoCentroid(d)
+            globe.pointOfView({ lat, lng, altitude: 1.4 }, 1000)
+            emit('country-click', d.properties.name)
+          })
 
-      // Avisa o pai que pode remover a tela de loading
-      emit('ready')
+        // Avisa o pai que pode remover a tela de loading
+        emit('ready')
+      } catch (e) {
+        // Roda dentro de requestAnimationFrame — um try/catch lá fora em
+        // volta de montarGlobo() não pega erro daqui, porque essa parte
+        // não é aguardada (await), só agendada.
+        console.error('Erro ao montar os polígonos do globo 3D:', e)
+        emit('error', e)
+      }
     })
     initFrame = null
   })
@@ -182,7 +202,7 @@ onMounted(async () => {
     }
   }
   document.addEventListener('visibilitychange', handleVisibility)
-})
+}
 
 onBeforeUnmount(() => {
   if (initFrame) { cancelAnimationFrame(initFrame); initFrame = null }

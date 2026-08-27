@@ -4,12 +4,39 @@ import axios from '@/services/axios'
 import MapFilterPanel from './MapFilterPanel.vue'
 import AgenciesPanel from './AgenciesPanel.vue'
 
+const isLoading = ref(true)
+const erroGlobo = ref(false)
+const chaveGlobo = ref(0)
+
+function onGlobeError() {
+  isLoading.value = false
+  erroGlobo.value = true
+}
+
+function tentarNovoGlobo() {
+  erroGlobo.value = false
+  isLoading.value = true
+  // Muda a key do componente pra forçar recriação do zero (o estado
+  // interno do globo/globe.gl não tem um jeito limpo de "reiniciar" sem
+  // desmontar e montar de novo).
+  chaveGlobo.value++
+}
+
 // O globo puxa globe.gl + d3 + topojson (as libs pesadas). Carregando ele
 // como componente assíncrono, isso vira um chunk separado que baixa em
-// paralelo enquanto os painéis (leves) já aparecem na tela.
-const GlobeCanvas = defineAsyncComponent(() => import('./GlobeCanvas.vue'))
-
-const isLoading = ref(true)
+// paralelo enquanto os painéis (leves) já aparecem na tela. onError cobre o
+// caso do PRÓPRIO arquivo .js falhar ao baixar (ex.: alguém com a aba aberta
+// bem na hora de um deploy novo, pedindo um hash de arquivo que já não
+// existe mais) — sem isso, o site ficava preso pra sempre na tela de
+// carregando, porque o componente nunca chegava a montar pra avisar nada.
+const GlobeCanvas = defineAsyncComponent({
+  loader: () => import('./GlobeCanvas.vue'),
+  onError(error, retry, fail) {
+    console.error('Erro ao baixar o componente do globo 3D:', error)
+    onGlobeError()
+    fail()
+  },
+})
 
 // ─── Categorias do painel de filtros ────────────────────────────────────────
 // Os rótulos ficam aqui (são fixos), mas os países/agências e a contagem de
@@ -150,6 +177,10 @@ function clearFilters() {
       <div class="loading-spinner"></div>
       <p class="loading-text">Carregando mapa...</p>
     </div>
+    <div v-else-if="erroGlobo" class="globe-loading">
+      <p class="loading-text">Não conseguimos carregar o mapa agora.</p>
+      <button class="btn-tentar-novamente" @click="tentarNovoGlobo">Tentar novamente</button>
+    </div>
   </Transition>
 
   <MapFilterPanel
@@ -169,11 +200,14 @@ function clearFilters() {
   <div class="active-badge" v-if="totalActiveFilters > 0">{{ totalActiveFilters }} filtro{{ totalActiveFilters === 1 ? '' : 's' }} ativo{{ totalActiveFilters === 1 ? '' : 's' }}</div>
 
   <GlobeCanvas
+    v-if="!erroGlobo"
+    :key="chaveGlobo"
     :country-meta="countryMeta"
     :active-filters="activeFilters"
     :agency-counts="agencyCountByCountry"
     @country-click="onCountryClick"
     @ready="isLoading = false"
+    @error="onGlobeError"
   />
 </template>
 
@@ -206,6 +240,20 @@ function clearFilters() {
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
+.btn-tentar-novamente {
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+  font-family: var(--gb-font-eyebrow);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 11px 22px;
+  border-radius: 12px;
+  background: transparent;
+  cursor: pointer;
+}
+.btn-tentar-novamente:hover { background: rgba(255, 255, 255, 0.1); }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .fade-enter-active, .fade-leave-active { transition: opacity 0.4s ease; }
