@@ -60,12 +60,12 @@ async function pick(v) {
     </section>
 
     <section class="gb-section historia">
-      <div class="historia-media"><img src="/images/motoresOportunidades.png" alt="" /></div>
+      <div class="historia-media"><img src="/images/comocomecamos.png" alt="" /></div>
       <div>
         <div class="eyebrow"><span class="eyebrow-label">Como começamos</span></div>
         <h2 class="gb-heading historia-heading">Uma decisão que não devia depender de sorte</h2>
         <p>O GlobalBridge nasceu de uma frustração bem concreta: decidir um intercâmbio dependia de planilha solta, grupo de WhatsApp, e agência que às vezes nem respondia. Cada informação vinha de um lugar diferente, e comparar dois países de verdade era quase impossível.</p>
-        <p>Um grupo de ex-intercambistas e desenvolvedores decidiu construir o que gostaria de ter tido na época: <strong>um lugar único</strong> pra comparar destinos com os mesmos critérios, ver avaliação real de quem já passou por cada agência, e falar direto com quem organiza o programa — sem intermediário escondendo informação.</p>
+        <p>Foi daí que veio a ideia de construir o que a gente gostaria de ter tido na época: <strong>um lugar único</strong> pra comparar destinos com os mesmos critérios, ver avaliação real de quem já passou por cada agência, e falar direto com quem organiza o programa — sem intermediário escondendo informação.</p>
         <p>Hoje a plataforma conecta estudantes a mais de 20 países e a agências parceiras verificadas, mas o objetivo continua o mesmo do primeiro dia: tirar a decisão do intercâmbio da mão do achismo — dos dois lados da mesa.</p>
       </div>
     </section>

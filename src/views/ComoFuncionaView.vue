@@ -17,21 +17,21 @@ const tiles = [
     numero: '01',
     label: 'Destino',
     text: 'Compare países por custo de vida, cultura, idioma e regras de visto no mapa.',
-    image: '/images/motoresCultura.png',
+    image: '/images/destinos.png',
     color: '#7A0F74'
   },
   {
     numero: '02',
     label: 'Programa',
     text: 'Universidade, curso de idioma, Study & Work ou Au Pair, lado a lado.',
-    image: '/images/motoresEnsino.png',
+    image: '/images/programs.png',
     color: '#3972DE'
   },
   {
     numero: '03',
     label: 'Agência',
     text: 'Fale direto com agências verificadas, com avaliação de quem já foi.',
-    image: '/images/MotoresIdiomas.png',
+    image: '/images/agencias.png',
     color: '#F0651E'
   }
 ]
