@@ -60,7 +60,7 @@ async function pick(v) {
     </section>
 
     <section class="gb-section historia">
-      <div class="historia-media"><img src="/images/comocomecamos.png" alt="" /></div>
+      <div class="historia-media"><img src="/images/comocomecamos.webp" alt="" /></div>
       <div>
         <div class="eyebrow"><span class="eyebrow-label">Como começamos</span></div>
         <h2 class="gb-heading historia-heading">Uma decisão que não devia depender de sorte</h2>
