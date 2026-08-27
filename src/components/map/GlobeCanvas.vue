@@ -3,7 +3,6 @@ import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import Globe from 'globe.gl'
 import * as d3 from 'd3'
 import * as topojson from 'topojson-client'
-import universitiesByCountry from '@/stores/universitiesByCountry'
 
 const props = defineProps({
   // { [nomeIngles]: { [categoria]: [valores] } } — tags do país, vindas da API.
@@ -11,7 +10,11 @@ const props = defineProps({
   activeFilters: {
     type: Object,
     default: () => ({ emprego: [], universidade: [], idioma: [], cultura: [] })
-  }
+  },
+  // { [nomeIngles]: quantidade } — quantas agências reais tem em cada país,
+  // vindas da API. É isso que colore o mapa agora (antes era um número fixo
+  // de universidades, sem relação com dado real da plataforma).
+  agencyCounts: { type: Object, default: () => ({}) }
 })
 const emit = defineEmits(['ready', 'country-click'])
 
@@ -70,15 +73,28 @@ function refreshGlobe() {
   animationFrame = requestAnimationFrame(() => {
     if (!globe) return
     globe
-      .polygonCapColor(d => d.properties.matchesFilter ? colorScale(d.properties.universities) : 'rgba(20,5,30,0.35)')
+      .polygonCapColor(d => d.properties.matchesFilter ? colorScale(d.properties.agencias) : 'rgba(20,5,30,0.35)')
       .polygonAltitude(getPolygonAltitude)
     animationFrame = null
   })
 }
 
-// Reage a mudanças vindas do componente pai (filtros ativos, tags dos países
-// chegando da API depois do globo já estar de pé).
-watch(() => [props.activeFilters, props.countryMeta], () => {
+// As agências chegam da API depois do globo já estar de pé (fetch
+// assíncrono no componente pai) — recalcula a contagem por país e reescala
+// as cores quando `agencyCounts` chegar ou mudar.
+function updateAgencyCounts() {
+  if (!countriesFeatures.length) return
+  countriesFeatures.forEach(d => {
+    d.properties.agencias = props.agencyCounts[d.properties.name] ?? 0
+  })
+  const max = Math.max(...countriesFeatures.map(d => d.properties.agencias), 1)
+  colorScale = d3.scaleSequentialSqrt(d3.interpolatePurples).domain([0, max])
+}
+
+// Reage a mudanças vindas do componente pai (filtros ativos, tags e
+// contagem de agências dos países chegando da API).
+watch(() => [props.activeFilters, props.countryMeta, props.agencyCounts], () => {
+  updateAgencyCounts()
   updateCountryMatches()
   refreshGlobe()
 }, { deep: true })
@@ -87,13 +103,8 @@ onMounted(async () => {
   // 1. Busca dados (usa cache se já foi carregado antes)
   const world = await getWorldData()
   const countries = topojson.feature(world, world.objects.countries)
-  countries.features.forEach(d => {
-    d.properties.universities = universitiesByCountry[d.properties.name] ?? 0
-  })
   countriesFeatures = countries.features
-
-  const maxUniv = Math.max(...countries.features.map(d => d.properties.universities), 1)
-  colorScale = d3.scaleSequentialSqrt(d3.interpolatePurples).domain([0, maxUniv])
+  updateAgencyCounts()
 
   // 2. Limpa instância anterior se existir
   if (globeEl.value) {
@@ -133,10 +144,10 @@ onMounted(async () => {
       globe
         .polygonsData(countries.features)
         .polygonAltitude(getPolygonAltitude)
-        .polygonCapColor(d => d.properties.matchesFilter ? colorScale(d.properties.universities) : 'rgba(20,5,30,0.35)')
+        .polygonCapColor(d => d.properties.matchesFilter ? colorScale(d.properties.agencias) : 'rgba(20,5,30,0.35)')
         .polygonSideColor(() => 'rgba(128,0,128,0.25)')
         .polygonStrokeColor(() => '#2d004b')
-        .polygonLabel(d => `<b>${d.properties.name}</b><br/>Universidades: ${d.properties.universities}`)
+        .polygonLabel(d => `<b>${d.properties.name}</b><br/>${d.properties.agencias} agência${d.properties.agencias === 1 ? '' : 's'}`)
         .onPolygonHover(d => { hoverD = d; refreshGlobe() })
         .onPolygonClick(d => {
           const [lng, lat] = d3.geoCentroid(d)

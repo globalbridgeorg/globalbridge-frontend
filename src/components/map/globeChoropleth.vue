@@ -93,6 +93,18 @@ const totalActiveFilters = computed(() =>
   Object.values(activeFilters).reduce((acc, arr) => acc + arr.length, 0)
 )
 
+// Contagem real de agências por país (nome em inglês, pra bater com o
+// dataset do globo) — é isso que colore o mapa agora, no lugar do
+// número fixo de universidades.
+const agencyCountByCountry = computed(() => {
+  const contagem = {}
+  for (const agencia of agencies.value) {
+    if (!agencia.paisNomeIngles) continue
+    contagem[agencia.paisNomeIngles] = (contagem[agencia.paisNomeIngles] ?? 0) + 1
+  }
+  return contagem
+})
+
 const filteredAgencies = computed(() => {
   let lista = agencies.value
   if (selectedCountry.value) {
@@ -159,6 +171,7 @@ function clearFilters() {
   <GlobeCanvas
     :country-meta="countryMeta"
     :active-filters="activeFilters"
+    :agency-counts="agencyCountByCountry"
     @country-click="onCountryClick"
     @ready="isLoading = false"
   />
