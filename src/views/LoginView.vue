@@ -32,6 +32,7 @@ const codigoEnviado = ref(false)
 const codigoValor = ref('')
 const codigoLoading = ref(false)
 const registerData = reactive({ email: '', verificationCode: '', name: '', password: '', confirmPassword: '' })
+const processandoEtapa = ref(false)
 
 const currentStep = computed(() => steps[step.value - 1] || steps[0])
 
@@ -71,13 +72,10 @@ function switchAuthMode(toRegister) {
 function goToRegister() { switchAuthMode(true) }
 function goToStep(target) { if (target < 1 || target >= step.value) return; step.value = target; animateStep('back'); clearError() }
 
-function nextStep() {
+async function nextStep() {
   clearError()
   const cur = currentStep.value
-  if (cur.fields[0] === 'verificationCode') {
-    if (step.value < steps.length) { step.value++; animateStep('forward') }
-    return
-  }
+
   for (const f of cur.fields) {
     if (!registerData[f]) {
       const label = cur.labels[cur.fields.indexOf(f)]
@@ -85,11 +83,46 @@ function nextStep() {
       return
     }
   }
+
+  if (cur.fields[0] === 'email') {
+    processandoEtapa.value = true
+    try {
+      await axios.post('/auth/cadastro/codigo/solicitar/', { email: registerData.email })
+    } catch (err) {
+      processandoEtapa.value = false
+      return setError('register.email', err.response?.data?.email?.[0] || err.response?.data?.detail || 'Não conseguimos enviar o código agora. Tente novamente.')
+    }
+    processandoEtapa.value = false
+  }
+
+  if (cur.fields[0] === 'verificationCode') {
+    processandoEtapa.value = true
+    try {
+      await axios.post('/auth/cadastro/codigo/verificar/', { email: registerData.email, codigo: registerData.verificationCode })
+    } catch (err) {
+      processandoEtapa.value = false
+      return setError('register.verificationCode', err.response?.data?.detail || 'Código inválido ou expirado.')
+    }
+    processandoEtapa.value = false
+  }
+
   if (step.value < steps.length) { step.value++; animateStep('forward') }
 }
 
+async function reenviarCodigoCadastro() {
+  clearError()
+  processandoEtapa.value = true
+  try {
+    await axios.post('/auth/cadastro/codigo/solicitar/', { email: registerData.email })
+    successMessage.value = 'Código reenviado — confira seu e-mail.'
+  } catch (err) {
+    setError('register.verificationCode', err.response?.data?.email?.[0] || err.response?.data?.detail || 'Não conseguimos reenviar o código agora.')
+  } finally {
+    processandoEtapa.value = false
+  }
+}
+
 function prevStep() { if (step.value > 1) { step.value--; animateStep('back'); clearError() } }
-function skipVerification() { registerData.verificationCode = '000000'; if (step.value < steps.length) { step.value++; animateStep('forward') } }
 function handleStepEnter() { step.value < steps.length ? nextStep() : handleRegister() }
 
 async function handleLogin() {
@@ -191,7 +224,6 @@ async function handleRegister() {
   } finally { loading.value = false }
 }
 
-function resendCode() { clearError(); successMessage.value = 'Código reenviado com sucesso.' }
 function backToLogin() { switchAuthMode(false) }
 
 onBeforeUnmount(() => {
@@ -406,14 +438,13 @@ onBeforeUnmount(() => {
         </div>
 
         <div v-if="step === 2" class="verification-actions">
-          <button class="resend-link" @click="resendCode">Reenviar código</button>
-          <button class="debug-link" @click="skipVerification">Pular verificação (debug)</button>
+          <button class="resend-link" :disabled="processandoEtapa" @click="reenviarCodigoCadastro">Reenviar código</button>
         </div>
 
         <div class="step-buttons">
-          <button v-if="step > 1" class="btn-secondary" @click="prevStep">Voltar</button>
-          <button v-if="step < steps.length" class="btn-primary" @click="nextStep">Próximo</button>
-          <button v-if="step === steps.length" class="btn-primary" @click="handleRegister">Criar conta</button>
+          <button v-if="step > 1" class="btn-secondary" :disabled="processandoEtapa" @click="prevStep">Voltar</button>
+          <button v-if="step < steps.length" class="btn-primary" :disabled="processandoEtapa" @click="nextStep">{{ processandoEtapa ? 'Enviando...' : 'Próximo' }}</button>
+          <button v-if="step === steps.length" class="btn-primary" :disabled="loading" @click="handleRegister">{{ loading ? 'Criando conta...' : 'Criar conta' }}</button>
         </div>
 
         <div class="back-to-login">
@@ -573,8 +604,7 @@ onBeforeUnmount(() => {
 .step-buttons .btn-primary, .step-buttons .btn-secondary { flex: 1; }
 .btn-secondary { background: transparent; color: var(--gb-dark); border: 1px solid var(--gb-purple-deep-16); padding: 13px; border-radius: 10px; font-family: var(--gb-font-eyebrow); font-weight: 700; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer; transition: background 0.2s ease; }
 .btn-secondary:hover { background: rgba(46, 10, 46, 0.05); }
-.verification-actions { display: flex; justify-content: space-between; align-items: center; margin: -10px 0 20px; }
-.debug-link { background: none; border: none; color: #b45309; font-size: 12px; cursor: pointer; text-decoration: underline; }
+.verification-actions { display: flex; align-items: center; margin: -10px 0 20px; }
 .field-error { display: block; margin-bottom: 8px; color: #dc2626; font-size: 13px; font-weight: 700; animation: errorShake 0.25s ease-in-out; }
 .field-success { display: block; margin-bottom: 16px; color: #15803d; font-size: 13px; font-weight: 700; }
 
