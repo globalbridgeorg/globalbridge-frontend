@@ -45,8 +45,16 @@ const variantePor = (tipo) => layoutFinal.value.find((b) => b.tipo === tipo)?.va
 const getStoredToken = () => localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
 
 const favoritado = computed(() => agencia.value ? isFavorito('agencia', agencia.value.id) : false)
-function handleFavoritar() {
-  if (agencia.value) toggleFavorito('agencia', agencia.value.id)
+function pulsarFavorito(el) {
+  if (!el) return
+  el.classList.remove('pulso')
+  void el.offsetWidth
+  el.classList.add('pulso')
+}
+function handleFavoritar(event) {
+  if (!agencia.value) return
+  toggleFavorito('agencia', agencia.value.id)
+  pulsarFavorito(event.currentTarget.querySelector('.fav-icon'))
 }
 
 function iniciaisDe(nome) {
@@ -235,7 +243,7 @@ onBeforeUnmount(() => ctx?.revert())
             <a v-if="agencia.contato" :href="`mailto:${agencia.contato}`" class="btn-primary-lg">Falar com a agência</a>
             <a v-if="agencia.site" :href="agencia.site" target="_blank" rel="noopener" class="btn-outline-lg btn-outline-on-banner">Visitar site</a>
             <button v-if="estaLogado" class="fav-btn fav-btn-on-banner" :class="{ active: favoritado }" :aria-pressed="favoritado" :aria-label="favoritado ? 'Remover dos favoritos' : 'Salvar nos favoritos'" @click="handleFavoritar">
-              <svg width="18" height="18" viewBox="0 0 24 24" :fill="favoritado ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7.5-4.6-10-9.1C.5 8.2 2.3 4.5 6 4c2.1-.3 3.9.9 6 3 2.1-2.1 3.9-3.3 6-3 3.7.5 5.5 4.2 4 7.9-2.5 4.5-10 9.1-10 9.1z" /></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" :fill="favoritado ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="fav-icon"><path d="M12 21s-7.5-4.6-10-9.1C.5 8.2 2.3 4.5 6 4c2.1-.3 3.9.9 6 3 2.1-2.1 3.9-3.3 6-3 3.7.5 5.5 4.2 4 7.9-2.5 4.5-10 9.1-10 9.1z" /></svg>
             </button>
           </div>
         </div>
@@ -269,7 +277,7 @@ onBeforeUnmount(() => ctx?.revert())
             :aria-label="favoritado ? 'Remover dos favoritos' : 'Salvar nos favoritos'"
             @click="handleFavoritar"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" :fill="favoritado ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" :fill="favoritado ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="fav-icon">
               <path d="M12 21s-7.5-4.6-10-9.1C.5 8.2 2.3 4.5 6 4c2.1-.3 3.9.9 6 3 2.1-2.1 3.9-3.3 6-3 3.7.5 5.5 4.2 4 7.9-2.5 4.5-10 9.1-10 9.1z" />
             </svg>
           </button>
@@ -674,6 +682,26 @@ onBeforeUnmount(() => ctx?.revert())
   color: var(--gb-magenta);
   border-color: var(--gb-magenta);
   background: rgba(176, 31, 176, 0.08);
+}
+
+.fav-icon {
+  display: block;
+}
+
+.fav-icon.pulso {
+  animation: fav-pop 260ms ease-out;
+}
+
+@keyframes fav-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fav-icon.pulso {
+    animation: none;
+  }
 }
 
 .btn-primary-lg, .btn-outline-lg {

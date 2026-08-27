@@ -192,6 +192,7 @@ function toggleSection(id) { openSections[id] = !openSections[id] }
   align-items: center;
   justify-content: center;
   background: #fff;
+  transition: background-color 150ms ease-out, border-color 150ms ease-out;
 }
 .option-item.active .option-check {
   background: var(--gb-magenta);

@@ -30,8 +30,19 @@ const erro = ref(false)
 
 const regiaoLabel = computed(() => pais.value ? (REGIAO_LABELS[pais.value.regiao] ?? pais.value.regiao) : '')
 const favoritado = computed(() => pais.value ? isFavorito('pais', pais.value.id) : false)
+const favIcon = ref(null)
 function handleFavoritar() {
-  if (pais.value) toggleFavorito('pais', pais.value.id)
+  if (!pais.value) return
+  toggleFavorito('pais', pais.value.id)
+  // Reinicia a animação CSS via reflow forçado em vez de um ref reativo
+  // com requestAnimationFrame + setTimeout — essa dupla podia entrar em
+  // corrida (o timeout que tira a classe disparando antes do rAF que
+  // bota), deixando o pulso preso ligado.
+  const el = favIcon.value
+  if (!el) return
+  el.classList.remove('pulso')
+  void el.offsetWidth
+  el.classList.add('pulso')
 }
 
 async function carregarPais() {
@@ -128,7 +139,7 @@ onBeforeUnmount(() => ctx?.revert())
               :aria-label="favoritado ? 'Remover dos favoritos' : 'Salvar nos favoritos'"
               @click="handleFavoritar"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" :fill="favoritado ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <svg ref="favIcon" width="18" height="18" viewBox="0 0 24 24" :fill="favoritado ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="fav-icon">
                 <path d="M12 21s-7.5-4.6-10-9.1C.5 8.2 2.3 4.5 6 4c2.1-.3 3.9.9 6 3 2.1-2.1 3.9-3.3 6-3 3.7.5 5.5 4.2 4 7.9-2.5 4.5-10 9.1-10 9.1z" />
               </svg>
             </button>
@@ -294,6 +305,26 @@ onBeforeUnmount(() => ctx?.revert())
   color: var(--gb-magenta);
   border-color: var(--gb-magenta);
   background: rgba(176, 31, 176, 0.16);
+}
+
+.fav-icon {
+  display: block;
+}
+
+.fav-icon.pulso {
+  animation: fav-pop 260ms ease-out;
+}
+
+@keyframes fav-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fav-icon.pulso {
+    animation: none;
+  }
 }
 
 .hero-title {
