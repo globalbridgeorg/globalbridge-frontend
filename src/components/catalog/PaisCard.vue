@@ -22,8 +22,9 @@ const props = defineProps({
 
 <template>
   <article class="pais-card">
-    <div class="art" :style="{ background: artGradient }">
+    <div class="art" :style="!imagem ? { background: artGradient } : null">
       <img v-if="imagem" :src="imagem" :alt="`Bandeira de ${nome}`" class="art-flag" loading="lazy" />
+      <div v-if="imagem" class="art-scrim" aria-hidden="true"></div>
       <span v-if="regiao" class="region-tag">{{ REGIAO_LABELS[regiao] ?? regiao }}</span>
     </div>
     <div class="body">
@@ -61,33 +62,34 @@ const props = defineProps({
 .art {
   height: 118px;
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   overflow: hidden;
 }
 
 .art-flag {
-  width: 56px;
-  height: 38px;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border-radius: 5px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.art-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0) 55%);
 }
 
 .region-tag {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  background: rgba(255, 255, 255, 0.9);
-  color: var(--gb-magenta-strong);
+  left: 12px;
+  bottom: 10px;
+  color: #fff;
   font-family: var(--gb-font-eyebrow);
   font-weight: 700;
   font-size: 10px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding: 4px 9px;
-  border-radius: var(--gb-radius-pill);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 .body {

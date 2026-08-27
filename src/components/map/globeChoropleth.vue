@@ -3,10 +3,12 @@ import { ref, reactive, computed, defineAsyncComponent } from 'vue'
 import axios from '@/services/axios'
 import MapFilterPanel from './MapFilterPanel.vue'
 import AgenciesPanel from './AgenciesPanel.vue'
+import HelpModal from '@/components/common/HelpModal.vue'
 
 const isLoading = ref(true)
 const erroGlobo = ref(false)
 const chaveGlobo = ref(0)
+const mostrarAjuda = ref(false)
 
 function onGlobeError() {
   isLoading.value = false
@@ -209,6 +211,12 @@ function clearFilters() {
     @ready="isLoading = false"
     @error="onGlobeError"
   />
+
+  <button type="button" class="help-btn" aria-label="Como funciona o mapa" @click="mostrarAjuda = true">
+    <span aria-hidden="true">?</span>
+  </button>
+
+  <HelpModal v-model="mostrarAjuda" title="Como funciona o mapa" video-src="/videos/mapview-explainer.mp4" />
 </template>
 
 <style>
@@ -309,6 +317,53 @@ function clearFilters() {
 @media (max-width: 768px) {
   .active-badge {
     bottom: calc(38vh + 74px + 14px);
+  }
+}
+
+/* ── Botão de ajuda ──────────────────────────────────────────────────── */
+.help-btn {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 1px solid var(--gb-purple-deep-16);
+  box-shadow: 0 8px 24px rgba(23, 17, 26, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--gb-font-display);
+  font-weight: 900;
+  font-size: 22px;
+  color: var(--gb-magenta);
+  cursor: pointer;
+  z-index: 120;
+  transition: transform 150ms ease-out, box-shadow 150ms ease-out;
+}
+.help-btn:hover {
+  box-shadow: 0 10px 28px rgba(23, 17, 26, 0.34);
+}
+.help-btn:active {
+  transform: scale(0.96);
+}
+.help-btn:focus-visible {
+  outline: 2px solid var(--gb-magenta);
+  outline-offset: 2px;
+}
+
+/* No celular o rodapé já tem a folha de agências + a barra de abas, então o
+   botão migra pro topo, espelhando o pill de "Filtros" do outro lado. */
+@media (max-width: 768px) {
+  .help-btn {
+    top: 88px;
+    right: 12px;
+    bottom: auto;
+    width: 40px;
+    height: 40px;
+    font-size: 17px;
+    box-shadow: 0 4px 16px rgba(23, 17, 26, 0.14);
   }
 }
 </style>

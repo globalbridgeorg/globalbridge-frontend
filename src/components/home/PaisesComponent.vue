@@ -58,7 +58,7 @@ onMounted(async () => {
 
     paises.value = response.data.map(p => ({
       ...p,
-      programasDisponiveis: p.programas_disponiveis ?? p.programasDisponiveis ?? 0
+      programasDisponiveis: p.programas_count ?? 0
     }))
   } catch (error) {
     console.error("Erro ao buscar países:", error)
