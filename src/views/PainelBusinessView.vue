@@ -389,17 +389,12 @@ onBeforeUnmount(() => ctx?.revert())
 </template>
 
 <style scoped>
-/* padding-top compensa o header do site, que é fixed só no desktop e
-   flutua por cima de tudo — sem isso o topbar dark próprio dessa
-   página ficava tampado atrás dele. 96px = altura real do header
-   (80px + 16px de margin-top que ele tem), medido no navegador. No
-   celular ele entra no fluxo normal (ver App.vue), não precisa de nada
-   aqui. */
-.painel-view { min-height: 100vh; background: #FFFFFF; font-family: 'Montserrat', sans-serif; padding-top: 96px; }
-
-@media (max-width: 768px) {
-  .painel-view { padding-top: 0; }
-}
+/* Sem padding-top: o fundo escuro do topbar vai até o topo de verdade da
+   página, e o header do site (fixed, flutuando por cima de tudo) sobrepõe
+   a parte de cima dele — é assim que a pílula branca sempre flutuou sobre
+   o resto do conteúdo, só que aqui o "resto do conteúdo" é esse fundo
+   escuro em vez de branco. */
+.painel-view { min-height: 100vh; background: #FFFFFF; font-family: 'Montserrat', sans-serif; }
 
 .estado-tela {
   min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
