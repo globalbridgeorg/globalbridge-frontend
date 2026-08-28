@@ -376,7 +376,7 @@ const toggleMenu = () => {
     max-width: 1227px;
   }
   .header-compact {
-    max-width: 1100px;
+    max-width: 930px;
   }
 }
 
