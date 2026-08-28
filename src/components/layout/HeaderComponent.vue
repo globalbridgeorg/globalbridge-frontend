@@ -14,6 +14,13 @@ const headerClass = computed(() => {
   return route.meta?.headerWidth === 'compact' ? 'header-compact' : 'header-full'
 })
 
+// Painel business e editor de página já têm sua própria barra escura no
+// topo — o header flutuante do site por cima dela ficava sobrepondo essa
+// barra (ver comentário em router/index.js). Nessas telas ele entra no
+// fluxo normal da página em vez de flutuar fixo, igual já acontece no
+// celular pra todo mundo.
+const headerFlutuante = computed(() => route.meta?.headerFloat !== false)
+
 // O login é uma cena de tela cheia própria (o fundo de prédios preenche
 // o viewport todo) — nela o header volta a flutuar por cima no celular,
 // em vez de ocupar espaço no fluxo como no resto do site, senão sobra
@@ -42,7 +49,7 @@ const toggleMenu = () => {
 </script>
 
 <template>
-  <header class="navbar" :class="[headerClass, { flutuante: flutuanteNoMobile }]">
+  <header class="navbar" :class="[headerClass, { flutuante: flutuanteNoMobile, 'nao-flutuante': !headerFlutuante }]">
     <div class="navbar_logo">
       <router-link to="/">
         <img src="/logogb.png" alt="GlobalBridge">
@@ -160,6 +167,19 @@ const toggleMenu = () => {
 .navbar {
   left: 50%;
   transform: translateX(-50%);
+}
+
+/* Painel business / editor de página: o header entra no fluxo normal da
+   página (não flutua fixo por cima de tudo) em qualquer largura de tela,
+   pra não tampar a barra escura que essas páginas já têm no topo — ver
+   headerFlutuante / router/index.js. */
+.navbar.nao-flutuante {
+  position: relative;
+  left: auto;
+  right: auto;
+  width: auto;
+  transform: none;
+  margin: 16px auto;
 }
 
 

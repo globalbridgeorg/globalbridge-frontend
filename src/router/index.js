@@ -109,13 +109,18 @@ const routes = [
     path: '/business',
     name: 'business',
     component: PainelBusinessView,
-    meta: { headerWidth: 'full' }
+    // headerFloat: false — essas duas telas já têm sua própria barra escura
+    // no topo (logo, "Sair da conta" etc.); o header flutuante do site por
+    // cima dela ficava tampando/sobrepondo essa barra. Sem flutuar, ele
+    // some do fixed e a barra escura da página passa a ocupar o topo de
+    // verdade (ver HeaderComponent.vue).
+    meta: { headerWidth: 'full', headerFloat: false }
   },
   {
     path: '/business/editar',
     name: 'business-editor',
     component: BusinessView,
-    meta: { headerWidth: 'full' }
+    meta: { headerWidth: 'full', headerFloat: false }
   },
   {
     path: '/business/solicitar',
