@@ -357,23 +357,8 @@ const toggleMenu = () => {
   max-width: 1440px;
 }
 
-/* /mapview tem um painel fixo de 300px grudado na esquerda e outro de
-   320px na direita (ver MapFilterPanel/AgenciesPanel). Em vez de tentar
-   CALCULAR uma largura seguramente centralizada (o que dá errado porque
-   300 ≠ 320 — centralizar na viewport não é o mesmo que centralizar no
-   vão entre os painéis, a conta simples de "vw menos os dois" fica torta
-   pra um lado), a pílula é ancorada direto nas bordas dos painéis com
-   left/right — o navegador preenche o vão sozinho, sem risco de sobrepor
-   nenhum dos dois lados nem precisar de margem de segurança arbitrária.
-   Abaixo de 768px o layout dos painéis muda pra mobile (ver media query
-   lá embaixo) e essas âncoras deixam de valer. */
 .header-compact {
-  left: 300px;
-  right: 320px;
-  transform: none;
-  width: auto;
   max-width: 1200px;
-  margin: 16px auto;
 }
 
 .mobile-menu-enter-active,
@@ -387,32 +372,11 @@ const toggleMenu = () => {
 }
 
 @media (max-width: 1600px) {
-  /* :not(.header-compact) — sem isso, essa regra e a de .header-compact
-     têm a mesma especificidade e teriam que disputar por ordem no
-     arquivo; assim cada uma cuida só do seu caso e não há risco de uma
-     pisar na largura calculada da outra se o CSS for reordenado depois. */
-  .navbar:not(.header-compact) {
+  .navbar {
     max-width: 1227px;
   }
-}
-
-/* No /mapview, a régua de links do menu desktop (logo + 4 links + 2
-   botões) precisa de uns 700px pra caber sem quebrar — só encolher o
-   max-width da pílula (regra acima) não é suficiente sozinho, porque o
-   conteúdo dela ainda vazaria por cima dos painéis fixos antes de a
-   tela ficar pequena o bastante pra virar o layout mobile de verdade
-   (768px). Por isso o header compacto troca pro menu hambúrguer bem
-   mais cedo que o resto do site, mas continua flutuando fixo (não entra
-   no fluxo da página como acontece abaixo de 768px) — os painéis do mapa
-   são fixos também, então o header precisa continuar por cima deles. */
-@media (max-width: 1400px) {
-  .header-compact .desktop-nav,
-  .header-compact .desktop-btn {
-    display: none;
-  }
-
-  .header-compact .mobile-menu-btn {
-    display: flex;
+  .header-compact {
+    max-width: 1100px;
   }
 }
 
@@ -435,8 +399,6 @@ const toggleMenu = () => {
        /mapview. */
     position: relative;
     left: auto;
-    right: auto;
-    width: auto;
     transform: none;
     margin: 12px 12px 0;
   }
