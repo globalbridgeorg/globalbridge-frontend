@@ -13,7 +13,7 @@ const props = defineProps({
   regiao: { type: String, default: '' },
   idioma: { type: String, default: '' },
   custoDeVida: { type: String, default: '' },
-  programasCount: { type: Number, default: 0 },
+  agenciasCount: { type: Number, default: 0 },
   artGradient: { type: String, default: 'linear-gradient(135deg, var(--gb-purple-deep), var(--gb-magenta))' },
   imagem: { type: String, default: '' },
   to: { type: [String, Object], default: null }
@@ -34,7 +34,7 @@ const props = defineProps({
         <span v-if="custoDeVida" class="fact">Custo: {{ custoDeVida }}</span>
       </div>
       <div class="footer">
-        <span class="footer-meta">{{ programasCount }} {{ programasCount === 1 ? 'programa' : 'programas' }}</span>
+        <span class="footer-meta">{{ agenciasCount }} {{ agenciasCount === 1 ? 'agência' : 'agências' }}</span>
         <component :is="to ? 'router-link' : 'span'" :to="to" class="cta">Ver destino</component>
       </div>
     </div>

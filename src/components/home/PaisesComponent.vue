@@ -58,7 +58,7 @@ onMounted(async () => {
 
     paises.value = response.data.map(p => ({
       ...p,
-      programasDisponiveis: p.programas_count ?? 0
+      programasDisponiveis: p.agencias_count ?? 0
     }))
   } catch (error) {
     console.error("Erro ao buscar países:", error)
@@ -147,7 +147,7 @@ const animarGraficos = () => {
       <span class="col-rank">#</span>
       <span class="col-pais">País</span>
       <span class="col-indicadores">Indicadores</span>
-      <span class="col-programas">Programas</span>
+      <span class="col-programas">Agências</span>
     </div>
 
     <div v-if="carregando" class="pais-skeleton" aria-hidden="true">
@@ -207,7 +207,7 @@ const animarGraficos = () => {
           :ref="el => setProgramasRef(el, pais.id)"
         >0</span>
         <span class="programas-label">
-          programas<br />disponíveis
+          agências<br />parceiras
         </span>
       </div>
     </div>

@@ -150,7 +150,7 @@ onBeforeUnmount(() => ctx?.revert())
             :regiao="pais.regiao"
             :idioma="pais.idioma"
             :custo-de-vida="pais.custo_de_vida"
-            :programas-count="pais.programas_count ?? 0"
+            :agencias-count="pais.agencias_count ?? 0"
             :imagem="pais.imagem_url"
             :to="{ name: 'pais', params: { id: pais.id } }"
           />
