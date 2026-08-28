@@ -168,6 +168,8 @@ onBeforeUnmount(() => ctx?.revert())
     <template v-else-if="agencia && painel">
       <div class="topbar">
         <div class="topbar-info">
+          <span class="logo">Global<span>Bridge</span></span>
+          <span class="divisor"></span>
           <span class="titulo-editando">Painel — {{ agencia.nome }}</span>
         </div>
         <div class="topbar-actions">
@@ -387,11 +389,17 @@ onBeforeUnmount(() => ctx?.revert())
 </template>
 
 <style scoped>
-/* O header do site não flutua mais por cima dessa página (ver
-   headerFlutuante em HeaderComponent.vue / router/index.js) — ele entra
-   no fluxo normal acima do topbar dark, então não precisa mais de
-   padding-top pra compensar nada. */
-.painel-view { min-height: 100vh; background: #FFFFFF; font-family: 'Montserrat', sans-serif; }
+/* padding-top compensa o header do site, que é fixed só no desktop e
+   flutua por cima de tudo — sem isso o topbar dark próprio dessa
+   página ficava tampado atrás dele. 96px = altura real do header
+   (80px + 16px de margin-top que ele tem), medido no navegador. No
+   celular ele entra no fluxo normal (ver App.vue), não precisa de nada
+   aqui. */
+.painel-view { min-height: 100vh; background: #FFFFFF; font-family: 'Montserrat', sans-serif; padding-top: 96px; }
+
+@media (max-width: 768px) {
+  .painel-view { padding-top: 0; }
+}
 
 .estado-tela {
   min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -404,6 +412,9 @@ onBeforeUnmount(() => ctx?.revert())
   padding: 0 24px; color: #fff;
 }
 .topbar-info { display: flex; align-items: center; gap: 16px; }
+.logo { font-family: var(--gb-font-display); font-weight: 900; font-size: 15px; letter-spacing: -0.02em; text-transform: uppercase; }
+.logo span { color: var(--gb-accent-light, #FF7DEE); }
+.divisor { width: 1px; height: 20px; background: rgba(255, 255, 255, 0.2); }
 .titulo-editando { font-size: 0.85rem; color: rgba(255, 255, 255, 0.7); }
 .topbar-actions { display: flex; align-items: center; gap: 20px; }
 .link-ver-pagina { font-size: 0.82rem; color: rgba(255, 255, 255, 0.75); text-decoration: underline; }

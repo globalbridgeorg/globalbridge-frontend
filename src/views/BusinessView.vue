@@ -772,10 +772,17 @@ onBeforeRouteLeave(() => {
   min-height: 100vh;
   background: #FFFFFF;
   font-family: 'Montserrat', sans-serif;
-  /* O header do site não flutua mais por cima dessa página (ver
-     headerFlutuante em HeaderComponent.vue / router/index.js) — entra no
-     fluxo normal acima do topbar dark, então não precisa mais de
-     padding-top pra compensar nada. */
+  /* O header do site é fixed só no desktop — flutua por cima de tudo,
+     então sem esse respiro o nosso topbar próprio (dark) ficava
+     tampado atrás dele. 96px = altura real do header (80px + 16px de
+     margin-top que ele tem), medido no navegador — não confiar só no
+     que a CSS do header declara. No celular ele entra no fluxo normal
+     (ver App.vue), então não precisa de nada aqui. */
+  padding-top: 96px;
+}
+
+@media (max-width: 768px) {
+  .business-view { padding-top: 0; }
 }
 
 .estado-tela {
