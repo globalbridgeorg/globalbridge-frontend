@@ -216,7 +216,7 @@ function clearFilters() {
     <span aria-hidden="true">?</span>
   </button>
 
-  <HelpModal v-model="mostrarAjuda" title="Como funciona o mapa" video-src="/videos/mapview-explainer.mp4" />
+  <HelpModal v-model="mostrarAjuda" title="Como funciona o globo" video-src="/videos/mapview-explainer.mp4" />
 </template>
 
 <style>
