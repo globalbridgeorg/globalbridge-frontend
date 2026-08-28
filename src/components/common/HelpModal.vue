@@ -118,7 +118,7 @@ onBeforeUnmount(() => {
 
 .help-modal-panel {
   width: 100%;
-  max-width: 1090px;
+  max-width: 780px;
   max-height: min(88vh, 720px);
   background: #FFFFFF;
   border-radius: 16px;
