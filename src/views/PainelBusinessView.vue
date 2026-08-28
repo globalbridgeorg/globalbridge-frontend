@@ -403,8 +403,8 @@ onBeforeUnmount(() => ctx?.revert())
 .link-voltar { color: var(--gb-magenta); font-weight: 600; }
 
 .topbar {
-  height: 64px; background: var(--gb-dark); display: flex; align-items: center; justify-content: space-between;
-  padding: 0 24px; color: #fff;
+  height: 190px; background: var(--gb-dark); display: flex; align-items: end; justify-content: space-between;
+  padding: 20px 24px; color: #fff;
 }
 .topbar-info { display: flex; align-items: center; gap: 16px; }
 .logo { font-family: var(--gb-font-display); font-weight: 900; font-size: 15px; letter-spacing: -0.02em; text-transform: uppercase; }

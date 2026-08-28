@@ -796,12 +796,12 @@ onBeforeRouteLeave(() => {
 }
 
 .topbar {
-  height: 64px;
+  height: 190px;
   background: var(--gb-dark);
   display: flex;
-  align-items: center;
+  align-items: end;
   justify-content: space-between;
-  padding: 0 24px;
+  padding: 20px 24px;
   color: #fff;
   flex-shrink: 0;
 }
