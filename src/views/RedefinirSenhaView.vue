@@ -56,13 +56,13 @@ async function redefinir() {
       <h1 class="gb-heading">Escolha uma<br />nova senha</h1>
 
       <div class="form-group">
-        <label>Nova senha</label>
-        <input type="password" v-model="novaSenha" placeholder="Mínimo 8 caracteres">
+        <label for="rs-nova-senha">Nova senha</label>
+        <input id="rs-nova-senha" type="password" v-model="novaSenha" placeholder="Mínimo 8 caracteres">
       </div>
       <div class="form-group">
-        <label>Confirmar senha</label>
+        <label for="rs-confirmar-senha">Confirmar senha</label>
         <div v-if="erro" class="field-error">{{ erro }}</div>
-        <input type="password" v-model="confirmarSenha" placeholder="Digite novamente" @keyup.enter="redefinir">
+        <input id="rs-confirmar-senha" type="password" v-model="confirmarSenha" placeholder="Digite novamente" @keyup.enter="redefinir">
       </div>
 
       <button class="btn-primary" :disabled="loading" @click="redefinir">{{ loading ? 'Salvando...' : 'Redefinir senha' }}</button>

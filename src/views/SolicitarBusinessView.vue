@@ -138,27 +138,27 @@ onMounted(carregarPaises)
         <span class="eyebrow">01 · Sobre a agência</span>
         <div class="grid-2">
           <div class="field">
-            <label>Nome da agência</label>
-            <input class="inp" :class="{ erro: camposComErro.nome }" v-model="form.nome" placeholder="Nome da sua agência">
+            <label for="sab-nome">Nome da agência</label>
+            <input id="sab-nome" class="inp" :class="{ erro: camposComErro.nome }" v-model="form.nome" placeholder="Nome da sua agência">
           </div>
           <div class="field">
-            <label>Site oficial</label>
-            <input class="inp" v-model="form.site" placeholder="https://suaagencia.com">
+            <label for="sab-site">Site oficial</label>
+            <input id="sab-site" class="inp" v-model="form.site" placeholder="https://suaagencia.com">
           </div>
           <div class="field">
-            <label>Cidade da sede</label>
-            <input class="inp" :class="{ erro: camposComErro.cidade }" v-model="form.cidade" placeholder="Cidade">
+            <label for="sab-cidade">Cidade da sede</label>
+            <input id="sab-cidade" class="inp" :class="{ erro: camposComErro.cidade }" v-model="form.cidade" placeholder="Cidade">
           </div>
           <div class="field">
-            <label>País da sede</label>
-            <select class="inp" :class="{ erro: camposComErro.pais_sede }" v-model="form.pais_sede" :disabled="carregandoPaises">
+            <label for="sab-pais">País da sede</label>
+            <select id="sab-pais" class="inp" :class="{ erro: camposComErro.pais_sede }" v-model="form.pais_sede" :disabled="carregandoPaises">
               <option value="" disabled>{{ carregandoPaises ? 'Carregando...' : 'Escolha um país' }}</option>
               <option v-for="p in paises" :key="p.id" :value="p.id">{{ p.nome }}</option>
             </select>
           </div>
           <div class="field">
-            <label>Ano de fundação</label>
-            <input class="inp" type="number" v-model="form.ano_fundacao" placeholder="Ex.: 2014">
+            <label for="sab-ano">Ano de fundação</label>
+            <input id="sab-ano" class="inp" type="number" v-model="form.ano_fundacao" placeholder="Ex.: 2014">
           </div>
         </div>
       </div>
@@ -178,25 +178,25 @@ onMounted(carregarPaises)
         <span class="eyebrow">03 · Quem está pedindo</span>
         <div class="grid-2">
           <div class="field">
-            <label>Seu nome</label>
-            <input class="inp" :class="{ erro: camposComErro.nome_responsavel }" v-model="form.nome_responsavel" placeholder="Seu nome completo">
+            <label for="sab-responsavel">Seu nome</label>
+            <input id="sab-responsavel" class="inp" :class="{ erro: camposComErro.nome_responsavel }" v-model="form.nome_responsavel" placeholder="Seu nome completo">
           </div>
           <div class="field">
-            <label>Cargo na agência</label>
-            <input class="inp" v-model="form.cargo_responsavel" placeholder="Ex.: Coordenador de Admissões">
+            <label for="sab-cargo">Cargo na agência</label>
+            <input id="sab-cargo" class="inp" v-model="form.cargo_responsavel" placeholder="Ex.: Coordenador de Admissões">
           </div>
           <div class="field field-full">
-            <label>E-mail institucional</label>
-            <input class="inp" :class="{ erro: camposComErro.email_responsavel }" type="email" v-model="form.email_responsavel" placeholder="voce@suaagencia.com">
+            <label for="sab-email">E-mail institucional</label>
+            <input id="sab-email" class="inp" :class="{ erro: camposComErro.email_responsavel }" type="email" v-model="form.email_responsavel" placeholder="voce@suaagencia.com">
             <p class="hint">É a primeira coisa que a gente confere — e vira o login da conta business assim que aprovado.</p>
           </div>
           <div class="field">
-            <label>Crie uma senha</label>
-            <input class="inp" :class="{ erro: camposComErro.senha }" type="password" v-model="form.senha" placeholder="Mínimo 8 caracteres">
+            <label for="sab-senha">Crie uma senha</label>
+            <input id="sab-senha" class="inp" :class="{ erro: camposComErro.senha }" type="password" v-model="form.senha" placeholder="Mínimo 8 caracteres">
           </div>
           <div class="field">
-            <label>Confirme a senha</label>
-            <input class="inp" :class="{ erro: camposComErro.confirmarSenha }" type="password" v-model="form.confirmarSenha" placeholder="Digite novamente">
+            <label for="sab-confirmar">Confirme a senha</label>
+            <input id="sab-confirmar" class="inp" :class="{ erro: camposComErro.confirmarSenha }" type="password" v-model="form.confirmarSenha" placeholder="Digite novamente">
           </div>
         </div>
         <p class="hint">Sua conta já é criada agora, com essa senha — dá pra logar e acompanhar o status do pedido a qualquer momento, mesmo antes de ser aprovada.</p>

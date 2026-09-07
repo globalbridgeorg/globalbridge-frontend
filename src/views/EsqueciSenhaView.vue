@@ -31,9 +31,9 @@ async function enviar() {
       <p class="desc">Informa o e-mail da sua conta que a gente manda um link pra você escolher uma nova senha.</p>
 
       <div class="form-group">
-        <label>E-mail</label>
+        <label for="es-email">E-mail</label>
         <div v-if="erro" class="field-error">{{ erro }}</div>
-        <input type="email" v-model="email" placeholder="seu@email.com" @keyup.enter="enviar">
+        <input id="es-email" type="email" v-model="email" placeholder="seu@email.com" @keyup.enter="enviar">
       </div>
 
       <button class="btn-primary" :disabled="loading" @click="enviar">{{ loading ? 'Enviando...' : 'Enviar link' }}</button>
