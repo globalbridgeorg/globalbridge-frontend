@@ -515,10 +515,55 @@ onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
 }
 
 @media (min-width: 769px) {
-  .mobile-nav {
-    display: none !important;
-  }
   .mobile-menu-btn {
+    display: none;
+  }
+
+  /* No desktop o menu em tela cheia só abre no mapview (abaixo); sem barra de abas embaixo */
+  .mobile-nav {
+    bottom: 0;
+  }
+
+  .mobile-nav-inner {
+    max-width: 560px;
+    margin-inline: auto;
+  }
+
+  /* Mapview: a nav fica na coluna do meio, entre os filtros (300px) e as agências (320px) */
+  .navbar.header-compact {
+    left: 316px;
+    right: 336px;
+    width: auto;
+    max-width: 930px;
+    margin: 16px auto 0;
+    transform: none;
+    /* o App.vue põe justify-self: center no header, que encolheria a pílula pro conteúdo */
+    justify-self: stretch;
+  }
+}
+
+/* Coluna do meio < ~750px: logo + Entrar + menu, igual à barra mobile */
+@media (min-width: 769px) and (max-width: 1399px) {
+  .navbar.header-compact .desktop-nav,
+  .navbar.header-compact .desktop-btn {
+    display: none;
+  }
+
+  .navbar.header-compact .mobile-menu-btn {
+    display: flex;
+    order: 3;
+  }
+
+  .navbar.header-compact .mobile-action {
+    display: inline-flex;
+    order: 2;
+    margin-left: auto;
+  }
+}
+
+/* Coluna do meio < ~900px: cabem os links, menos o "Instalar App" */
+@media (min-width: 1400px) and (max-width: 1551px) {
+  .navbar.header-compact .install-link {
     display: none;
   }
 }
