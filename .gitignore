@@ -40,3 +40,6 @@ __screenshots__/
 
 # PWA dev service worker (gerado)
 dev-dist
+
+# cache local do detector do Impeccable
+.impeccable/hook.cache.json
