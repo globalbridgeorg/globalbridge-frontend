@@ -11,6 +11,11 @@ const props = defineProps({
     type: String,
     default: "primary",
   },
+  // "span" quando o botão é só o visual de um link (<a>/<router-link>) — evita botão dentro de link
+  tag: {
+    type: String,
+    default: "button",
+  },
 });
 
 // Tamanho do ícone e espaço até o texto — iguais a --icon-size / --gap no CSS
@@ -133,7 +138,8 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <button
+  <component
+    :is="tag"
     class="swap-btn"
     @mouseenter="play(true)"
     @mouseleave="play(false)"
@@ -157,7 +163,7 @@ onBeforeUnmount(() => {
         aria-hidden="true"
       />
     </span>
-  </button>
+  </component>
 </template>
 
 <style scoped>

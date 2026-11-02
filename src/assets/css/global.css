@@ -94,8 +94,8 @@ body {
   border: 0;
 }
 
-/* Largura máxima padrão de toda seção de conteúdo da home (sem padding
-   lateral — conteúdo vai até a borda da viewport de propósito). */
+/* Largura máxima padrão de toda seção de conteúdo. Acima de 1280px a margem
+   vem do próprio max-width; no celular cada componente põe o seu padding. */
 .gb-section {
   width: 100%;
   max-width: 1440px;
@@ -108,6 +108,16 @@ body {
     max-width: 1225px;
   }
 }
+
+/* Entre o celular e o max-width o conteúdo encostava na borda da tela. */
+@media (min-width: 769px) and (max-width: 1280px) {
+  .gb-section {
+    padding-inline: var(--gb-space-x);
+  }
+}
+
+/* Escala de breakpoints do projeto: 480 / 640 / 768 / 1024 / 1280
+   (+1600 só pra telas largas). Use estes valores em novos @media. */
 
 /* Variantes de cor do ButtonComponent — evita repetir o mesmo
    background-color/color inline em cada tela que usa um botão escuro ou

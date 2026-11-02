@@ -101,7 +101,7 @@ const iniciais = computed(() => {
 .stat-label { display: block; margin-top: 4px; font-family: var(--gb-font-eyebrow); font-weight: 700; font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gb-ink-faint); }
 
 .grid-duas { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 20px; }
-@media (max-width: 820px) { .grid-duas, .grid-stats { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 768px) { .grid-stats { grid-template-columns: 1fr 1fr; } .grid-duas { grid-template-columns: 1fr; } }
 
 .linha-nota { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
 .linha-nota-label { width: 34px; font-size: 0.8rem; font-weight: 700; color: var(--gb-ink-soft); flex-shrink: 0; }

@@ -195,6 +195,9 @@ onBeforeUnmount(() => ctx?.revert())
 }
 
 .breadcrumb a {
+  display: inline-block;
+  padding-block: 5px;
+  margin-block: -5px;
   color: var(--gb-ink-faint);
   text-decoration: none;
 }
@@ -412,16 +415,16 @@ onBeforeUnmount(() => ctx?.revert())
   .skeleton-hero, .skeleton-row { animation: none; }
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1280px) {
   .countries-grid { grid-template-columns: repeat(3, 1fr); }
   .stats { grid-template-columns: repeat(2, 1fr); }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .countries-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 768px) {
   .countries-grid { grid-template-columns: 1fr; }
   .stats { grid-template-columns: 1fr; }
   .hero { padding: 28px 24px; }

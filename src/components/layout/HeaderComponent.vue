@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watchEffect } from 'vue'
+import { ref, computed, watchEffect, watch, onBeforeUnmount } from 'vue'
 import ButtonComponent from '@/components/common/ButtonComponent.vue'
 import { usePWA } from '@/composables/usePWA'
 import { useContaAtual } from '@/composables/useContaAtual'
@@ -36,9 +36,21 @@ const buttonLink = computed(() => {
   return conta.tipo === 'agencia' ? '/business' : '/profile'
 })
 
+const menuBtn = ref(null)
 const toggleMenu = () => {
   mobileMenuOpen.value = !mobileMenuOpen.value
 }
+
+// Escape fecha o menu e devolve o foco pro botão que abriu
+const fecharComEsc = (e) => {
+  if (e.key !== 'Escape') return
+  mobileMenuOpen.value = false
+  menuBtn.value?.focus()
+}
+watch(mobileMenuOpen, (aberto) => {
+  window[aberto ? 'addEventListener' : 'removeEventListener']('keydown', fecharComEsc)
+})
+onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
 </script>
 
 <template>
@@ -51,6 +63,7 @@ const toggleMenu = () => {
 
   <!-- nav mobile -->
     <button
+      ref="menuBtn"
       class="mobile-menu-btn"
       :class="{ open: mobileMenuOpen }"
       @click="toggleMenu"
@@ -77,7 +90,7 @@ const toggleMenu = () => {
     <router-link :to="buttonLink" 
       class="desktop-btn"
       >
-      <ButtonComponent 
+      <ButtonComponent tag="span" 
         :text="buttonText" 
         icon-position="right"
       />
@@ -162,6 +175,10 @@ const toggleMenu = () => {
   transform: translateX(-50%);
 }
 
+
+.navbar_logo a {
+  display: block;
+}
 
 .navbar_logo img {
   height: 40px;

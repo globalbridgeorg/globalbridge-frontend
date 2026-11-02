@@ -9,7 +9,7 @@ import { initSmoothScroll } from '@/utils/lenis'
 const route = useRoute()
 
 const shouldShowFooter = computed(() => !['mapview', 'profile', 'login'].includes(route.name))
-// MobileTabBar já se esconde nessas rotas — sem isso o <main> reservava
+// MobileTabBar já se esconde nessas rotas — sem isso o layout reservava
 // 74px de espaço embaixo pra uma barra que não estava lá, sobrando um
 // vão vazio (e mais scroll) no celular.
 const shouldShowTabBar = computed(() => route.name !== 'login')
@@ -20,20 +20,21 @@ onMounted(() => {
 </script>
 
 <template>
-  <main :class="{ 'sem-tabbar': !shouldShowTabBar }">
+  <div class="app-shell" :class="{ 'sem-tabbar': !shouldShowTabBar }">
+    <a href="#conteudo" class="skip-link">Pular para o conteúdo</a>
     <HeaderComponent
     class="header"
     />
-    <div class="page-viewport">
+    <main id="conteudo" class="page-viewport" tabindex="-1">
       <router-view v-slot="{ Component, route: currentRoute }">
         <transition type="transition" :name="['mapview', 'profile'].includes(currentRoute.name) ? 'page-focus-noenter' : 'page-focus'">
           <component :is="Component" :key="currentRoute.path" />
         </transition>
       </router-view>
-    </div>
+    </main>
     <FooterComponent v-if="shouldShowFooter" />
     <MobileTabBar v-if="shouldShowTabBar" />
-  </main>
+  </div>
 </template>
 
 <style scoped>
@@ -54,6 +55,29 @@ header {
   overflow-x: clip;
 }
 
+.page-viewport:focus {
+  outline: none;
+}
+
+.skip-link {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2000;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: var(--gb-dark);
+  color: #fff;
+  font-weight: 600;
+  transform: translateY(-150%);
+}
+
+.skip-link:focus-visible {
+  transform: none;
+  outline: 2px solid var(--gb-magenta);
+  outline-offset: 2px;
+}
+
 /* No celular o header deixa de flutuar sobre o conteúdo (era fixed,
    igual no PC) e passa a rolar junto com a página — a barra de abas
    fixa (MobileTabBar) é que garante acesso rápido à navegação agora.
@@ -69,11 +93,11 @@ header {
     box-shadow: none;
   }
 
-  main {
+  .app-shell {
     padding-bottom: 74px;
   }
 
-  main.sem-tabbar {
+  .app-shell.sem-tabbar {
     padding-bottom: 0;
   }
 }

@@ -66,7 +66,9 @@ async function enviarAvaliacao() {
           @click="novaNota = n"
         >{{ n <= novaNota ? '★' : '☆' }}</button>
       </div>
+      <label for="comentario-avaliacao" class="sr-only">Comentário da avaliação</label>
       <textarea
+        id="comentario-avaliacao"
         v-model="novoComentario"
         class="form-textarea"
         rows="3"
@@ -162,6 +164,8 @@ async function enviarAvaliacao() {
   color: var(--gb-purple-deep-16);
   cursor: pointer;
   padding: 0;
+  min-width: 28px;
+  min-height: 28px;
 }
 
 .form-star.filled {
@@ -181,7 +185,7 @@ async function enviarAvaliacao() {
 }
 
 .form-textarea:focus {
-  outline: none;
+  outline: 2px solid var(--gb-magenta); outline-offset: 1px;
   border-color: var(--gb-magenta);
 }
 
@@ -297,11 +301,11 @@ async function enviarAvaliacao() {
   max-width: 640px;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1024px) {
   .review-cards { grid-template-columns: repeat(2, 1fr); }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 768px) {
   .review-cards { grid-template-columns: 1fr; }
 }
 </style>

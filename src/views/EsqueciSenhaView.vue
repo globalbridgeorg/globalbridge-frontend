@@ -94,7 +94,7 @@ async function enviar() {
 .form-group { text-align: left; margin-bottom: 20px; }
 .form-group label { display: block; margin-bottom: 8px; font-family: var(--gb-font-eyebrow); font-weight: 700; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gb-ink-faint); }
 .form-group input { width: 100%; padding: 12px 14px; border: 1px solid var(--gb-purple-deep-16); border-radius: 10px; font-size: 14px; font-family: var(--gb-font-display); background: #fff; color: var(--gb-dark); }
-.form-group input:focus { outline: none; border-color: var(--gb-magenta); box-shadow: 0 0 0 3px rgba(176, 31, 176, 0.12); }
+.form-group input:focus { outline: 2px solid var(--gb-magenta); outline-offset: 1px; border-color: var(--gb-magenta); }
 .field-error { display: block; margin-bottom: 8px; color: #dc2626; font-size: 13px; font-weight: 700; }
 
 .btn-primary { width: 100%; background: var(--gb-dark); color: #fff; border: none; padding: 13px; border-radius: 10px; font-family: var(--gb-font-eyebrow); font-weight: 700; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer; }

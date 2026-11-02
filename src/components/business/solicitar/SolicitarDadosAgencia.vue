@@ -130,7 +130,7 @@ onMounted(carregarPaises)
 }
 
 .inp:focus {
-  outline: none;
+  outline: 2px solid var(--gb-magenta); outline-offset: 1px;
   border-color: var(--gb-magenta);
 }
 

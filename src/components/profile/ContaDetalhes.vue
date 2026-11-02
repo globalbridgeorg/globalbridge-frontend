@@ -86,7 +86,7 @@ const activity = [
   gap: 20px;
 }
 
-@media (max-width: 800px) {
+@media (max-width: 768px) {
   .account-grid {
     grid-template-columns: 1fr;
   }

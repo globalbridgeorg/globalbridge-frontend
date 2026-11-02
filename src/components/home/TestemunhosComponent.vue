@@ -155,7 +155,7 @@ onBeforeUnmount(() => ctx?.revert())
   color: var(--gb-mauve-muted);
 }
 
-@media (min-width: 900px) {
+@media (min-width: 1024px) {
   .cards {
     flex-direction: row;
   }

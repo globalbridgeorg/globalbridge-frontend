@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 
 const props = defineProps({
   // [{ id, label, options: [{ value, label, count }] }]
@@ -18,13 +18,17 @@ const totalActiveFilters = computed(() =>
 )
 
 function toggleSection(id) { openSections[id] = !openSections[id] }
+
+const fecharComEsc = (e) => { if (e.key === 'Escape' && !panelCollapsed.value) panelCollapsed.value = true }
+onMounted(() => window.addEventListener('keydown', fecharComEsc))
+onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
 </script>
 
 <template>
   <!-- Botão flutuante e fundo escurecido: só existem visualmente no celular
        (ver media query no <style>), onde o painel vira um overlay que desliza
        por cima do globo em vez de uma coluna fixa ao lado. -->
-  <button class="mobile-filter-toggle" @click="panelCollapsed = !panelCollapsed" :aria-label="panelCollapsed ? 'Abrir filtros' : 'Fechar filtros'">
+  <button :aria-expanded="!panelCollapsed" class="mobile-filter-toggle" @click="panelCollapsed = !panelCollapsed" :aria-label="panelCollapsed ? 'Abrir filtros' : 'Fechar filtros'">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#17111A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16" /><path d="M7 12h10" /><path d="M10 18h4" /></svg>
     <span>Filtros</span>
     <span v-if="totalActiveFilters > 0" class="badge">{{ totalActiveFilters }}</span>
@@ -32,12 +36,12 @@ function toggleSection(id) { openSections[id] = !openSections[id] }
   <div v-if="!panelCollapsed" class="filter-backdrop" @click="panelCollapsed = true"></div>
 
   <aside class="filter-panel" :class="{ collapsed: panelCollapsed }">
-    <button class="collapse-btn" @click="panelCollapsed = !panelCollapsed" :aria-label="panelCollapsed ? 'Expandir filtros' : 'Recolher filtros'">
+    <button class="collapse-btn" :aria-expanded="!panelCollapsed" @click="panelCollapsed = !panelCollapsed" :aria-label="panelCollapsed ? 'Expandir filtros' : 'Recolher filtros'">
       <svg width="14" height="14" viewBox="0 0 16 16" fill="none" :style="{ transform: panelCollapsed ? 'rotate(180deg)' : 'none' }">
         <path d="M10 3L5 8L10 13" stroke="#17111A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
       </svg>
     </button>
-    <div class="panel-inner" data-lenis-prevent>
+    <div class="panel-inner" data-lenis-prevent :inert="panelCollapsed">
       <div class="panel-heading">
         <span class="panel-eyebrow">Explorar por</span>
         <h2 class="panel-title">Filtros</h2>

@@ -38,12 +38,15 @@ const { logout } = useAuth()
 
 <style scoped>
 .topbar {
-  height: 190px;
+  min-height: 190px;
   background: var(--gb-dark);
   display: flex;
-  align-items: end;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  align-content: flex-end;
   justify-content: space-between;
-  padding: 20px 24px;
+  gap: 16px 24px;
+  padding: 96px 24px 20px;
   color: #fff;
   flex-shrink: 0;
 }
@@ -76,8 +79,9 @@ const { logout } = useAuth()
 
 .topbar-actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 16px;
+  gap: 12px 16px;
 }
 
 .link-ver-pagina {

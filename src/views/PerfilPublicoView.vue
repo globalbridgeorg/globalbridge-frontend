@@ -663,7 +663,7 @@ onMounted(carregarPerfil)
   .skeleton-hero { animation: none; }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .stats-row, .review-cards, .ag-stats {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -676,7 +676,7 @@ onMounted(carregarPerfil)
   }
 }
 
-@media (max-width: 560px) {
+@media (max-width: 640px) {
   .stats-row, .review-cards, .ag-stats {
     grid-template-columns: 1fr;
   }

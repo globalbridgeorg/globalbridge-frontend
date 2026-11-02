@@ -197,15 +197,15 @@ onBeforeUnmount(() => ctx?.revert())
 .link-voltar { color: var(--gb-magenta); font-weight: 600; }
 
 .topbar {
-  height: 190px; background: var(--gb-dark); display: flex; align-items: end; justify-content: space-between;
-  padding: 20px 24px; color: #fff;
+  min-height: 190px; background: var(--gb-dark); display: flex; flex-wrap: wrap; align-items: flex-end; align-content: flex-end;
+  justify-content: space-between; gap: 16px 24px; padding: 96px 24px 20px; color: #fff;
 }
 .topbar-info { display: flex; align-items: center; gap: 16px; }
 .logo { font-family: var(--gb-font-display); font-weight: 900; font-size: 15px; letter-spacing: -0.02em; text-transform: uppercase; }
 .logo span { color: var(--gb-accent-light, #FF7DEE); }
 .divisor { width: 1px; height: 20px; background: rgba(255, 255, 255, 0.2); }
 .titulo-editando { font-size: 0.85rem; color: rgba(255, 255, 255, 0.7); }
-.topbar-actions { display: flex; align-items: center; gap: 20px; }
+.topbar-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
 .link-ver-pagina { font-size: 0.82rem; color: rgba(255, 255, 255, 0.75); text-decoration: underline; }
 .link-sair { font-family: inherit; font-size: 0.82rem; color: rgba(255, 255, 255, 0.75); text-decoration: underline; background: none; border: none; cursor: pointer; padding: 0; }
 .link-sair:hover { color: #fff; }
@@ -217,7 +217,7 @@ onBeforeUnmount(() => ctx?.revert())
 .conteudo { max-width: 1100px; margin: 0 auto; padding: 32px 24px 90px; display: flex; flex-direction: column; gap: 20px; }
 
 .grid-duas { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 20px; }
-@media (max-width: 820px) { .grid-duas { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 768px) { .grid-duas { grid-template-columns: 1fr; } }
 
 .tabela-head { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px; padding: 0 0 8px; border-bottom: 1px solid rgba(46,10,46,0.12); font-family: var(--gb-font-eyebrow); font-weight: 700; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gb-ink-faint); }
 .tabela-linha { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(46,10,46,0.06); align-items: center; font-size: 0.86rem; color: var(--gb-ink-soft); }

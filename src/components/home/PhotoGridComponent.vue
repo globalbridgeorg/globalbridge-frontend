@@ -69,7 +69,7 @@ onUnmounted(() => {
 /* pc */
 .roboto-condensed {
   font-family: "Roboto Condensed", sans-serif;
-  font-size: 6rem;
+  font-size: clamp(3rem, 1rem + 5.5vw, 6rem);
   font-weight: 900;
   font-style: normal;
   color: #333231;
@@ -160,6 +160,12 @@ onUnmounted(() => {
   }
 }
 
+@media (min-width: 769px) and (max-width: 1280px) {
+  .main-layout-wrapper {
+    padding-inline: var(--gb-space-x);
+  }
+}
+
 @media (max-width: 768px) {
   .main-layout-wrapper {
     flex-direction: column;
@@ -173,9 +179,6 @@ onUnmounted(() => {
     width: 100%;
   }
 
-  .roboto-condensed {
-    font-size: clamp(3rem, 8vw, 3rem);
-  }
 
   .photo-section {
     min-height: auto;

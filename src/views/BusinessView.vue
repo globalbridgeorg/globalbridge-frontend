@@ -223,7 +223,7 @@ onBeforeRouteLeave(() => {
   height: calc(100vh - 64px - 96px);
 }
 
-@media (max-width: 960px) {
+@media (max-width: 1024px) {
   .editor-layout { flex-direction: column; height: auto; }
 }
 </style>

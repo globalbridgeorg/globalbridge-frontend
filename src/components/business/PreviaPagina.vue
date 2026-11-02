@@ -235,7 +235,7 @@ function estrelasTexto(nota) {
 
 .p-whatsapp-btn { background: #25D366; color: #fff; border-radius: 8px; padding: 10px; text-align: center; font-size: 0.78rem; font-weight: 700; }
 
-@media (max-width: 960px) {
+@media (max-width: 1024px) {
   .canvas { padding: 24px 16px; }
 }
 </style>

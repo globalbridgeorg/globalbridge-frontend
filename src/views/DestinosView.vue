@@ -261,11 +261,11 @@ onMounted(carregarContagens)
   background: rgba(46, 10, 46, 0.04);
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .continentes-grid, .continente-skeleton { grid-template-columns: repeat(2, 1fr); }
 }
 
-@media (max-width: 560px) {
+@media (max-width: 640px) {
   .continentes-grid, .continente-skeleton { grid-template-columns: 1fr; }
 }
 

@@ -224,7 +224,7 @@ onMounted(() => {
   padding-bottom: 40px;
 }
 
-@media (max-width: 800px) {
+@media (max-width: 768px) {
   .layout {
     grid-template-columns: 1fr;
   }
@@ -273,7 +273,7 @@ onMounted(() => {
   margin-bottom: 14px;
 }
 
-@media (max-width: 560px) {
+@media (max-width: 640px) {
   :deep(.field-row) {
     grid-template-columns: 1fr;
   }
@@ -309,9 +309,8 @@ onMounted(() => {
 
 :deep(.field input:focus),
 :deep(.field textarea:focus) {
-  outline: none;
+  outline: 2px solid var(--gb-magenta); outline-offset: 1px;
   border-color: var(--gb-magenta);
-  box-shadow: 0 0 0 3px rgba(176, 31, 176, 0.12);
 }
 
 :deep(.btn-save) {

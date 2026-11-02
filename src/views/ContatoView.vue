@@ -273,12 +273,12 @@ async function pick(v) {
   display: grid;
   grid-template-columns: 1fr;
   gap: 36px;
-  padding: 44px 0 56px;
+  padding-block: 44px 56px;
   border-top: 1px solid var(--gb-purple-deep-18);
   margin-top: 24px;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 1024px) {
   .historia {
     grid-template-columns: 1fr 1fr;
     align-items: center;
@@ -330,7 +330,7 @@ async function pick(v) {
   margin: 0 0 56px;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 1024px) {
   .fork {
     grid-template-columns: 1fr 1fr;
   }
@@ -413,7 +413,7 @@ async function pick(v) {
 
 /* form */
 .form-wrap {
-  padding: 0 0 56px;
+  padding-block: 0 56px;
 }
 
 .form-head {
@@ -486,7 +486,7 @@ async function pick(v) {
   gap: 18px;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 768px) {
   .form-grid {
     grid-template-columns: 1fr;
   }
@@ -526,9 +526,8 @@ async function pick(v) {
 .field input:focus,
 .field select:focus,
 .field textarea:focus {
-  outline: none;
+  outline: 2px solid var(--gb-magenta); outline-offset: 1px;
   border-color: var(--gb-magenta);
-  box-shadow: 0 0 0 3px rgba(176, 31, 176, 0.12);
 }
 
 .field textarea {
@@ -551,7 +550,7 @@ async function pick(v) {
 
 /* canais diretos */
 .canais {
-  padding: 0 0 56px;
+  padding-block: 0 56px;
   border-top: 1px solid var(--gb-purple-deep-18);
   padding-top: 40px;
   display: grid;
@@ -559,7 +558,7 @@ async function pick(v) {
   gap: 24px;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 1024px) {
   .canais {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -616,7 +615,7 @@ async function pick(v) {
 
 /* faq */
 .faq {
-  padding: 0 0 60px;
+  padding-block: 0 60px;
 }
 
 .faq-item {

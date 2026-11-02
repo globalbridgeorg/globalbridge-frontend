@@ -175,7 +175,7 @@ function handleFavoritar() {
   border-radius: var(--gb-radius-pill);
 }
 
-@media (max-width: 720px) {
+@media (max-width: 768px) {
   .hero { padding: 32px 24px; }
 }
 </style>

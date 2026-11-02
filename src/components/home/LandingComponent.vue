@@ -137,7 +137,7 @@ onBeforeUnmount(() => {
         <div class="opcoes-footer">
           <span class="opcoes-updated">Seleção atualizada 2026</span>
           <router-link to="/mapview">
-            <ButtonComponent text="Ver os 20+ países" iconType="tertiary" class="btn-dark" />
+            <ButtonComponent tag="span" text="Ver os 20+ países" iconType="tertiary" class="btn-dark" />
           </router-link>
         </div>
       </div>
@@ -333,7 +333,7 @@ onBeforeUnmount(() => {
   color: var(--gb-ink-faint);
 }
 
-@media (min-width: 900px) {
+@media (min-width: 1024px) {
   .cards-row {
     flex-direction: row;
   }

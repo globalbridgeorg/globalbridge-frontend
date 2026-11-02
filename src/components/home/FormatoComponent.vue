@@ -130,7 +130,7 @@ onBeforeUnmount(() => ctx?.revert())
   color: #44404A;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 1024px) {
   .heading-row {
     flex-direction: row;
     justify-content: space-between;

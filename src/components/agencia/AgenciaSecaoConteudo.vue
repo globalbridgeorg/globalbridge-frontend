@@ -270,12 +270,12 @@ function videoEmbedUrl(url) {
 }
 .btn-whatsapp:hover { background: #1ebe57; }
 
-@media (max-width: 1100px) {
+@media (max-width: 1024px) {
   .equipe-grid, .certificacoes-grid { grid-template-columns: repeat(2, 1fr); }
   .galeria-grid-publica { grid-template-columns: repeat(3, 1fr); }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 768px) {
   .equipe-grid, .certificacoes-grid { grid-template-columns: 1fr; }
   .galeria-grid-publica { grid-template-columns: repeat(2, 1fr); }
 }

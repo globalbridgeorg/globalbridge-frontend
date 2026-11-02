@@ -397,7 +397,7 @@ function onDropSecao(index) {
   flex-shrink: 0;
 }
 
-@media (max-width: 960px) {
+@media (max-width: 1024px) {
   .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--gb-purple-deep-16); }
 }
 </style>

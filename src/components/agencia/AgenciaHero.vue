@@ -331,7 +331,7 @@ const estrelas = computed(() => {
   background: rgba(46, 10, 46, 0.04);
 }
 
-@media (max-width: 720px) {
+@media (max-width: 768px) {
   .hero { flex-direction: column; align-items: flex-start; }
   .hero-actions { flex-direction: row; width: 100%; }
   .hero-actions a { flex: 1; }

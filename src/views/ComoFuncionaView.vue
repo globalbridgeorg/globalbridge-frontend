@@ -58,7 +58,7 @@ const paraAgencias = [
       <p class="hero-desc">Onde ir, o que cursar e com quem falar — cada passo do intercâmbio pela GlobalBridge cabe numa dessas três frentes.</p>
       <p class="hero-proof">Explore nossa seleção com <strong>mais de 20 países</strong> ao redor do mundo e compare qual combina com o seu perfil.</p>
       <router-link to="/mapview" class="cta-link">
-        <ButtonComponent text="Explorar o mapa" class="btn-dark" />
+        <ButtonComponent tag="span" text="Explorar o mapa" class="btn-dark" />
       </router-link>
     </section>
 
@@ -109,7 +109,7 @@ const paraAgencias = [
             </div>
           </div>
           <router-link to="/mapview" class="cta-link">
-            <ButtonComponent text="Começar agora" class="btn-dark" />
+            <ButtonComponent tag="span" text="Começar agora" class="btn-dark" />
           </router-link>
         </div>
 
@@ -123,7 +123,7 @@ const paraAgencias = [
             </div>
           </div>
           <a href="mailto:contato@globalbridge.com?subject=Login%20business" class="cta-link">
-            <ButtonComponent text="Login business" class="btn-outline-light" />
+            <ButtonComponent tag="span" text="Login business" class="btn-outline-light" />
           </a>
         </div>
       </div>
@@ -137,7 +137,7 @@ const paraAgencias = [
       <div class="gb-section final-inner">
         <h2 class="gb-heading on-dark">Pronto pra dar o próximo passo?</h2>
         <router-link to="/mapview" class="cta-link">
-          <ButtonComponent text="Começar agora" style="background: var(--gb-magenta);" />
+          <ButtonComponent tag="span" text="Começar agora" style="background: var(--gb-magenta);" />
         </router-link>
       </div>
     </section>
@@ -151,7 +151,7 @@ const paraAgencias = [
 }
 
 .hero {
-  padding: var(--gb-space-y) 0 40px;
+  padding-block: var(--gb-space-y) 40px;
   padding-top: 120px;
   
 }
@@ -191,7 +191,7 @@ const paraAgencias = [
   display: grid;
   grid-template-columns: 1fr;
   gap: 16px;
-  padding: 12px 0 40px;
+  padding-block: 12px 40px;
 }
 
 @media (min-width: 640px) {
@@ -290,7 +290,7 @@ const paraAgencias = [
   border-top: 1px solid var(--gb-purple-deep-18);
 }
 
-@media (min-width: 900px) {
+@media (min-width: 1024px) {
   .detalhes {
     grid-template-columns: repeat(3, 1fr);
     gap: 40px;
@@ -369,7 +369,7 @@ const paraAgencias = [
   margin-bottom: 20px;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 1024px) {
   .fork {
     grid-template-columns: 1fr 1fr;
   }

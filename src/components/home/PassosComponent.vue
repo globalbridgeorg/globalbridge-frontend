@@ -193,7 +193,7 @@ onBeforeUnmount(() => ctx?.revert())
   color: var(--gb-ink-soft);
 }
 
-@media (min-width: 900px) {
+@media (min-width: 1024px) {
   .cols {
     flex-direction: row;
     gap: 0;

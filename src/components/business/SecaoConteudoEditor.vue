@@ -102,7 +102,7 @@ function removerItem(tipoBloco, campo, index) {
   color: var(--gb-dark);
   background: #fff;
 }
-.campo-input:focus, .campo-textarea:focus { outline: none; border-color: var(--gb-magenta); }
+.campo-input:focus, .campo-textarea:focus { outline: 2px solid var(--gb-magenta); outline-offset: 1px; border-color: var(--gb-magenta); }
 .campo-textarea { resize: vertical; }
 
 .item-lista { display: flex; gap: 6px; align-items: center; }
