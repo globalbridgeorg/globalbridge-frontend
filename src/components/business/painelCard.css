@@ -1,0 +1,8 @@
+/* Base dos cards do painel business — importado com <style scoped src>
+   no PainelBusinessView e nos cards filhos dele. */
+.card { background: #fff; border: 1px solid var(--gb-purple-deep-16); border-radius: 16px; padding: 24px; }
+.card-titulo { display: block; margin: 0; font-weight: 700; font-size: 0.98rem; color: var(--gb-dark); }
+.card-desc { margin: 0 0 16px; font-size: 0.82rem; color: var(--gb-ink-faint); }
+.card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; flex-wrap: wrap; gap: 10px; }
+.vazio-pequeno { color: var(--gb-ink-faint); font-size: 0.85rem; }
+

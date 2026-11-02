@@ -70,6 +70,17 @@ onMounted(async () => {
   animarGraficos()
 })
 
+// Conta de 0 até `alvo` dentro da timeline, escrevendo o número no elemento
+const animarContador = (tl, el, alvo, duration, ease, formatar) => {
+  const contador = { valor: 0 }
+  tl.to(contador, {
+    valor: alvo,
+    duration,
+    ease,
+    onUpdate: () => { el.textContent = formatar(Math.round(contador.valor)) }
+  }, "<")
+}
+
 const animarGraficos = () => {
   paises.value.forEach(pais => {
     const paisEl = paisRefs.value[pais.id]
@@ -83,49 +94,26 @@ const animarGraficos = () => {
       }
     })
 
-
     // Animação das barras + números de cada métrica
     metricsConfig.forEach(metric => {
       const chave = `${pais.id}-${metric.key}`
       const barraEl = barraRefs.value[chave]
       const numeroEl = numeroRefs.value[chave]
-      const percentual = calcularPercentual(pais, metric.key)
-      const valorFinal = pais[metric.key] || 0
 
       if (barraEl) {
         tl.fromTo(barraEl,
           { width: "0%" },
-          { width: percentual + "%", duration: 1.2, ease: "power3.out" },
+          { width: calcularPercentual(pais, metric.key) + "%", duration: 1.2, ease: "power3.out" },
           "<" // começa junto com as outras animações da timeline
         )
       }
 
-      if (numeroEl) {
-        const contador = { valor: 0 }
-        tl.to(contador, {
-          valor: valorFinal,
-          duration: 1.2,
-          ease: "power3.out",
-          onUpdate: () => {
-            numeroEl.textContent = Math.round(contador.valor).toLocaleString("pt-BR")
-          }
-        }, "<")
-      }
+      if (numeroEl) animarContador(tl, numeroEl, pais[metric.key] || 0, 1.2, "power3.out", v => v.toLocaleString("pt-BR"))
     })
 
     // Número grande de "programas disponíveis"
     const programasEl = programasRefs.value[pais.id]
-    if (programasEl) {
-      const contador = { valor: 0 }
-      tl.to(contador, {
-        valor: pais.programasDisponiveis || 0,
-        duration: 1,
-        ease: "power2.out",
-        onUpdate: () => {
-          programasEl.textContent = Math.round(contador.valor)
-        }
-      }, "<")
-    }
+    if (programasEl) animarContador(tl, programasEl, pais.programasDisponiveis || 0, 1, "power2.out", v => v)
   })
 }
 </script>

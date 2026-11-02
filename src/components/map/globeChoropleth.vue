@@ -1,9 +1,9 @@
 <script setup>
 import { ref, reactive, computed, defineAsyncComponent } from 'vue'
-import axios from '@/services/axios'
 import MapFilterPanel from './MapFilterPanel.vue'
 import AgenciesPanel from './AgenciesPanel.vue'
 import HelpModal from '@/components/common/HelpModal.vue'
+import { fetchMapData, matchesFilters } from './globeUtils'
 
 const isLoading = ref(true)
 const erroGlobo = ref(false)
@@ -59,44 +59,13 @@ const nomePtPorNomeIngles = ref({})
 const carregandoDados = ref(true)
 const selectedCountry = ref(null) // { nomeIngles, nomePt }
 
-function agruparTagsPorCategoria(tags) {
-  const grupos = {}
-  for (const tag of tags ?? []) {
-    if (!grupos[tag.categoria]) grupos[tag.categoria] = []
-    grupos[tag.categoria].push(tag.valor)
-  }
-  return grupos
-}
-
 async function carregarDadosDoMapa() {
   carregandoDados.value = true
   try {
-    const [resPaises, resAgencias] = await Promise.all([
-      axios.get('/paises/'),
-      axios.get('/agencia/')
-    ])
-    const paises = Array.isArray(resPaises.data) ? resPaises.data : (resPaises.data.results ?? [])
-    const agenciasApi = Array.isArray(resAgencias.data) ? resAgencias.data : (resAgencias.data.results ?? [])
-
-    const meta = {}
-    const nomesPt = {}
-    for (const pais of paises) {
-      if (!pais.nome_ingles) continue
-      meta[pais.nome_ingles] = agruparTagsPorCategoria(pais.tags)
-      nomesPt[pais.nome_ingles] = pais.nome
-    }
-    countryMeta.value = meta
-    nomePtPorNomeIngles.value = nomesPt
-
-    agencies.value = agenciasApi.map((a) => ({
-      id: a.id,
-      name: a.nome,
-      stars: Math.round(a.nota_media ?? 0),
-      description: a.descricao,
-      location: a.cidade && a.pais ? `${a.cidade}, ${a.pais}` : (a.pais ?? ''),
-      paisNomeIngles: a.pais_nome_ingles,
-      tags: agruparTagsPorCategoria(a.tags)
-    }))
+    const dados = await fetchMapData()
+    countryMeta.value = dados.countryMeta
+    nomePtPorNomeIngles.value = dados.nomesPt
+    agencies.value = dados.agencies
   } catch (e) {
     console.error('Erro ao buscar dados do mapa:', e)
   } finally {
@@ -140,14 +109,7 @@ const filteredAgencies = computed(() => {
     lista = lista.filter((agency) => agency.paisNomeIngles === selectedCountry.value.nomeIngles)
   }
   if (totalActiveFilters.value === 0) return lista
-  return lista.filter(agency => {
-    for (const [cat, selected] of Object.entries(activeFilters)) {
-      if (selected.length === 0) continue
-      const values = agency.tags?.[cat] ?? []
-      if (!selected.some(v => values.includes(v))) return false
-    }
-    return true
-  })
+  return lista.filter(agency => matchesFilters(agency.tags, activeFilters))
 })
 
 function clearSelectedCountry() {

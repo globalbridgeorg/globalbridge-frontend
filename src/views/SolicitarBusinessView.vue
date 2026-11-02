@@ -1,12 +1,10 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from '@/services/axios'
+import SolicitarDadosAgencia from '@/components/business/solicitar/SolicitarDadosAgencia.vue'
 
 const router = useRouter()
-
-const paises = ref([])
-const carregandoPaises = ref(true)
 
 const form = ref({
   nome: '',
@@ -28,25 +26,8 @@ const enviando = ref(false)
 const erro = ref('')
 const camposComErro = ref({})
 
-async function carregarPaises() {
-  try {
-    const { data } = await axios.get('/paises/')
-    paises.value = [...data].sort((a, b) => a.nome.localeCompare(b.nome))
-  } catch (e) {
-    console.error('Erro ao buscar países:', e)
-  } finally {
-    carregandoPaises.value = false
-  }
-}
-
 function handleDocumento(event) {
   documento.value = event.target.files?.[0] || null
-}
-
-function toggleAtendido(id) {
-  const idx = form.value.paises_atendidos.indexOf(id)
-  if (idx === -1) form.value.paises_atendidos.push(id)
-  else form.value.paises_atendidos.splice(idx, 1)
 }
 
 function validar() {
@@ -121,8 +102,6 @@ async function enviar() {
     enviando.value = false
   }
 }
-
-onMounted(carregarPaises)
 </script>
 
 <template>
@@ -134,45 +113,7 @@ onMounted(carregarPaises)
     </div>
 
     <form class="card-form" @submit.prevent="enviar">
-      <div class="bloco">
-        <span class="eyebrow">01 · Sobre a agência</span>
-        <div class="grid-2">
-          <div class="field">
-            <label for="sab-nome">Nome da agência</label>
-            <input id="sab-nome" class="inp" :class="{ erro: camposComErro.nome }" v-model="form.nome" placeholder="Nome da sua agência">
-          </div>
-          <div class="field">
-            <label for="sab-site">Site oficial</label>
-            <input id="sab-site" class="inp" v-model="form.site" placeholder="https://suaagencia.com">
-          </div>
-          <div class="field">
-            <label for="sab-cidade">Cidade da sede</label>
-            <input id="sab-cidade" class="inp" :class="{ erro: camposComErro.cidade }" v-model="form.cidade" placeholder="Cidade">
-          </div>
-          <div class="field">
-            <label for="sab-pais">País da sede</label>
-            <select id="sab-pais" class="inp" :class="{ erro: camposComErro.pais_sede }" v-model="form.pais_sede" :disabled="carregandoPaises">
-              <option value="" disabled>{{ carregandoPaises ? 'Carregando...' : 'Escolha um país' }}</option>
-              <option v-for="p in paises" :key="p.id" :value="p.id">{{ p.nome }}</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="sab-ano">Ano de fundação</label>
-            <input id="sab-ano" class="inp" type="number" v-model="form.ano_fundacao" placeholder="Ex.: 2014">
-          </div>
-        </div>
-      </div>
-
-      <div class="bloco">
-        <span class="eyebrow">02 · Sua agência atende outros países?</span>
-        <p class="hint">Marque, além da sede, todo país onde a agência também tem unidade ou atuação — como a EF Education, que aparece em vários.</p>
-        <div class="paises-grid">
-          <label v-for="p in paises" :key="p.id" class="pais-chip" :class="{ active: form.paises_atendidos.includes(p.id) }">
-            <input type="checkbox" :checked="form.paises_atendidos.includes(p.id)" @change="toggleAtendido(p.id)" hidden>
-            {{ p.nome }}
-          </label>
-        </div>
-      </div>
+      <SolicitarDadosAgencia :form="form" :campos-com-erro="camposComErro" />
 
       <div class="bloco">
         <span class="eyebrow">03 · Quem está pedindo</span>
@@ -278,11 +219,6 @@ onMounted(carregarPaises)
   padding-top: 24px;
 }
 
-.bloco:first-child {
-  border-top: none;
-  padding-top: 0;
-}
-
 .eyebrow {
   font-family: var(--gb-font-eyebrow);
   font-weight: 700;
@@ -341,29 +277,6 @@ onMounted(carregarPaises)
   color: var(--gb-ink-faint);
   margin-top: 6px;
   line-height: 1.5;
-}
-
-.paises-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.pais-chip {
-  border: 1.5px solid var(--gb-purple-deep-16);
-  border-radius: 20px;
-  padding: 8px 14px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--gb-ink-soft);
-  cursor: pointer;
-  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
-}
-
-.pais-chip.active {
-  border-color: var(--gb-magenta);
-  background: rgba(176, 31, 176, 0.08);
-  color: var(--gb-magenta-strong);
 }
 
 .dropzone {

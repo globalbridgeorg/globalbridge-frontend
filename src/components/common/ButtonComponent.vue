@@ -2,7 +2,6 @@
 import { ref, nextTick, onMounted, onBeforeUnmount, watch } from "vue";
 import gsap from "gsap";
 
-
 const props = defineProps({
   text: {
     type: String,
@@ -12,23 +11,13 @@ const props = defineProps({
     type: String,
     default: "primary",
   },
-  iconSize: {
-    type: Number,
-    default: 20,
-  },
-  gap: {
-    type: Number,
-    default: 10,
-  },
-  duration: {
-    type: Number,
-    default: 0.45,
-  },
-  ease: {
-    type: String,
-    default: "power4.out",
-  },
 });
+
+// Tamanho do ícone e espaço até o texto — iguais a --icon-size / --gap no CSS
+const ICON_SIZE = 20;
+const GAP = 10;
+const DURATION = 0.45;
+const EASE = "power4.out";
 
 const icons = {
   primary: "/icons/icon_button.png",
@@ -58,10 +47,10 @@ function updateMetrics() {
   if (!textRef.value || !iconRightRef.value) return;
 
   const textWidth = textRef.value.offsetWidth;
-  const iconWidth = iconRightRef.value.offsetWidth || props.iconSize;
+  const iconWidth = iconRightRef.value.offsetWidth || ICON_SIZE;
 
   // quanto o texto precisa andar para abrir espaço para o ícone à esquerda
-  const slot = iconWidth + props.gap;
+  const slot = iconWidth + GAP;
 
   // quanto o ícone vai “viajar” para fora
   const travel = Math.max(slot + 8, iconWidth * 1.4);
@@ -73,160 +62,69 @@ function updateMetrics() {
   metrics.leftIconX = 0;
 
   // ícone da direita fica depois do texto
-  metrics.rightIconX = textWidth + props.gap;
+  metrics.rightIconX = textWidth + GAP;
 
   // posições fora da área visível
   metrics.offLeftX = -travel;
   metrics.offRightX = metrics.rightIconX + travel;
 }
 
+// Alvos de cada elemento no estado normal (hovered=false) ou com hover
+function targets(hovered) {
+  return hovered
+    ? [
+        [textRef.value, { x: metrics.textHoverX }],
+        [iconRightRef.value, { x: metrics.offRightX, opacity: 0 }],
+        [iconLeftRef.value, { x: metrics.leftIconX, opacity: 1 }],
+      ]
+    : [
+        [textRef.value, { x: metrics.textIdleX }],
+        [iconRightRef.value, { x: metrics.rightIconX, opacity: 1 }],
+        [iconLeftRef.value, { x: metrics.offLeftX, opacity: 0 }],
+      ];
+}
+
 function applyStaticState() {
   if (!textRef.value || !iconRightRef.value || !iconLeftRef.value) return;
 
   tl?.kill();
-
-  if (isHovered) {
-    gsap.set(textRef.value, { x: metrics.textHoverX });
-    gsap.set(iconRightRef.value, {
-      x: metrics.offRightX,
-      opacity: 0,
-    });
-    gsap.set(iconLeftRef.value, {
-      x: metrics.leftIconX,
-      opacity: 1,
-    });
-  } else {
-    gsap.set(textRef.value, { x: metrics.textIdleX });
-    gsap.set(iconRightRef.value, {
-      x: metrics.rightIconX,
-      opacity: 1,
-    });
-    gsap.set(iconLeftRef.value, {
-      x: metrics.offLeftX,
-      opacity: 0,
-    });
-  }
+  targets(isHovered).forEach(([el, vars]) => gsap.set(el, vars));
 }
 
-function playEnter() {
-  if (isHovered) return;
+function play(hovered) {
+  if (isHovered === hovered) return;
   if (!window.matchMedia("(hover: hover)").matches) return;
 
-  isHovered = true;
+  isHovered = hovered;
   updateMetrics();
   tl?.kill();
 
-  tl = gsap.timeline({
-    defaults: {
-      duration: props.duration,
-      ease: props.ease,
-    },
-  });
-
-  tl.to(
-    textRef.value,
-    {
-      x: metrics.textHoverX,
-    },
-    0
-  )
-    .to(
-      iconRightRef.value,
-      {
-        x: metrics.offRightX,
-        opacity: 0,
-      },
-      0
-    )
-    .to(
-      iconLeftRef.value,
-      {
-        x: metrics.leftIconX,
-        opacity: 1,
-      },
-      0
-    );
+  tl = gsap.timeline({ defaults: { duration: DURATION, ease: EASE } });
+  targets(hovered).forEach(([el, vars]) => tl.to(el, vars, 0));
 }
 
-function playLeave() {
-  if (!isHovered) return;
-  if (!window.matchMedia("(hover: hover)").matches) return;
-
-  isHovered = false;
+function syncIfIdle() {
   updateMetrics();
-  tl?.kill();
-
-  tl = gsap.timeline({
-    defaults: {
-      duration: props.duration,
-      ease: props.ease,
-    },
-  });
-
-  tl.to(
-    textRef.value,
-    {
-      x: metrics.textIdleX,
-    },
-    0
-  )
-    .to(
-      iconRightRef.value,
-      {
-        x: metrics.rightIconX,
-        opacity: 1,
-      },
-      0
-    )
-    .to(
-      iconLeftRef.value,
-      {
-        x: metrics.offLeftX,
-        opacity: 0,
-      },
-      0
-    );
+  if (!tl || !tl.isActive()) applyStaticState();
 }
 
 async function syncLayout() {
   await nextTick();
-  updateMetrics();
-
-  if (!tl || !tl.isActive()) {
-    applyStaticState();
-  }
+  syncIfIdle();
 }
 
 onMounted(async () => {
   await syncLayout();
 
-  resizeObserver = new ResizeObserver(() => {
-    updateMetrics();
-
-    if (!tl || !tl.isActive()) {
-      applyStaticState();
-    }
-  });
+  resizeObserver = new ResizeObserver(syncIfIdle);
 
   if (stageRef.value) resizeObserver.observe(stageRef.value);
   if (textRef.value) resizeObserver.observe(textRef.value);
 
-  if (document.fonts?.ready) {
-    document.fonts.ready.then(() => {
-      updateMetrics();
-      if (!tl || !tl.isActive()) {
-        applyStaticState();
-      }
-    });
-  }
+  document.fonts?.ready?.then(syncIfIdle);
 });
 
-watch(
-  () => [props.text, props.iconSize, props.gap],
-  async () => {
-    await syncLayout();
-  }
-);
+watch(() => props.text, syncLayout);
 
 onBeforeUnmount(() => {
   tl?.kill();
@@ -237,17 +135,11 @@ onBeforeUnmount(() => {
 <template>
   <button
     class="swap-btn"
-    :style="{
-      '--icon-size': `${iconSize}px`,
-      '--gap': `${gap}px`,
-    }"
-    @mouseenter="playEnter"
-    @mouseleave="playLeave"
+    @mouseenter="play(true)"
+    @mouseleave="play(false)"
   >
     <span ref="stageRef" class="btn-stage">
-      <span ref="textRef" class="btn-text">
-        <slot>{{ text }}</slot>
-      </span>
+      <span ref="textRef" class="btn-text">{{ text }}</span>
 
       <img
         ref="iconRightRef"
@@ -270,6 +162,8 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .swap-btn {
+  --icon-size: 20px;
+  --gap: 10px;
   display: inline-flex;
   align-items: center;
   justify-content: center;

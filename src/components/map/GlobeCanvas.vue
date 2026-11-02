@@ -3,6 +3,7 @@ import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import Globe from 'globe.gl'
 import * as d3 from 'd3'
 import * as topojson from 'topojson-client'
+import { getWorldData, matchesFilters, destroyGlobe } from './globeUtils'
 
 const props = defineProps({
   // { [nomeIngles]: { [categoria]: [valores] } } — tags do país, vindas da API.
@@ -18,14 +19,6 @@ const props = defineProps({
 })
 const emit = defineEmits(['ready', 'error', 'country-click'])
 
-// ─── Cache de módulo: só faz fetch uma vez por sessão ───────────────────────
-let _worldCache = null
-async function getWorldData() {
-  if (_worldCache) return _worldCache
-  _worldCache = await fetch('https://unpkg.com/world-atlas@2/countries-110m.json').then(r => r.json())
-  return _worldCache
-}
-
 const globeEl = ref(null)
 
 let globe = null
@@ -39,28 +32,13 @@ let handleVisibility = null
 let countriesFeatures = []
 let colorScale
 
-function totalActiveFilters() {
-  return Object.values(props.activeFilters).reduce((acc, arr) => acc + (arr?.length ?? 0), 0)
-}
-
-function countryMatchesFilters(name) {
-  if (totalActiveFilters() === 0) return true
-  const meta = props.countryMeta[name]
-  if (!meta) return false
-  for (const [cat, selected] of Object.entries(props.activeFilters)) {
-    if (!selected?.length) continue
-    const values = meta[cat] ?? []
-    if (!selected.some(v => values.includes(v))) return false
-  }
-  return true
-}
-
 function updateCountryMatches() {
-  const hasFilters = totalActiveFilters() > 0
   countriesFeatures.forEach(d => {
-    d.properties.matchesFilter = hasFilters ? countryMatchesFilters(d.properties.name) : true
+    d.properties.matchesFilter = matchesFilters(props.countryMeta[d.properties.name], props.activeFilters)
   })
 }
+
+const getPolygonCapColor = d => d.properties.matchesFilter ? colorScale(d.properties.agencias) : 'rgba(20,5,30,0.35)'
 
 function getPolygonAltitude(d) {
   if (!d.properties.matchesFilter) return 0.005
@@ -73,7 +51,7 @@ function refreshGlobe() {
   animationFrame = requestAnimationFrame(() => {
     if (!globe) return
     globe
-      .polygonCapColor(d => d.properties.matchesFilter ? colorScale(d.properties.agencias) : 'rgba(20,5,30,0.35)')
+      .polygonCapColor(getPolygonCapColor)
       .polygonAltitude(getPolygonAltitude)
     animationFrame = null
   })
@@ -157,7 +135,7 @@ async function montarGlobo() {
         globe
           .polygonsData(countries.features)
           .polygonAltitude(getPolygonAltitude)
-          .polygonCapColor(d => d.properties.matchesFilter ? colorScale(d.properties.agencias) : 'rgba(20,5,30,0.35)')
+          .polygonCapColor(getPolygonCapColor)
           .polygonSideColor(() => 'rgba(128,0,128,0.25)')
           .polygonStrokeColor(() => '#2d004b')
           .polygonLabel(d => `<b>${d.properties.name}</b><br/>${d.properties.agencias} agência${d.properties.agencias === 1 ? '' : 's'}`)
@@ -213,20 +191,7 @@ onBeforeUnmount(() => {
   if (handleVisibility) { document.removeEventListener('visibilitychange', handleVisibility); handleVisibility = null }
 
   if (globe) {
-    if (globe.controls) {
-      const controls = globe.controls()
-      controls.autoRotate = false
-      controls.dispose?.()
-    }
-    const renderer = globe.renderer?.()
-    if (renderer) {
-      renderer.dispose()
-      renderer.domElement?.remove()
-    }
-    if (globeEl.value) {
-      while (globeEl.value.firstChild) globeEl.value.removeChild(globeEl.value.firstChild)
-    }
-    globe._destructor?.()
+    destroyGlobe(globe, globeEl.value)
     globe = null
   }
 })
