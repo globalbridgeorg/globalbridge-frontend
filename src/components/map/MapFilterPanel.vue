@@ -102,11 +102,6 @@ onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
   flex-direction: column;
 }
 .filter-panel.collapsed { transform: translateX(calc(32px - var(--map-panel-left))); }
-
-/* Tablet: a nav ocupa o topo inteiro, então o painel começa embaixo dela */
-@media (min-width: 769px) and (max-width: 1279px) {
-  .filter-panel { top: 107px; height: calc(100vh - 107px); }
-}
 .collapse-btn {
   position: absolute;
   top: 50%;

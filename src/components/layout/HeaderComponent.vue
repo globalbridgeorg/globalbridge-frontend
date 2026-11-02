@@ -520,10 +520,9 @@ onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
   }
 }
 
-/* Mapview: a nav fica entre os painéis de filtros e de agências, que encolhem
-   com a tela (--map-panel-left/right no global.css). Abaixo de 1280px não cabe
-   lado a lado: a nav fica no topo e os painéis começam embaixo dela. */
-@media (min-width: 1280px) {
+/* Mapview: a nav fica sempre entre os painéis de filtros e de agências, que
+   encolhem com a tela (--map-panel-left/right no global.css) pra sobrar espaço. */
+@media (min-width: 769px) {
   .navbar.header-compact {
     left: calc(var(--map-panel-left) + 16px);
     right: calc(var(--map-panel-right) + 16px);
@@ -535,10 +534,20 @@ onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
     /* o App.vue põe justify-self: center no header, que encolheria a pílula pro conteúdo */
     justify-self: stretch;
   }
+
+  /* menu em tela cheia (só abre no tablet, abaixo): sem barra de abas embaixo */
+  .mobile-nav {
+    bottom: 0;
+  }
+
+  .mobile-nav-inner {
+    max-width: 560px;
+    margin-inline: auto;
+  }
 }
 
 /* Coluna do meio apertada: links mais justos, sem "Instalar App" */
-@media (min-width: 1280px) and (max-width: 1551px) {
+@media (min-width: 769px) and (max-width: 1551px) {
   .navbar.header-compact .install-link {
     display: none;
   }
@@ -548,7 +557,39 @@ onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
   }
 
   .navbar.header-compact .desktop-nav a {
-    padding-inline: clamp(4px, 0.6vw, 10px);
+    padding-inline: clamp(4px, 0.5vw, 10px);
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1279px) {
+  .navbar.header-compact .navbar_logo img {
+    height: 30px;
+  }
+}
+
+/* Ainda mais apertado: some o "Meu destino" — é a própria página do mapa */
+@media (min-width: 900px) and (max-width: 1099px) {
+  .navbar.header-compact .desktop-nav a[href="/mapview"] {
+    display: none;
+  }
+}
+
+/* Tablet: não cabe a nav entre os painéis — logo + Entrar + menu */
+@media (min-width: 769px) and (max-width: 899px) {
+  .navbar.header-compact .desktop-nav,
+  .navbar.header-compact .desktop-btn {
+    display: none;
+  }
+
+  .navbar.header-compact .mobile-menu-btn {
+    display: flex;
+    order: 3;
+  }
+
+  .navbar.header-compact .mobile-action {
+    display: inline-flex;
+    order: 2;
+    margin-left: auto;
   }
 }
 </style>
