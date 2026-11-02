@@ -174,6 +174,25 @@ onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
 .navbar {
   left: 50%;
   transform: translateX(-50%);
+  gap: 12px;
+}
+
+/* Mesmo gutter das seções (.gb-section) — antes a pílula encostava nas bordas da tela */
+@media (min-width: 769px) and (max-width: 1280px) {
+  .navbar {
+    width: calc(100% - 2 * var(--gb-space-x));
+  }
+}
+
+/* Tablet: não cabem os 5 links + botão; "Instalar App" é o menos essencial */
+@media (min-width: 769px) and (max-width: 1023px) {
+  .navbar_logo img {
+    height: 34px;
+  }
+
+  .desktop-nav .install-link {
+    display: none;
+  }
 }
 
 
@@ -189,16 +208,18 @@ onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
 /* desktop nav */
 .desktop-nav {
   display: flex;
-  gap: 20px;
+  gap: clamp(2px, 1.4vw, 20px);
 }
 
+/* Fonte, padding e espaço encolhem com a tela em vez de quebrar linha */
 .desktop-nav a,
 .desktop-nav .install-link {
   text-decoration: none;
   color: var(--gb-plum);
-  font-size: 14px;
+  font-size: clamp(13px, 0.7rem + 0.3vw, 14px);
   font-weight: 600;
-  padding: 8px 10px;
+  padding: 8px clamp(6px, 0.8vw, 10px);
+  white-space: nowrap;
   transition: all 0.2s ease;
 }
 
