@@ -518,53 +518,37 @@ onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
   .mobile-menu-btn {
     display: none;
   }
+}
 
-  /* No desktop o menu em tela cheia só abre no mapview (abaixo); sem barra de abas embaixo */
-  .mobile-nav {
-    bottom: 0;
-  }
-
-  .mobile-nav-inner {
-    max-width: 560px;
-    margin-inline: auto;
-  }
-
-  /* Mapview: a nav fica na coluna do meio, entre os filtros (300px) e as agências (320px) */
+/* Mapview: a nav fica entre os painéis de filtros e de agências, que encolhem
+   com a tela (--map-panel-left/right no global.css). Abaixo de 1280px não cabe
+   lado a lado: a nav fica no topo e os painéis começam embaixo dela. */
+@media (min-width: 1280px) {
   .navbar.header-compact {
-    left: 316px;
-    right: 336px;
+    left: calc(var(--map-panel-left) + 16px);
+    right: calc(var(--map-panel-right) + 16px);
     width: auto;
     max-width: 930px;
     margin: 16px auto 0;
     transform: none;
+    gap: 8px;
     /* o App.vue põe justify-self: center no header, que encolheria a pílula pro conteúdo */
     justify-self: stretch;
   }
 }
 
-/* Coluna do meio < ~750px: logo + Entrar + menu, igual à barra mobile */
-@media (min-width: 769px) and (max-width: 1399px) {
-  .navbar.header-compact .desktop-nav,
-  .navbar.header-compact .desktop-btn {
-    display: none;
-  }
-
-  .navbar.header-compact .mobile-menu-btn {
-    display: flex;
-    order: 3;
-  }
-
-  .navbar.header-compact .mobile-action {
-    display: inline-flex;
-    order: 2;
-    margin-left: auto;
-  }
-}
-
-/* Coluna do meio < ~900px: cabem os links, menos o "Instalar App" */
-@media (min-width: 1400px) and (max-width: 1551px) {
+/* Coluna do meio apertada: links mais justos, sem "Instalar App" */
+@media (min-width: 1280px) and (max-width: 1551px) {
   .navbar.header-compact .install-link {
     display: none;
+  }
+
+  .navbar.header-compact .desktop-nav {
+    gap: 0;
+  }
+
+  .navbar.header-compact .desktop-nav a {
+    padding-inline: clamp(4px, 0.6vw, 10px);
   }
 }
 </style>

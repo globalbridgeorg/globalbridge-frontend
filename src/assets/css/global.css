@@ -54,6 +54,10 @@ body {
   --gb-space-x: 5%;
   --gb-space-y: 40px;
 
+  /* Largura dos painéis laterais do mapview (filtros / agências) no desktop */
+  --map-panel-left: clamp(240px, 19vw, 300px);
+  --map-panel-right: clamp(260px, 21vw, 320px);
+
   --gb-radius-card: 12px;
   --gb-radius-pill: 20px;
   --gb-shadow-card: 0 10px 24px rgba(23, 17, 26, 0.08);

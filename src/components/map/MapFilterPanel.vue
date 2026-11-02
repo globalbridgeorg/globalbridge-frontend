@@ -93,7 +93,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
   top: 0;
   left: 0;
   height: 100vh;
-  width: 300px;
+  width: var(--map-panel-left);
   background: white;
   border-right: 1px solid var(--gb-purple-deep-16);
   transition: transform 0.35s cubic-bezier(.4,0,.2,1);
@@ -101,7 +101,12 @@ onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
   display: flex;
   flex-direction: column;
 }
-.filter-panel.collapsed { transform: translateX(-268px); }
+.filter-panel.collapsed { transform: translateX(calc(32px - var(--map-panel-left))); }
+
+/* Tablet: a nav ocupa o topo inteiro, então o painel começa embaixo dela */
+@media (min-width: 769px) and (max-width: 1279px) {
+  .filter-panel { top: 107px; height: calc(100vh - 107px); }
+}
 .collapse-btn {
   position: absolute;
   top: 50%;

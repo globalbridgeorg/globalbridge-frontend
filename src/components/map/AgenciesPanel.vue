@@ -68,7 +68,7 @@ const agenciesExpanded = ref(false)
   top: 0;
   right: 0;
   height: 100vh;
-  width: 320px;
+  width: var(--map-panel-right);
   background: white;
   border-left: 1px solid var(--gb-purple-deep-16);
   display: flex;
@@ -193,6 +193,11 @@ const agenciesExpanded = ref(false)
 /* ── Mobile ──────────────────────────────────────────────────────────────
    No desktop é uma coluna fixa de 320px ao lado do globo. No celular vira
    uma folha que "espia" embaixo do globo — toca no cabeçalho pra expandir. */
+/* Tablet: a nav ocupa o topo inteiro, então o painel começa embaixo dela */
+@media (min-width: 769px) and (max-width: 1279px) {
+  .agencies-panel { top: 107px; height: calc(100vh - 107px); }
+}
+
 @media (max-width: 768px) {
   .agencies-panel {
     top: auto;
