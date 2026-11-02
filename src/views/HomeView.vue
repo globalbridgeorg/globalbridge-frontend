@@ -3,7 +3,6 @@ import { onMounted } from "vue"
 import { useRoute } from "vue-router"
 import { scrollToTarget } from "@/utils/lenis"
 import VideoComponent from "@/components/home/VideoComponent.vue";
-import ButtonComponent from "@/components/common/ButtonComponent.vue";
 import PhotoGrid from '@/components/home/PhotoGridComponent.vue'
 import Landing from '@/components/home/LandingComponent.vue';
 import Numeros from '@/components/home/NumerosComponent.vue';

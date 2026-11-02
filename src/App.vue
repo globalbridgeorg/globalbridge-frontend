@@ -8,11 +8,11 @@ import { initSmoothScroll } from '@/utils/lenis'
 
 const route = useRoute()
 
-const shouldShowFooter = computed(() => !['mapview', 'profile', 'login', 'test'].includes(route.name))
+const shouldShowFooter = computed(() => !['mapview', 'profile', 'login'].includes(route.name))
 // MobileTabBar já se esconde nessas rotas — sem isso o <main> reservava
 // 74px de espaço embaixo pra uma barra que não estava lá, sobrando um
 // vão vazio (e mais scroll) no celular.
-const shouldShowTabBar = computed(() => !['login', 'test'].includes(route.name))
+const shouldShowTabBar = computed(() => route.name !== 'login')
 
 onMounted(() => {
   initSmoothScroll()

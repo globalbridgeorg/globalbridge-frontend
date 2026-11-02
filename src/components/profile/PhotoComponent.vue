@@ -37,15 +37,10 @@ function revokeTemporaryPreview() {
 }
 
 async function loadCurrentPhoto() {
-  const token = getToken()
-  if (!token) return
+  if (!getToken()) return
 
   try {
-    const response = await axios.get(props.fetchUrl, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
+    const response = await axios.get(props.fetchUrl)
 
     const avatarUrl = normalizeAvatarUrl(response.data)
     if (avatarUrl) {
@@ -60,22 +55,12 @@ async function loadCurrentPhoto() {
 }
 
 async function saveAvatarToBackend(imageUrl) {
-  const token = getToken()
-  if (!token) return
+  if (!getToken()) return
 
   try {
     loading.value = true
 
-    const response = await axios.patch(
-      '/usuarios/me/avatar/',
-      { avatar_url: imageUrl },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        }
-      }
-    )
+    const response = await axios.patch('/usuarios/me/avatar/', { avatar_url: imageUrl })
 
     const avatarUrl = normalizeAvatarUrl(response.data)
 

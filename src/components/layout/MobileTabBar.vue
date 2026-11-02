@@ -28,7 +28,7 @@ const perfilLink = computed(() => {
 // Em rotas de tela cheia (login/cadastro) a barra atrapalha mais do que
 // ajuda — o /mapview já tem seu próprio layout mobile (globo + folha de
 // agências) que reserva espaço embaixo pra ela.
-const rotasOcultas = ['login', 'test']
+const rotasOcultas = ['login']
 const mostrar = computed(() => !rotasOcultas.includes(route.name))
 
 const abas = computed(() => [

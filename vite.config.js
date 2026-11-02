@@ -130,7 +130,7 @@ export default defineConfig(({ command, mode }) => {
         output: {
           manualChunks: {
             'globe': ['globe.gl', 'd3', 'topojson-client'],
-            'vendor': ['vue', 'vue-router', 'pinia', 'axios'],
+            'vendor': ['vue', 'vue-router', 'axios'],
           },
         },
       },

@@ -177,7 +177,7 @@ function fallbackToFileInput(onSuccess, onError) {
  * Upload tradicional via backend
  * Backend salva em Cloudinary Storage automaticamente
  */
-export async function uploadFileToBackend(file, onSuccess, onError) {
+async function uploadFileToBackend(file, onSuccess, onError) {
   try {
     const formData = new FormData()
     formData.append('avatar', file)
@@ -199,12 +199,4 @@ export async function uploadFileToBackend(file, onSuccess, onError) {
     console.error('❌ Erro ao fazer upload:', err)
     onError?.(err.message || 'Erro ao fazer upload')
   }
-}
-
-
-
-export default {
-  openCloudinaryWidget,
-  uploadFileToBackend,
-  ensureCloudinaryLoaded,
 }

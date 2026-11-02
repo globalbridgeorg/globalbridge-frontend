@@ -2,7 +2,6 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { resetScroll } from '@/utils/lenis';
 import HomeView from '../views/HomeView.vue';
-import TestView from '@/views/TestView.vue';
 import MapView from '@/views/MapView.vue';
 import LoginView from '@/views/LoginView.vue';
 import ProfileView from '@/views/ProfileView.vue';
@@ -67,12 +66,6 @@ const routes = [
     path: '/contato',
     name: 'contato',
     component: ContatoView,
-    meta: { headerWidth: 'full' }
-  },
-  {
-    path: '/test',
-    name: 'test',
-    component: TestView,
     meta: { headerWidth: 'full' }
   },
   {

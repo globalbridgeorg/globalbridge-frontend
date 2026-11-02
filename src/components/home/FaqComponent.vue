@@ -53,13 +53,6 @@ const props = defineProps({
   }
 })
 
-// Deixei preparado caso queira transformar em accordion no futuro
-// (por enquanto todas as respostas ficam visíveis, igual na referência)
-const activeId = ref(null)
-const toggleFaq = (id) => {
-  activeId.value = activeId.value === id ? null : id
-}
-
 const listRef = ref(null)
 let ctx
 
