@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watchEffect, watch, onBeforeUnmount } from 'vue'
+import { ref, computed, watchEffect, watch, onBeforeUnmount, nextTick } from 'vue'
 import ButtonComponent from '@/components/common/ButtonComponent.vue'
 import { usePWA } from '@/composables/usePWA'
 import { useContaAtual } from '@/composables/useContaAtual'
@@ -39,6 +39,7 @@ const buttonLink = computed(() => {
 const menuBtn = ref(null)
 const toggleMenu = () => {
   mobileMenuOpen.value = !mobileMenuOpen.value
+  if (!mobileMenuOpen.value) nextTick(() => menuBtn.value?.focus())
 }
 
 // Escape fecha o menu e devolve o foco pro botão que abriu
@@ -67,14 +68,15 @@ onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
       class="mobile-menu-btn"
       :class="{ open: mobileMenuOpen }"
       @click="toggleMenu"
-      aria-label="Menu"
+      :aria-label="mobileMenuOpen ? 'Fechar menu' : 'Abrir menu'"
       :aria-expanded="mobileMenuOpen"
       aria-controls="mobile-nav"
     >
       <span></span>
       <span></span>
-      <span></span>
     </button>
+
+    <router-link :to="buttonLink" class="mobile-action" @click="mobileMenuOpen = false">{{ buttonText }}</router-link>
 
     <!-- nav desktop -->
     <nav class="navbar_links desktop-nav">
@@ -90,10 +92,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
     <router-link :to="buttonLink" 
       class="desktop-btn"
       >
-      <ButtonComponent tag="span" 
-        :text="buttonText" 
-        icon-position="right"
-      />
+      <ButtonComponent tag="span" :text="buttonText" />
     </router-link>
 
     <!-- menu mobile -->
@@ -102,8 +101,10 @@ onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
         <div class="mobile-nav-glow" aria-hidden="true"></div>
 
         <button class="mobile-nav-close" @click="toggleMenu" aria-label="Fechar menu">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12" /><path d="M18 6L6 18" /></svg>
+          <span></span>
+          <span></span>
         </button>
+
 
         <div class="mobile-nav-inner" data-lenis-prevent>
           <span class="mobile-nav-eyebrow">Navegar</span>
@@ -220,7 +221,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   width: 44px;
   height: 44px;
   background: transparent;
@@ -230,20 +231,66 @@ onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
 }
 
 .mobile-menu-btn span {
-  width: 26px;
-  height: 3px;
+  width: 18px;
+  height: 2px;
   background: var(--gb-plum);
-  border-radius: 3px;
-  transition: all 0.3s ease;
+  border-radius: 2px;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Com o menu aberto, o hambúrguer da pílula branca some — quem fecha o
-   menu agora é o X bem visível dentro do próprio painel escuro (.mobile-nav-close),
-   evitando dois "X" diferentes brigando pela atenção. */
+/* O painel escuro cobre o header; quem fecha é o X dele, no mesmo lugar do hambúrguer. */
 .mobile-menu-btn.open {
   opacity: 0;
   pointer-events: none;
 }
+
+.mobile-nav-close {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.mobile-nav-close span {
+  position: absolute;
+  width: 18px;
+  height: 2px;
+  border-radius: 2px;
+  background: #fff;
+  animation: vira-x 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.mobile-nav-close span:first-child { --y: -3px; --r: 45deg; }
+.mobile-nav-close span:last-child { --y: 3px; --r: -45deg; }
+
+@keyframes vira-x {
+  from { transform: translateY(var(--y)) rotate(0deg); }
+  to { transform: rotate(var(--r)); }
+}
+
+.mobile-action {
+  display: none;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: var(--gb-magenta);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.mobile-action:hover { background: var(--gb-magenta-strong); }
 
 /* Menu mobile (overlay em tela cheia, roxo escuro) — some atrás da pílula
    do header (que continua com z-index mais alto e fundo opaco), e para
@@ -270,34 +317,13 @@ onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
   pointer-events: none;
 }
 
-.mobile-nav-close {
-  position: absolute;
-  top: 24px;
-  right: 24px;
-  z-index: 2;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.12);
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.mobile-nav-close:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
 .mobile-nav-inner {
   position: relative;
   z-index: 1;
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 100px 28px 32px;
+  padding: 84px 28px 32px;
   overflow-y: auto;
 }
 
@@ -342,6 +368,12 @@ onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
 }
 
 .mobile-nav-sub {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -405,6 +437,30 @@ onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
 
   .mobile-menu-btn {
     display: flex;
+    order: 3;
+  }
+
+  .mobile-action {
+    display: inline-flex;
+    order: 2;
+    margin-left: auto;
+  }
+
+  /* Barra fina colada no topo: sem pílula, sem sombra, uma linha embaixo. */
+  .navbar,
+  .navbar.header-full,
+  .navbar.header-compact {
+    max-width: none;
+    height: 56px;
+    border-radius: 0;
+    box-shadow: none;
+    border-bottom: 1px solid rgba(46, 10, 46, 0.1);
+    padding: 0 6px 0 16px;
+    gap: 4px;
+  }
+
+  .navbar_logo img {
+    height: 30px;
   }
 
   .navbar {
@@ -417,7 +473,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
     position: relative;
     left: auto;
     transform: none;
-    margin: 12px 12px 0;
+    margin: 0;
   }
 
   /* Login: volta a flutuar por cima da cena (ver flutuanteNoMobile) em
@@ -425,10 +481,16 @@ onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
      inteira atrás dela. */
   .navbar.flutuante {
     position: fixed;
-    left: 50%;
-    transform: translateX(-50%);
-    margin: 12px auto 0;
+    left: 0;
+    right: 0;
+    transform: none;
+    margin: 0;
   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-menu-btn span { transition: none; }
+  .mobile-nav-close span { animation: none; transform: rotate(var(--r)); }
 }
 
 @media (min-width: 769px) {
