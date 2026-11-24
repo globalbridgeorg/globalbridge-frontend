@@ -392,6 +392,7 @@ onBeforeUnmount(() => ctx?.revert())
 }
 
 .review-text {
+  flex: 1;
   font-size: 0.92rem;
   line-height: 1.6;
   color: #3a3640;
@@ -402,6 +403,9 @@ onBeforeUnmount(() => ctx?.revert())
   display: flex;
   align-items: center;
   gap: 10px;
+  margin-top: auto;
+  min-height: 64px;
+  box-sizing: border-box;
   padding-top: 12px;
   border-top: 1px solid var(--gb-purple-deep-16);
   text-decoration: none;
@@ -425,16 +429,21 @@ onBeforeUnmount(() => ctx?.revert())
 .review-agencia-info {
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
 }
 
 .review-agencia-info strong {
   font-size: 0.85rem;
+  line-height: 1.25;
   color: var(--gb-dark);
   transition: color 0.15s ease;
 }
 
 .review-agencia-info span {
   font-size: 0.72rem;
+  line-height: 1.3;
   color: var(--gb-ink-faint);
 }
 

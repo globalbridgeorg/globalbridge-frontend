@@ -250,6 +250,7 @@ async function enviarAvaliacao() {
 }
 
 .review-text {
+  flex: 1;
   font-size: 0.92rem;
   line-height: 1.6;
   color: #3A3640;
@@ -260,6 +261,7 @@ async function enviarAvaliacao() {
   display: flex;
   align-items: center;
   gap: 10px;
+  margin-top: auto;
   padding-top: 12px;
   border-top: 1px solid var(--gb-purple-deep-16);
   text-decoration: none;

@@ -755,6 +755,7 @@ onBeforeUnmount(() => {
 
 .linha-avaliacao {
   display: flex;
+  align-items: flex-start;
   gap: 14px;
   padding: 14px 0;
   border-top: 1px solid rgba(46, 10, 46, 0.1);
