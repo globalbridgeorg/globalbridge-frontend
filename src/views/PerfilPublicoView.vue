@@ -134,7 +134,15 @@ onBeforeUnmount(() => ctx?.revert())
           <h2 class="gb-heading section-title">A agência<br />por trás da conta</h2>
 
           <router-link :to="{ name: 'agencia', params: { id: perfil.agencia.id } }" class="agencia-card-link">
-            <div class="agencia-photo-band" aria-hidden="true">{{ iniciaisDe(perfil.agencia.nome) }}</div>
+            <div
+              class="agencia-photo-band"
+              :style="perfil.agencia.imagem_capa_url ? {
+                backgroundImage: `url(${perfil.agencia.imagem_capa_url})`,
+                backgroundSize: 'cover',
+                backgroundPosition: `${perfil.agencia.imagem_capa_foco_x ?? 50}% ${perfil.agencia.imagem_capa_foco_y ?? 50}%`,
+              } : {}"
+              aria-hidden="true"
+            >{{ perfil.agencia.imagem_capa_url ? '' : iniciaisDe(perfil.agencia.nome) }}</div>
             <div class="agencia-card-body">
               <div class="agencia-card-top">
                 <span class="agencia-card-nome">{{ perfil.agencia.nome }}</span>

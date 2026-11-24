@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useFavoritos } from '@/composables/useFavoritos'
 import { iniciaisDe } from '@/utils/iniciais'
@@ -11,6 +11,9 @@ const props = defineProps({
   agencia: { type: Object, required: true },
   variante: { type: String, default: 'foto' }
 })
+
+const erroFoto = ref(false)
+watch(() => props.agencia?.imagem_capa_url, () => { erroFoto.value = false })
 
 const siteSeguro = computed(() => sanitizarUrl(props.agencia?.site))
 
@@ -62,6 +65,7 @@ const estrelas = computed(() => {
           {{ agencia.cidade }}<template v-if="agencia.pais">, {{ agencia.pais }}</template>
         </span>
       </div>
+      <p v-if="agencia.descricao" class="tagline on-banner">{{ agencia.descricao }}</p>
       <div class="hero-actions">
         <a v-if="agencia.contato" :href="`mailto:${agencia.contato}`" class="btn-primary-lg">Falar com a agência</a>
         <a v-if="siteSeguro" :href="siteSeguro" target="_blank" rel="noopener noreferrer" class="btn-outline-lg btn-outline-on-banner">Visitar site</a>
@@ -73,7 +77,17 @@ const estrelas = computed(() => {
   </section>
 
   <section v-else class="hero reveal-section">
-    <div class="avatar" aria-hidden="true">{{ iniciais }}</div>
+    <div class="avatar" :class="{ 'has-photo': agencia.imagem_capa_url && !erroFoto }">
+      <img
+        v-if="agencia.imagem_capa_url && !erroFoto"
+        :src="agencia.imagem_capa_url"
+        :alt="`Foto de ${agencia.nome}`"
+        class="avatar-img"
+        :style="{ objectPosition: `${agencia.imagem_capa_foco_x ?? 50}% ${agencia.imagem_capa_foco_y ?? 50}%` }"
+        @error="erroFoto = true"
+      />
+      <span v-else aria-hidden="true">{{ iniciais }}</span>
+    </div>
     <div class="hero-info">
       <h1 class="agencia-title">{{ agencia.nome }}</h1>
       <div class="meta-row">
@@ -186,10 +200,11 @@ const estrelas = computed(() => {
   margin-top: 10px;
 }
 .avatar {
-  width: 104px;
-  height: 104px;
+  width: 112px;
+  height: 112px;
   border-radius: 24px;
   flex-shrink: 0;
+  overflow: hidden;
   background: linear-gradient(135deg, var(--gb-magenta), var(--gb-purple-deep));
   display: flex;
   align-items: center;
@@ -198,6 +213,14 @@ const estrelas = computed(() => {
   font-weight: 900;
   font-size: 40px;
   color: #fff;
+  box-shadow: 0 10px 26px rgba(23, 17, 26, 0.12);
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .hero-info {
@@ -258,6 +281,11 @@ const estrelas = computed(() => {
   color: var(--gb-ink-soft);
   max-width: 560px;
   margin: 0;
+}
+
+.tagline.on-banner {
+  color: rgba(251, 246, 231, 0.88);
+  max-width: 640px;
 }
 
 .hero-actions {

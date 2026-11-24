@@ -23,6 +23,9 @@ function formatarAgenciaResumida(a, paisContexto = null) {
     pais_nome_ingles: paisContexto ? paisContexto.nome_ingles : (sedePais?.nome_ingles ?? null),
     nota_media: mediaNotas(a.avaliacoes),
     tags: extrairTags(a.agencia_tags),
+    imagem_capa_url: a.imagem_capa_url ?? null,
+    imagem_capa_foco_x: a.imagem_capa_foco_x ?? 50,
+    imagem_capa_foco_y: a.imagem_capa_foco_y ?? 50,
   }
 }
 
@@ -99,7 +102,7 @@ export async function getPaisDetalhe(id) {
       estados(id, nome, cidade_principal),
       agencia_paises_atendidos(
         agencia:agencias(
-          id, nome, descricao, ativo,
+          id, nome, descricao, ativo, imagem_capa_url, imagem_capa_foco_x, imagem_capa_foco_y,
           estado:estados(cidade_principal, pais_id, pais:paises(nome, nome_ingles)),
           avaliacoes(nota),
           agencia_tags(tag:tags(id, categoria, valor, label)),
@@ -150,7 +153,7 @@ export async function getAgencias({ pais, regiao } = {}) {
   const { data, error } = await supabase
     .from('agencias')
     .select(`
-      id, nome, descricao, ativo,
+      id, nome, descricao, ativo, imagem_capa_url, imagem_capa_foco_x, imagem_capa_foco_y,
       estado:estados(cidade_principal, pais_id, pais:paises(id, nome, nome_ingles, regiao)),
       avaliacoes(nota),
       agencia_tags(tag:tags(id, categoria, valor, label)),
@@ -269,6 +272,67 @@ export async function getProgramas() {
   return data || []
 }
 
+export async function getDepoimentosHome(limite = 3) {
+  const { data, error } = await supabase
+    .from('avaliacoes')
+    .select(`
+      id, nota, comentario,
+      autor:profiles(id, name, username, avatar_url),
+      agencia:agencias(id, nome, ativo, estado:estados(cidade_principal, pais:paises(nome)))
+    `)
+    .gte('nota', 4)
+    .order('nota', { ascending: false })
+    .order('id', { ascending: false })
+    .limit(60)
+
+  if (error) throw error
+
+  const candidatos = (data || [])
+    .filter((av) => av.agencia?.ativo && av.autor?.name && av.comentario?.trim())
+    .sort((a, b) => (b.comentario.length - a.comentario.length) || (b.nota - a.nota) || (b.id - a.id))
+
+  const escolhidos = []
+  const autoresVistos = new Set()
+  const textosVistos = new Set()
+  const paisesVistos = new Set()
+
+  const tentarAdicionar = (av, exigirPaisUnico) => {
+    const autorKey = av.autor.id
+    const textoKey = av.comentario.trim().toLowerCase()
+    const paisNome = av.agencia.estado?.pais?.nome || ''
+    if (autoresVistos.has(autorKey) || textosVistos.has(textoKey)) return
+    if (exigirPaisUnico && paisNome && paisesVistos.has(paisNome)) return
+    autoresVistos.add(autorKey)
+    textosVistos.add(textoKey)
+    if (paisNome) paisesVistos.add(paisNome)
+    escolhidos.push({
+      id: av.id,
+      nota: av.nota,
+      texto: av.comentario.trim(),
+      autor: av.autor.name,
+      autor_username: av.autor.username || '',
+      autor_foto: av.autor.avatar_url || null,
+      agencia_id: av.agencia.id,
+      agencia_nome: av.agencia.nome,
+      cidade: av.agencia.estado?.cidade_principal || null,
+      pais: paisNome || null,
+    })
+  }
+
+  for (const av of candidatos) {
+    if (escolhidos.length >= limite) break
+    tentarAdicionar(av, true)
+  }
+  if (escolhidos.length < limite) {
+    for (const av of candidatos) {
+      if (escolhidos.length >= limite) break
+      tentarAdicionar(av, false)
+    }
+  }
+
+  return escolhidos
+}
+
 export async function getPerfilPublico(username) {
   const { data: prof, error } = await supabase
     .from('profiles')
@@ -283,7 +347,7 @@ export async function getPerfilPublico(username) {
     const { data: ag } = await supabase
       .from('agencias')
       .select(`
-        id, nome, descricao,
+        id, nome, descricao, imagem_capa_url, imagem_capa_foco_x, imagem_capa_foco_y,
         estado:estados(cidade_principal, pais:paises(nome)),
         avaliacoes(nota),
         planos(id)
@@ -296,6 +360,9 @@ export async function getPerfilPublico(username) {
         id: ag.id,
         nome: ag.nome,
         descricao: ag.descricao,
+        imagem_capa_url: ag.imagem_capa_url ?? null,
+        imagem_capa_foco_x: ag.imagem_capa_foco_x ?? 50,
+        imagem_capa_foco_y: ag.imagem_capa_foco_y ?? 50,
         cidade: ag.estado?.cidade_principal ?? null,
         pais: ag.estado?.pais?.nome ?? null,
         nota_media: mediaNotas(ag.avaliacoes),

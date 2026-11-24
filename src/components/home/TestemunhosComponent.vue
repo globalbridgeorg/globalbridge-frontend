@@ -1,84 +1,125 @@
 <script setup>
 import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, reactive, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { getDepoimentosHome } from '@/services/api'
+import { prefersReducedMotion } from '@/composables/usePageTransition'
+import { iniciaisDe } from '@/utils/iniciais'
 
 gsap.registerPlugin(ScrollTrigger)
 
-const depoimentos = [
-  {
-    nome: 'Marina T.',
-    estrelas: 5,
-    texto: 'Comparei sete países numa tarde e entendi que Dublin caberia no meu orçamento. Seis meses depois eu estava lá, com o visto aprovado na primeira tentativa.',
-    curso: 'Curso de idioma · Irlanda'
-  },
-  {
-    nome: 'Lucas A.',
-    estrelas: 4,
-    texto: 'O que mudou o jogo foi ver as agências avaliadas. Falei direto com três, escolhi a que respondeu melhor e não paguei intermediário nenhum.',
-    curso: 'Study & Work · Canadá'
-  },
-  {
-    nome: 'Sofia K.',
-    estrelas: 5,
-    texto: 'Eu não falava japonês e achava que isso me barrava. Achei um programa com idioma integrado e comecei do zero, em Kyoto.',
-    curso: 'Idioma · Japão'
-  }
-]
-
-const cardsRef = ref([])
+const depoimentos = ref([])
+const carregando = ref(true)
+const fotosComErro = reactive({})
+const sectionRef = ref(null)
 let ctx
 
-onMounted(() => {
+function animarCards() {
+  if (prefersReducedMotion() || !sectionRef.value) return
+  const cards = sectionRef.value.querySelectorAll('.card')
+  if (!cards.length) return
+  ctx?.revert()
   ctx = gsap.context(() => {
-    gsap.from(cardsRef.value, {
+    gsap.from(cards, {
       opacity: 0,
-      y: 30,
+      y: 28,
       duration: 0.6,
       stagger: 0.14,
       ease: 'power3.out',
       clearProps: 'transform,opacity',
-      scrollTrigger: { trigger: cardsRef.value[0], start: 'top 82%' }
+      scrollTrigger: { trigger: cards[0], start: 'top 84%', once: true }
     })
-  })
+  }, sectionRef.value)
+}
+
+onMounted(async () => {
+  try {
+    depoimentos.value = await getDepoimentosHome(3)
+  } catch (e) {
+    console.error('Erro ao carregar depoimentos da home:', e)
+  } finally {
+    carregando.value = false
+    await nextTick()
+    animarCards()
+  }
 })
 
 onBeforeUnmount(() => ctx?.revert())
 </script>
 
 <template>
-  <section class="testemunhos">
+  <section ref="sectionRef" class="testemunhos">
     <div class="inner gb-section">
       <SectionEyebrow label="Quem já foi" />
       <h2 class="gb-heading">Já embarcaram<br />com a gente</h2>
 
-      <div class="cards">
-        <div
-          v-for="(dep, i) in depoimentos"
-          :key="dep.curso"
-          class="card"
-          :ref="el => (cardsRef[i] = el)"
-        >
-          <span class="estrelas">
-            <template v-for="n in 5" :key="n">{{ n <= dep.estrelas ? '★' : '☆' }}</template>
-          </span>
-          <p class="texto">{{ dep.texto }}</p>
-
+      <div v-if="carregando" class="cards" aria-hidden="true">
+        <div v-for="n in 3" :key="n" class="card card-skeleton">
+          <div class="sk-line sk-stars"></div>
+          <div class="sk-line sk-body"></div>
+          <div class="sk-line sk-body short"></div>
           <div class="autor">
-            <span class="avatar">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="3" y="3" width="18" height="18" rx="3" stroke="#B0A79E" stroke-width="1.5"/>
-                <circle cx="9" cy="10" r="1.5" fill="#B0A79E"/>
-                <path d="M3 17L8 13L11 15L16 10L21 15" stroke="#B0A79E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </span>
-            <div>
-              <strong>{{ dep.nome }}</strong>
-              <span class="curso">{{ dep.curso }}</span>
+            <span class="avatar sk-avatar"></span>
+            <div class="sk-meta">
+              <div class="sk-line sk-name"></div>
+              <div class="sk-line sk-sub"></div>
             </div>
           </div>
         </div>
+      </div>
+
+      <div v-else-if="depoimentos.length" class="cards">
+        <article
+          v-for="dep in depoimentos"
+          :key="dep.id"
+          class="card"
+        >
+          <span class="estrelas" role="img" :aria-label="`${dep.nota} de 5 estrelas`">
+            <template v-for="n in 5" :key="n"><span aria-hidden="true">{{ n <= dep.nota ? '★' : '☆' }}</span></template>
+          </span>
+          <p class="texto">“{{ dep.texto }}”</p>
+
+          <div class="autor">
+            <router-link
+              v-if="dep.autor_username"
+              :to="{ name: 'perfil-publico', params: { username: dep.autor_username } }"
+              class="autor-link"
+            >
+              <span class="avatar">
+                <img
+                  v-if="dep.autor_foto && !fotosComErro[dep.id]"
+                  :src="dep.autor_foto"
+                  :alt="dep.autor"
+                  loading="lazy"
+                  @error="fotosComErro[dep.id] = true"
+                />
+                <span v-else aria-hidden="true">{{ iniciaisDe(dep.autor) }}</span>
+              </span>
+              <strong>{{ dep.autor }}</strong>
+            </router-link>
+            <div v-else class="autor-link">
+              <span class="avatar">
+                <img
+                  v-if="dep.autor_foto && !fotosComErro[dep.id]"
+                  :src="dep.autor_foto"
+                  :alt="dep.autor"
+                  loading="lazy"
+                  @error="fotosComErro[dep.id] = true"
+                />
+                <span v-else aria-hidden="true">{{ iniciaisDe(dep.autor) }}</span>
+              </span>
+              <strong>{{ dep.autor }}</strong>
+            </div>
+
+            <router-link
+              :to="{ name: 'agencia', params: { id: dep.agencia_id } }"
+              class="curso"
+            >
+              {{ dep.agencia_nome }}<template v-if="dep.pais"> · {{ dep.pais }}</template>
+            </router-link>
+          </div>
+        </article>
       </div>
     </div>
   </section>
@@ -89,7 +130,6 @@ onBeforeUnmount(() => ctx?.revert())
   background: var(--gb-pink);
   padding: 56px 0;
 }
-
 
 .gb-heading {
   margin: 24px 0 32px;
@@ -103,11 +143,12 @@ onBeforeUnmount(() => ctx?.revert())
 
 .card {
   background: white;
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 24px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  box-shadow: 0 8px 24px rgba(46, 10, 46, 0.05);
 }
 
 .estrelas {
@@ -117,43 +158,94 @@ onBeforeUnmount(() => ctx?.revert())
 }
 
 .texto {
+  flex: 1;
   font-size: 0.92rem;
-  line-height: 1.6;
+  line-height: 1.65;
   color: #3A3640;
   margin: 0;
 }
 
 .autor {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  padding-top: 12px;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 14px;
   border-top: 1px solid var(--gb-purple-deep-16);
 }
 
+.autor-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  text-decoration: none;
+  width: fit-content;
+}
+
 .avatar {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: rgba(46, 10, 46, 0.06);
-  border: 1px dashed #B0A79E;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--gb-magenta), var(--gb-purple-deep));
+  color: #fff;
+  font-family: var(--gb-font-display);
+  font-weight: 800;
+  font-size: 13px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .autor strong {
   display: block;
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   color: var(--gb-dark);
+  transition: color 0.15s ease;
+}
+
+.autor-link:hover strong {
+  color: var(--gb-magenta);
 }
 
 .autor .curso {
-  display: block;
+  display: inline-block;
+  margin-left: 51px;
+  margin-top: -8px;
   font-size: 0.78rem;
   color: var(--gb-mauve-muted);
+  text-decoration: none;
+  width: fit-content;
+  transition: color 0.15s ease;
 }
+
+.autor .curso:hover {
+  color: var(--gb-magenta);
+}
+
+.card-skeleton {
+  min-height: 220px;
+}
+
+.sk-line {
+  border-radius: 6px;
+  background: rgba(46, 10, 46, 0.08);
+}
+
+.sk-stars { width: 92px; height: 14px; }
+.sk-body { width: 100%; height: 14px; }
+.sk-body.short { width: 72%; }
+.sk-avatar { background: rgba(46, 10, 46, 0.08); }
+.sk-meta { display: flex; flex-direction: column; gap: 6px; margin-left: 51px; margin-top: -36px; }
+.sk-name { width: 110px; height: 12px; }
+.sk-sub { width: 150px; height: 10px; }
 
 @media (min-width: 1024px) {
   .cards {
@@ -165,8 +257,6 @@ onBeforeUnmount(() => ctx?.revert())
   }
 }
 
-/* .gb-section não tem padding próprio — mesmo respiro de 16px usado no
-   resto do site no celular. */
 @media (max-width: 768px) {
   .inner.gb-section {
     padding-left: 16px;

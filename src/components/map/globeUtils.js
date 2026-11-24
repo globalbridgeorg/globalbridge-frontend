@@ -50,6 +50,9 @@ export async function fetchMapData() {
     description: a.descricao,
     location: a.cidade && a.pais ? `${a.cidade}, ${a.pais}` : (a.pais ?? ''),
     paisNomeIngles: a.pais_nome_ingles,
+    coverUrl: a.imagem_capa_url ?? null,
+    focoX: a.imagem_capa_foco_x ?? 50,
+    focoY: a.imagem_capa_foco_y ?? 50,
     tags: agruparTagsPorCategoria(a.tags)
   }))
 
