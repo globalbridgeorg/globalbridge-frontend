@@ -64,7 +64,14 @@ function formatarPreco(valor) {
           </div>
         </div>
         <div v-else-if="bloco.tipo === 'hero'" class="p-hero-foto">
-          <div class="p-avatar">{{ iniciaisDe(agencia.nome) }}</div>
+          <div
+            class="p-avatar"
+            :style="agencia.imagem_capa_url ? {
+              backgroundImage: `url(${agencia.imagem_capa_url})`,
+              backgroundSize: 'cover',
+              backgroundPosition: `${focoX}% ${focoY}%`,
+            } : {}"
+          >{{ agencia.imagem_capa_url ? '' : iniciaisDe(agencia.nome) }}</div>
           <div>
             <span class="p-stars">{{ estrelasTexto(agencia.nota_media) }} <span class="p-rating">{{ agencia.nota_media ?? '—' }}</span></span>
             <h1 class="p-title">{{ agencia.nome }}</h1>

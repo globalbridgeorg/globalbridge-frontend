@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { reactive, ref } from 'vue'
 
 defineProps({
   agencies: { type: Array, required: true },
@@ -12,6 +12,7 @@ const emit = defineEmits(['clear-country'])
 // cabeçalho expande pra ver a lista inteira (no desktop o clique não muda
 // nada visualmente, já mostra tudo).
 const agenciesExpanded = ref(false)
+const brokenCovers = reactive({})
 </script>
 
 <template>
@@ -36,6 +37,15 @@ const agenciesExpanded = ref(false)
     <div class="agencies-list" data-lenis-prevent>
       <p v-if="loading" class="agencies-loading">Carregando agências...</p>
       <div v-for="agency in agencies" :key="agency.id" class="agency-card">
+        <div v-if="agency.coverUrl && !brokenCovers[agency.id]" class="agency-cover" aria-hidden="true">
+          <img
+            :src="agency.coverUrl"
+            alt=""
+            loading="lazy"
+            :style="{ objectPosition: `${agency.focoX ?? 50}% ${agency.focoY ?? 50}%` }"
+            @error="brokenCovers[agency.id] = true"
+          />
+        </div>
         <div class="agency-header">
           <span class="agency-name">{{ agency.name }}</span>
           <span class="agency-stars" role="img" :aria-label="`${agency.stars} de 5 estrelas`">
@@ -91,7 +101,20 @@ const agenciesExpanded = ref(false)
   display: flex;
   flex-direction: column;
   gap: 6px;
+  overflow: hidden;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.agency-cover {
+  margin: -16px -16px 6px;
+  height: 82px;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--gb-magenta), var(--gb-purple-deep));
+}
+.agency-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 .agency-card:hover {
   box-shadow: 0 8px 20px rgba(23,17,26,0.08);

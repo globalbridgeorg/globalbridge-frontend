@@ -163,6 +163,9 @@ onBeforeUnmount(() => ctx?.revert())
             :descricao="agencia.descricao"
             :cidade="agencia.cidade"
             :nota-media="agencia.nota_media"
+            :imagem-capa="agencia.imagem_capa_url"
+            :foco-x="agencia.imagem_capa_foco_x"
+            :foco-y="agencia.imagem_capa_foco_y"
             :to="{ name: 'agencia', params: { id: agencia.id } }"
           />
         </div>

@@ -1,13 +1,19 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 const props = defineProps({
   nome: { type: String, required: true },
   descricao: { type: String, required: true },
   cidade: { type: String, default: '' },
   notaMedia: { type: Number, default: null },
+  imagemCapa: { type: String, default: null },
+  focoX: { type: Number, default: 50 },
+  focoY: { type: Number, default: 50 },
   to: { type: [String, Object], default: null }
 })
+
+const erroImagem = ref(false)
+watch(() => props.imagemCapa, () => { erroImagem.value = false })
 
 const estrelas = computed(() => {
   const nota = Math.round(props.notaMedia ?? 0)
@@ -27,7 +33,18 @@ const iniciais = computed(() => {
 
 <template>
   <article class="agencia-card">
-    <div class="agencia-photo" aria-hidden="true">{{ iniciais }}</div>
+    <div class="agencia-photo" :class="{ 'has-photo': imagemCapa && !erroImagem }" aria-hidden="true">
+      <img
+        v-if="imagemCapa && !erroImagem"
+        :src="imagemCapa"
+        alt=""
+        loading="lazy"
+        class="agencia-photo-img"
+        :style="{ objectPosition: `${focoX}% ${focoY}%` }"
+        @error="erroImagem = true"
+      />
+      <span v-else>{{ iniciais }}</span>
+    </div>
     <div class="agencia-header">
       <h3 class="agencia-nome">{{ nome }}</h3>
       <span
@@ -69,8 +86,10 @@ const iniciais = computed(() => {
 }
 
 .agencia-photo {
-  height: 84px;
+  position: relative;
+  height: 124px;
   flex-shrink: 0;
+  overflow: hidden;
   background: linear-gradient(135deg, var(--gb-magenta), var(--gb-purple-deep));
   display: flex;
   align-items: center;
@@ -79,6 +98,26 @@ const iniciais = computed(() => {
   font-weight: 900;
   font-size: 22px;
   color: rgba(255, 255, 255, 0.85);
+}
+
+.agencia-photo.has-photo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(23, 17, 26, 0.04) 40%, rgba(23, 17, 26, 0.28) 100%);
+  pointer-events: none;
+}
+
+.agencia-photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.35s ease;
+}
+
+.agencia-card:hover .agencia-photo-img {
+  transform: scale(1.04);
 }
 
 .agencia-header,
