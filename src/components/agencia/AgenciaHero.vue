@@ -146,7 +146,7 @@ const estrelas = computed(() => {
 .hero-banner-scrim {
   position: absolute;
   inset: 0;
-  background: linear-gradient(0deg, rgba(23, 17, 26, 0.9) 10%, rgba(23, 17, 26, 0.2) 60%);
+  background: linear-gradient(0deg, rgba(23, 17, 26, 0.92) 8%, rgba(23, 17, 26, 0.62) 56%, rgba(23, 17, 26, 0.22) 100%);
 }
 
 .hero-banner-content {
