@@ -1,32 +1,166 @@
 <script setup>
-import HeaderComponent from "@/components/HeaderComponent.vue";
-import FooterComponent from "@/components/FooterComponent.vue";
-import { onMounted } from 'vue'
+import HeaderComponent from "@/components/layout/HeaderComponent.vue";
+import FooterComponent from "@/components/layout/FooterComponent.vue";
+import MobileTabBar from "@/components/layout/MobileTabBar.vue";
+import { computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { initSmoothScroll } from '@/utils/lenis'
+import { carregarConta } from '@/composables/useContaAtual'
+
+const route = useRoute()
+
+const shouldShowFooter = computed(
+  () => !['mapview', 'profile', 'login', 'esqueci-senha', 'redefinir-senha', 'business', 'business-editor', 'admin'].includes(route.name)
+)
+// MobileTabBar já se esconde nessas rotas — sem isso o layout reservava
+// 74px de espaço embaixo pra uma barra que não estava lá, sobrando um
+// vão vazio (e mais scroll) no celular.
+const shouldShowTabBar = computed(
+  () => !['login', 'esqueci-senha', 'redefinir-senha'].includes(route.name)
+)
 
 onMounted(() => {
   initSmoothScroll()
+  carregarConta()
 })
 </script>
 
 <template>
-  <main>
-    <HeaderComponent 
+  <div class="app-shell" :class="{ 'sem-tabbar': !shouldShowTabBar }">
+    <a href="#conteudo" class="skip-link">Pular para o conteúdo</a>
+    <HeaderComponent
     class="header"
     />
-    <router-view />
-  </main>
+    <main id="conteudo" class="page-viewport" tabindex="-1">
+      <router-view v-slot="{ Component, route: currentRoute }">
+        <transition type="transition" :name="['mapview', 'profile'].includes(currentRoute.name) ? 'page-focus-noenter' : 'page-focus'">
+          <component :is="Component" :key="currentRoute.path" />
+        </transition>
+      </router-view>
+    </main>
+    <FooterComponent v-if="shouldShowFooter" />
+    <MobileTabBar v-if="shouldShowTabBar" />
+  </div>
 </template>
 
 <style scoped>
+
 header {
   position: fixed;
   justify-self: center;
   top: 0;
   width: 100%;
-  height: 80px; /* Defina uma altura fixa para o seu header */
+  height: 80px;
   background-color: #fff;
-  z-index: 1000; /* Garante que o header fique sempre na frente do vídeo */
+  z-index: 1000;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.page-viewport {
+  position: relative;
+  overflow-x: clip;
+}
+
+.page-viewport:focus {
+  outline: none;
+}
+
+.skip-link {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2000;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: var(--gb-dark);
+  color: #fff;
+  font-weight: 600;
+  transform: translateY(-150%);
+}
+
+.skip-link:focus-visible {
+  transform: none;
+  outline: 2px solid var(--gb-magenta);
+  outline-offset: 2px;
+}
+
+/* No celular o header deixa de flutuar sobre o conteúdo (era fixed,
+   igual no PC) e passa a rolar junto com a página — a barra de abas
+   fixa (MobileTabBar) é que garante acesso rápido à navegação agora.
+   Por isso reserva espaço embaixo pra ela não cobrir o rodapé/conteúdo. */
+@media (max-width: 768px) {
+  header {
+    /* "relative" em vez de "static": continua ocupando espaço no fluxo
+       normal (não flutua sobre o conteúdo como no PC), mas mantém o
+       z-index funcionando — sem isso, elementos fixed de tela cheia
+       (como o globo do /mapview) pintariam por cima do header. */
+    position: relative;
+    height: auto;
+    box-shadow: none;
+  }
+
+  .app-shell {
+    padding-bottom: 74px;
+  }
+
+  .app-shell.sem-tabbar {
+    padding-bottom: 0;
+  }
+}
+
+/* Corte C — Zoom com foco: a página atual estica levemente e desfoca,
+   como se a câmera passasse por ela; a nova entra logo atrás, um pouco
+   menor, ganhando nitidez até encaixar. */
+:deep(.page-focus-enter-active) {
+  transition: transform 0.2s ease 0.02s, filter 0.2s ease 0.02s, opacity 0.2s ease 0.02s;
+}
+
+:deep(.page-viewport > .page-focus-leave-active) {
+  transition: transform 0.16s ease, filter 0.16s ease, opacity 0.16s ease;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  z-index: 1;
+}
+
+:deep(.page-focus-enter-from) {
+  transform: scale(0.97);
+  filter: blur(7px);
+  opacity: 0;
+}
+
+:deep(.page-focus-leave-to) {
+  transform: scale(1.045);
+  filter: blur(7px);
+  opacity: 0;
+}
+
+/* Indo para o mapview ou o perfil a entrada é instantânea (sem
+   zoom/blur); a saída de outras páginas para lá mantém a animação
+   normal, e sair do mapview/perfil pra qualquer outro lugar também. */
+:deep(.page-focus-noenter-enter-active) {
+  transition: none;
+}
+
+:deep(.page-viewport > .page-focus-noenter-leave-active) {
+  transition: transform 0.16s ease, filter 0.16s ease, opacity 0.16s ease;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  z-index: 1;
+}
+
+:deep(.page-focus-noenter-leave-to) {
+  transform: scale(1.045);
+  filter: blur(7px);
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :deep(.page-focus-enter-active),
+  :deep(.page-focus-leave-active),
+  :deep(.page-focus-noenter-leave-active) {
+    transition: none !important;
+  }
 }
 </style>

@@ -1,0 +1,768 @@
+<script setup>
+import { ref, reactive, nextTick } from 'vue'
+import { enviarContato } from '@/services/api'
+
+const publico = ref('estudante')
+const formShell = ref(null)
+const enviando = ref(false)
+const enviado = ref(false)
+const erro = ref('')
+
+const form = reactive({
+  nome: '',
+  email: '',
+  nomeAgencia: '',
+  assunto: 'Dúvida sobre destino ou programa',
+  mensagem: '',
+})
+
+async function handleEnviar() {
+  erro.value = ''
+  enviado.value = false
+
+  if (!form.nome.trim()) { erro.value = 'Informe seu nome.'; return }
+  if (!form.email.trim() || !form.email.includes('@')) { erro.value = 'Informe um e-mail válido.'; return }
+  if (publico.value === 'agencia' && !form.nomeAgencia.trim()) {
+    erro.value = 'Informe o nome da agência ou instituição.'
+    return
+  }
+  if (form.mensagem.trim().length < 10) {
+    erro.value = 'Escreva sua mensagem com pelo menos 10 caracteres.'
+    return
+  }
+
+  enviando.value = true
+  try {
+    await enviarContato({
+      publico: publico.value,
+      nome: form.nome,
+      email: form.email,
+      nomeAgencia: publico.value === 'agencia' ? form.nomeAgencia : '',
+      assunto: form.assunto,
+      mensagem: form.mensagem,
+    })
+    enviado.value = true
+    form.mensagem = ''
+  } catch (e) {
+    console.error('Erro ao enviar mensagem de contato:', e)
+    erro.value = 'Não conseguimos enviar sua mensagem agora. Tente novamente em instantes.'
+  } finally {
+    enviando.value = false
+  }
+}
+
+async function pick(v) {
+  if (v === publico.value) return
+  const shell = formShell.value
+
+  if (shell) {
+    shell.style.height = shell.getBoundingClientRect().height + 'px'
+    shell.classList.add('resizing')
+  }
+
+  publico.value = v
+  await nextTick()
+
+  if (shell) {
+    // mede a altura real liberando a altura travada por um instante
+    // (com a altura antiga fixada, scrollHeight só "estoura" quando o
+    // conteúdo novo é maior, nunca quando é menor). Desliga a transição
+    // enquanto mede: sem isso, esse vai-e-vem no valor de height "consome"
+    // a transição de verdade e o encolher só dá um salto direto pro
+    // tamanho final, sem animar.
+    const lockedHeight = shell.style.height
+    shell.style.transition = 'none'
+    shell.style.height = 'auto'
+    const endHeight = shell.scrollHeight
+    shell.style.height = lockedHeight
+    void shell.offsetHeight
+
+    shell.style.transition = ''
+    void shell.offsetHeight
+    shell.style.height = endHeight + 'px'
+
+    let done = false
+    const cleanup = () => {
+      if (done) return
+      done = true
+      shell.style.height = ''
+      shell.classList.remove('resizing')
+      shell.removeEventListener('transitionend', onEnd)
+    }
+    const onEnd = (event) => {
+      if (event.target === shell && event.propertyName === 'height') cleanup()
+    }
+    shell.addEventListener('transitionend', onEnd)
+    setTimeout(cleanup, 320)
+  }
+}
+</script>
+
+<template>
+  <div class="contato">
+    <section class="gb-section hero">
+      <div class="eyebrow"><span class="eyebrow-label">Contato</span></div>
+      <h1 class="gb-heading hero-heading">Quem quer que você seja,<br />a gente escuta</h1>
+      <p class="hero-desc">Seja você um <strong>estudante</strong> decidindo o próximo destino ou uma <strong>agência de intercâmbio</strong> querendo se cadastrar, tem um jeito certo de falar com a gente logo abaixo.</p>
+    </section>
+
+    <section class="gb-section historia">
+      <div class="historia-media"><img src="/images/comocomecamos.webp" alt="" /></div>
+      <div>
+        <div class="eyebrow"><span class="eyebrow-label">Como começamos</span></div>
+        <h2 class="gb-heading historia-heading">Uma decisão que não devia depender de sorte</h2>
+        <p>O GlobalBridge nasceu de uma frustração bem concreta: decidir um intercâmbio dependia de planilha solta, grupo de WhatsApp, e agência que às vezes nem respondia. Cada informação vinha de um lugar diferente, e comparar dois países de verdade era quase impossível.</p>
+        <p>Foi daí que veio a ideia de construir o que a gente gostaria de ter tido na época: <strong>um lugar único</strong> pra comparar destinos com os mesmos critérios, ver avaliação real de quem já passou por cada agência, e falar direto com quem organiza o programa — sem intermediário escondendo informação.</p>
+        <p>Hoje a plataforma conecta estudantes a mais de 20 países e a agências parceiras verificadas, mas o objetivo continua o mesmo do primeiro dia: tirar a decisão do intercâmbio da mão do achismo — dos dois lados da mesa.</p>
+      </div>
+    </section>
+
+    <section class="gb-section">
+      <div class="fork">
+        <div class="fork-panel light">
+          <p class="fork-tag">Se você é estudante</p>
+          <h3>Fale com a gente sobre</h3>
+          <div class="reason-list">
+            <div class="reason-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7" /></svg>
+              <p>Dúvidas sobre um destino, programa ou como comparar países no mapa.</p>
+            </div>
+            <div class="reason-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7" /></svg>
+              <p>Problemas com uma agência parceira ou algo que não bateu com o combinado.</p>
+            </div>
+            <div class="reason-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7" /></svg>
+              <p>Sugestões de melhoria pra plataforma — a gente lê tudo.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="fork-panel dark">
+          <p class="fork-tag">Se você é agência ou instituição</p>
+          <h3 class="on-dark">Fale com a gente sobre</h3>
+          <div class="reason-list">
+            <div class="reason-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7" /></svg>
+              <p>Cadastro de programas e verificação pra aparecer na plataforma.</p>
+            </div>
+            <div class="reason-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7" /></svg>
+              <p>Parcerias institucionais e acesso ao login business.</p>
+            </div>
+            <div class="reason-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7" /></svg>
+              <p>Suporte técnico ou dúvida sobre uma avaliação recebida.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="gb-section form-wrap">
+      <div class="form-head">
+        <div class="eyebrow"><span class="eyebrow-label">Formulário</span></div>
+        <div class="heading-row">
+          <h2 class="gb-heading">Manda sua mensagem</h2>
+          <p class="heading-desc">Escolha quem você é pra gente direcionar certo — o resto do time responde por aqui.</p>
+        </div>
+      </div>
+
+      <div class="segmented">
+        <div class="segmented-thumb" :class="{ right: publico === 'agencia' }"></div>
+        <button type="button" class="seg-btn" :class="{ active: publico === 'estudante' }" :aria-pressed="publico === 'estudante'" @click="pick('estudante')">Sou estudante</button>
+        <button type="button" class="seg-btn" :class="{ active: publico === 'agencia' }" :aria-pressed="publico === 'agencia'" @click="pick('agencia')">Sou agência</button>
+      </div>
+
+      <div class="form-shell" ref="formShell">
+        <form class="form-grid" @submit.prevent="handleEnviar" novalidate>
+          <div class="field">
+            <label for="contato-nome">Nome</label>
+            <input id="contato-nome" v-model="form.nome" type="text" autocomplete="name" placeholder="Seu nome" required />
+          </div>
+          <div class="field">
+            <label for="contato-email">E-mail</label>
+            <input id="contato-email" v-model="form.email" type="email" autocomplete="email" placeholder="seu@email.com" required />
+          </div>
+          <div v-if="publico === 'agencia'" class="field full">
+            <label for="contato-agencia">Nome da agência</label>
+            <input id="contato-agencia" v-model="form.nomeAgencia" type="text" placeholder="Nome da sua agência ou instituição" />
+          </div>
+          <div class="field full">
+            <label for="contato-assunto">Assunto</label>
+            <select id="contato-assunto" v-model="form.assunto">
+              <option>Dúvida sobre destino ou programa</option>
+              <option>Problema com uma agência</option>
+              <option>Cadastro de programas</option>
+              <option>Parceria institucional</option>
+              <option>Suporte técnico</option>
+              <option>Sugestão pra plataforma</option>
+            </select>
+          </div>
+          <div class="field full">
+            <label for="contato-mensagem">Mensagem</label>
+            <textarea id="contato-mensagem" v-model="form.mensagem" rows="4" placeholder="Conte com detalhes o que você precisa" required></textarea>
+          </div>
+          <p v-if="erro" class="form-feedback form-feedback--erro" role="alert">{{ erro }}</p>
+          <p v-if="enviado" class="form-feedback form-feedback--ok" role="status">Mensagem enviada! A gente retorna no e-mail informado.</p>
+          <div class="form-actions">
+            <button class="btn btn-dark" type="submit" :disabled="enviando">
+              {{ enviando ? 'Enviando...' : 'Enviar mensagem' }}
+            </button>
+            <p class="form-note">Respondemos pelo e-mail que você deixar aqui.</p>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section class="gb-section canais">
+      <div class="canal">
+        <div class="canal-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v12H4z" /><path d="M4 7l8 6 8-6" /></svg></div>
+        <div>
+          <h3>E-mail</h3>
+          <a href="mailto:contato@globalbridge.com">contato@globalbridge.com</a>
+        </div>
+      </div>
+      <div class="canal">
+        <div class="canal-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="4" /><circle cx="12" cy="12" r="3.2" /><circle cx="16.2" cy="7.8" r="0.6" fill="currentColor" /></svg></div>
+        <div>
+          <h3>Instagram</h3>
+          <p>@globalbridge <span class="soon">(em breve)</span></p>
+        </div>
+      </div>
+      <div class="canal">
+        <div class="canal-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3" /><path d="M8 11v5M8 8.2v.1M12 16v-3.2c0-1.2 1-2 2-2s2 .8 2 2V16" /></svg></div>
+        <div>
+          <h3>LinkedIn</h3>
+          <p>GlobalBridge <span class="soon">(em breve)</span></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="gb-section faq">
+      <div class="eyebrow"><span class="eyebrow-label">Perguntas frequentes</span></div>
+      <div class="heading-row"><h2 class="gb-heading">Antes de escrever</h2></div>
+      <div class="faq-item">
+        <h3>Preciso ter conta pra falar com vocês?</h3>
+        <p>Não. O formulário e o e-mail funcionam pra qualquer pessoa, com ou sem cadastro na plataforma.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Sou uma agência, como faço pra me cadastrar?</h3>
+        <p>Use o formulário acima com "Sou agência" selecionado e assunto "Cadastro de programas" — nosso time entra em contato com os próximos passos da verificação.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Tive um problema com uma agência parceira, o que eu faço?</h3>
+        <p>Conte pra gente com o máximo de detalhe no formulário (assunto "Problema com uma agência") — isso também entra na avaliação da agência na plataforma.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Encontrei um erro ou tenho uma ideia pra plataforma</h3>
+        <p>Manda pelo formulário com o assunto "Sugestão pra plataforma" — feedback de quem usa é o que mais ajuda a gente a melhorar.</p>
+      </div>
+    </section>
+  </div>
+</template>
+
+<style scoped>
+.contato {
+  width: 100%;
+  padding-top: 120px;
+}
+
+.eyebrow {
+  display: flex;
+  align-items: baseline;
+  width: 100%;
+  padding-top: 16px;
+  border-top: 1px solid var(--gb-purple-deep-18);
+}
+
+.eyebrow-label {
+  font-family: var(--gb-font-eyebrow);
+  font-weight: 700;
+  font-size: 12.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gb-mauve);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn-dark {
+  background: var(--gb-dark);
+  color: #fff;
+}
+
+.btn-dark:hover {
+  background: var(--gb-magenta);
+}
+
+/* hero */
+.hero {
+  padding-bottom: 30px;
+}
+
+.hero-heading {
+  font-size: clamp(2.1rem, 1.2rem + 3.8vw, 3.4rem);
+  margin: 20px 0 16px;
+  max-width: 760px;
+}
+
+.hero-desc {
+  font-size: 1.02rem;
+  line-height: 1.6;
+  color: var(--gb-ink-soft);
+  max-width: 620px;
+  margin: 0;
+}
+
+.hero-desc strong {
+  color: var(--gb-dark);
+}
+
+/* história */
+.historia {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 36px;
+  padding-block: 44px 56px;
+  border-top: 1px solid var(--gb-purple-deep-18);
+  margin-top: 24px;
+}
+
+@media (min-width: 1024px) {
+  .historia {
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: 56px;
+  }
+}
+
+.historia-media {
+  border-radius: var(--gb-radius-card);
+  overflow: hidden;
+  aspect-ratio: 4/3;
+  border: 1px solid var(--gb-purple-deep-16);
+}
+
+.historia-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.historia-heading {
+  font-size: clamp(1.5rem, 1.1rem + 1.8vw, 2.1rem);
+  margin: 16px 0 18px;
+}
+
+.historia p {
+  font-size: 0.98rem;
+  line-height: 1.7;
+  color: var(--gb-ink-soft);
+  margin: 0 0 16px;
+}
+
+.historia p:last-child {
+  margin-bottom: 0;
+}
+
+.historia strong {
+  color: var(--gb-dark);
+}
+
+/* fork */
+.fork {
+  display: grid;
+  grid-template-columns: 1fr;
+  border-radius: var(--gb-radius-card);
+  overflow: hidden;
+  border: 1px solid var(--gb-purple-deep-16);
+  margin: 0 0 56px;
+}
+
+@media (min-width: 1024px) {
+  .fork {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.fork-panel {
+  padding: 40px 40px;
+}
+
+.fork-panel.light {
+  background: #fff;
+}
+
+.fork-panel.dark {
+  background: var(--gb-purple-deep);
+}
+
+.fork-tag {
+  font-family: var(--gb-font-eyebrow);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gb-magenta);
+  margin: 0 0 10px;
+}
+
+.fork-panel.dark .fork-tag {
+  color: var(--gb-pink);
+}
+
+.fork-panel h3 {
+  font-family: var(--gb-font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 1.4rem;
+  margin: 0 0 18px;
+  color: var(--gb-dark);
+}
+
+.fork-panel h3.on-dark {
+  color: #fff;
+}
+
+.reason-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0 0 24px;
+}
+
+.reason-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.reason-item svg {
+  width: 17px;
+  height: 17px;
+  stroke: var(--gb-magenta);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.fork-panel.dark .reason-item svg {
+  stroke: var(--gb-pink);
+}
+
+.reason-item p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--gb-ink-soft);
+}
+
+.fork-panel.dark .reason-item p {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* form */
+.form-wrap {
+  padding-block: 0 56px;
+}
+
+.form-head {
+  margin-bottom: 24px;
+}
+
+.segmented {
+  position: relative;
+  display: inline-flex;
+  background: #fff;
+  border: 1px solid var(--gb-purple-deep-16);
+  border-radius: var(--gb-radius-pill);
+  padding: 4px;
+  margin-bottom: 28px;
+}
+
+.segmented-thumb {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  height: calc(100% - 8px);
+  background: var(--gb-dark);
+  border-radius: var(--gb-radius-pill);
+  transition: transform 0.25s ease;
+}
+
+.segmented-thumb.right {
+  transform: translateX(100%);
+}
+
+.seg-btn {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  white-space: nowrap;
+  border: none;
+  background: transparent;
+  padding: 9px 20px;
+  border-radius: var(--gb-radius-pill);
+  font-family: var(--gb-font-eyebrow);
+  font-weight: 700;
+  font-size: 12.5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--gb-ink-soft);
+  cursor: pointer;
+  transition: color 0.25s ease;
+}
+
+.seg-btn.active {
+  color: #fff;
+}
+
+.form-shell {
+  transition: height 0.28s ease;
+}
+
+.form-shell.resizing {
+  overflow: hidden;
+}
+
+.form-grid {
+  background: #fff;
+  border: 1px solid var(--gb-purple-deep-16);
+  border-radius: var(--gb-radius-card);
+  padding: 36px 40px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field.full {
+  grid-column: 1 / -1;
+}
+
+.field label {
+  font-family: var(--gb-font-eyebrow);
+  font-weight: 700;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gb-ink-faint);
+}
+
+.field input,
+.field select,
+.field textarea {
+  padding: 11px 13px;
+  border: 1px solid var(--gb-purple-deep-16);
+  border-radius: 9px;
+  font-size: 14px;
+  font-family: var(--gb-font-display);
+  color: var(--gb-dark);
+  background: #fff;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: 2px solid var(--gb-magenta); outline-offset: 1px;
+  border-color: var(--gb-magenta);
+}
+
+.field textarea {
+  resize: vertical;
+}
+
+.form-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 6px;
+}
+
+.form-feedback {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 11px 14px;
+  border-radius: 9px;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.form-feedback--erro {
+  background: #fff4f4;
+  border: 1px solid rgba(179, 38, 30, 0.25);
+  color: #b3261e;
+}
+
+.form-feedback--ok {
+  background: rgba(61, 154, 75, 0.1);
+  border: 1px solid rgba(61, 154, 75, 0.3);
+  color: #266b30;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.form-note {
+  font-size: 0.8rem;
+  color: var(--gb-ink-faint);
+  margin: 0;
+}
+
+/* canais diretos */
+.canais {
+  padding-block: 0 56px;
+  border-top: 1px solid var(--gb-purple-deep-18);
+  padding-top: 40px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 1024px) {
+  .canais {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.canal {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.canal-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: white;
+  border: 1px solid var(--gb-purple-deep-16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.canal-icon svg {
+  width: 19px;
+  height: 19px;
+  stroke: var(--gb-magenta-strong);
+}
+
+.canal h3 {
+  margin: 0 0 4px;
+  font-family: var(--gb-font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  color: var(--gb-dark);
+}
+
+.canal p,
+.canal a {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--gb-ink-soft);
+  text-decoration: none;
+}
+
+.canal a:hover {
+  color: var(--gb-magenta);
+}
+
+.soon {
+  opacity: 0.6;
+}
+
+/* faq */
+.faq {
+  padding-block: 0 60px;
+}
+
+.faq-item {
+  border-top: 1px solid var(--gb-purple-deep-18);
+  padding: 20px 0;
+}
+
+.faq-item h3 {
+  margin: 0 0 8px;
+  font-family: var(--gb-font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 0.92rem;
+  color: var(--gb-dark);
+}
+
+.faq-item p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--gb-ink-soft);
+  max-width: 720px;
+}
+
+.heading-row {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 20px 0 28px;
+}
+
+.heading-desc {
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--gb-ink-soft);
+  max-width: 460px;
+  margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .segmented-thumb,
+  .seg-btn,
+  .form-shell {
+    transition: none;
+  }
+}
+
+/* Header deixou de ser fixed no celular (ver App.vue) — não precisa mais
+   do respiro de 120px pra não ficar embaixo dele. Padding padrão de
+   celular igual ao do hero em vídeo da home: 16px de respiro. */
+@media (max-width: 768px) {
+  .contato {
+    padding-top: 16px;
+  }
+
+  .gb-section {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+</style>

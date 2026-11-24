@@ -1,0 +1,361 @@
+<script setup>
+import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
+import ButtonComponent from '@/components/common/ButtonComponent.vue'
+import VideoComponent from '@/components/home/VideoComponent.vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { scrollToTarget } from '@/utils/lenis'
+
+gsap.registerPlugin(ScrollTrigger)
+
+const irParaFormatos = () => scrollToTarget('#formatos')
+
+const idiomas = ['Inglês', 'Espanhol', 'Japonês', 'Alemão', '+8 idiomas']
+
+const opcoes = [
+  'custo de vida',
+  'recepção local',
+  'cultura interna',
+  'nível de idioma'
+]
+
+const sectionRef = ref(null)
+const cardPinkRef = ref(null)
+const cardBlueRef = ref(null)
+const destinoRef = ref(null)
+const opcoesRef = ref(null)
+const listItemRefs = ref([])
+
+let triggers = []
+
+onMounted(() => {
+  const ctx = gsap.context(() => {
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: sectionRef.value,
+        start: 'top 75%'
+      }
+    })
+
+    tl.from(cardPinkRef.value, { y: 40, opacity: 0, duration: 0.7, ease: 'power3.out', clearProps: 'transform,opacity' })
+      .from(cardBlueRef.value, { y: 40, opacity: 0, duration: 0.7, ease: 'power3.out', clearProps: 'transform,opacity' }, '-=0.5')
+
+    gsap.from(destinoRef.value, {
+      opacity: 0,
+      x: -30,
+      duration: 0.8,
+      ease: 'power3.out',
+      clearProps: 'transform,opacity',
+      scrollTrigger: { trigger: destinoRef.value, start: 'top 80%' }
+    })
+
+    gsap.from(opcoesRef.value, {
+      opacity: 0,
+      x: 30,
+      duration: 0.8,
+      ease: 'power3.out',
+      clearProps: 'transform,opacity',
+      scrollTrigger: { trigger: opcoesRef.value, start: 'top 80%' }
+    })
+
+    gsap.from(listItemRefs.value, {
+      opacity: 0,
+      y: 12,
+      duration: 0.5,
+      stagger: 0.08,
+      ease: 'power2.out',
+      clearProps: 'transform,opacity',
+      scrollTrigger: { trigger: opcoesRef.value, start: 'top 75%' }
+    })
+  }, sectionRef.value)
+
+  triggers.push(ctx)
+})
+
+onBeforeUnmount(() => {
+  triggers.forEach(ctx => ctx.revert())
+})
+</script>
+
+<template>
+  <section class="programas" ref="sectionRef">
+    <SectionEyebrow label="Programas disponíveis" />
+    <h2 class="sr-only">Programas disponíveis</h2>
+
+    <div class="cards-row">
+      <div class="card card-pink" ref="cardPinkRef">
+        <svg class="quote-icon" viewBox="0 0 32 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 24V14.4C0 9.87 1.28 6.24 3.84 3.5C6.4 0.9 9.6 0 13.44 0V4.8C10.88 4.8 8.96 5.6 7.68 7.2C6.4 8.66 5.76 10.75 5.76 13.44H13.44V24H0ZM18.56 24V14.4C18.56 9.87 19.84 6.24 22.4 3.5C24.96 0.9 28.16 0 32 0V4.8C29.44 4.8 27.52 5.6 26.24 7.2C24.96 8.66 24.32 10.75 24.32 13.44H32V24H18.56Z" fill="#42023C"/>
+        </svg>
+        <p class="quote-text">
+          Planos de intercâmbio intensivo com ensino universitário
+          <em>“Study &amp; Work”</em>, <em>“Au Pair”</em> e residência garantida.
+          Programas completos para quem deseja estudar, trabalhar e viver uma
+          experiência internacional com mais segurança e planejamento.
+        </p>
+        <ButtonComponent text="Comparar formatos" iconType="primary" @click="irParaFormatos" />
+      </div>
+
+      <div class="card card-blue" ref="cardBlueRef">
+        <h3 class="blue-title">INTERCÂMBIO SEM<br />SABER O IDIOMA</h3>
+        <p class="blue-subtitle">
+          Veja planos de intercâmbio com ensino de idioma integrado. Comece seu futuro hoje!
+        </p>
+        <ButtonComponent text="Ver os planos" iconType="secondary" class="btn-ghost-light" @click="irParaFormatos" />
+
+        <ul class="idiomas-pills">
+          <li v-for="idioma in idiomas" :key="idioma">{{ idioma }}</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="destino-row">
+      <div class="destino-imagem" ref="destinoRef">
+        <VideoComponent src="/videos/video-landing.mp4" compact />
+        <span class="destino-caption">destino em destaque — rua movimentada</span>
+      </div>
+
+      <div class="opcoes" ref="opcoesRef">
+        <span class="opcoes-badge">+20 países</span>
+        <h2 class="opcoes-title">NOSSAS OPÇÕES</h2>
+        <p class="opcoes-desc">
+          Explore nossa seleção com mais de 20 países ao redor do mundo. Compare
+          destinos e descubra qual combina com seu perfil, planeje sua experiência
+          internacional com mais segurança e confiança com base em:
+        </p>
+
+        <ul class="opcoes-list">
+          <li v-for="(opcao, i) in opcoes" :key="opcao" :ref="el => (listItemRefs[i] = el)">
+            <span>{{ opcao }}</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4 12L12 4M12 4H5M12 4V11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </li>
+        </ul>
+
+        <div class="opcoes-footer">
+          <span class="opcoes-updated">Seleção atualizada 2026</span>
+          <router-link to="/mapview">
+            <ButtonComponent tag="span" text="Ver os 20+ países" iconType="tertiary" class="btn-dark" />
+          </router-link>
+        </div>
+      </div>
+    </div>
+  </section>
+</template>
+
+<style scoped>
+.programas {
+  width: 100%;
+  padding: var(--gb-space-y) 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.cards-row {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+}
+
+.card {
+  flex: 1;
+  border-radius: 12px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 260px;
+  box-sizing: border-box;
+}
+
+.card-pink {
+  background-color: var(--gb-pink);
+}
+
+.quote-icon {
+  width: 32px;
+  height: 24px;
+  margin-bottom: 20px;
+}
+
+.quote-text {
+  font-family: var(--gb-font-display);
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #42023C;
+  margin: 0 0 20px;
+}
+
+.quote-text em {
+  font-style: italic;
+}
+
+.card-blue {
+  background-color: var(--gb-blue);
+  color: #fff;
+}
+
+.blue-title {
+  font-family: var(--gb-font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: clamp(1.4rem, 1rem + 2vw, 2rem);
+  line-height: 1.15;
+  margin: 0 0 12px;
+}
+
+.blue-subtitle {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0 0 20px;
+  opacity: 0.92;
+}
+
+.idiomas-pills {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 20px 0 0;
+  padding: 0;
+}
+
+.idiomas-pills li {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.destino-row {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+}
+
+.destino-imagem {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  height: 280px;
+  background: #E5E0CF;
+}
+
+.destino-caption {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  background: rgba(23, 17, 26, 0.55);
+  color: #fff;
+  backdrop-filter: blur(6px);
+  font-size: 0.75rem;
+  padding: 6px 12px;
+  border-radius: 20px;
+}
+
+.opcoes {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+}
+
+.opcoes-badge {
+  font-family: var(--gb-font-eyebrow);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gb-magenta);
+  margin-bottom: 12px;
+}
+
+.opcoes-title {
+  font-family: var(--gb-font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: clamp(1.4rem, 1rem + 2vw, 2rem);
+  color: var(--gb-dark);
+  margin: 0 0 14px;
+}
+
+.opcoes-desc {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--gb-ink-soft);
+  margin: 0 0 20px;
+}
+
+.opcoes-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.opcoes-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-top: 1px solid var(--gb-purple-deep-18);
+  font-weight: 600;
+  color: var(--gb-dark);
+}
+
+.opcoes-list li:last-child {
+  border-bottom: 1px solid var(--gb-purple-deep-18);
+}
+
+.opcoes-list li svg {
+  color: var(--gb-magenta);
+  flex-shrink: 0;
+}
+
+.opcoes-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.opcoes-updated {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gb-ink-faint);
+}
+
+@media (min-width: 1024px) {
+  .cards-row {
+    flex-direction: row;
+  }
+
+  .card {
+    min-height: 324px;
+  }
+
+  .destino-row {
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .destino-imagem {
+    flex: 0.8;
+    height: auto;
+  }
+
+  .opcoes {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+</style>

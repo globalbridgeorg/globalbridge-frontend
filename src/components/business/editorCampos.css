@@ -1,0 +1,38 @@
+/* Estilos comuns aos campos da barra lateral do editor (capa, galeria e
+   seções de conteúdo) — importado com <style scoped src> em cada um. */
+
+/* Só visualmente escondido — continua no fluxo de tab e recebe foco de
+   teclado (Enter/Espaço abrem o seletor de arquivo). display:none ou o
+   atributo hidden tiram o elemento da árvore de acessibilidade inteira,
+   o que deixava o upload de imagem impossível de usar só com teclado. */
+.sr-only-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.img-field, .bloco-conteudo {
+  padding-top: 14px;
+  border-top: 1px solid var(--gb-purple-deep-16);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.img-field-lbl, .campo-label {
+  font-family: var(--gb-font-eyebrow);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gb-ink-soft);
+  display: block;
+}
+
+.bloco-dica { font-size: 11px; color: var(--gb-ink-soft); line-height: 1.4; }
