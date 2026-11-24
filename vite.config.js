@@ -1,12 +1,10 @@
 import { fileURLToPath, URL } from 'node:url';
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import vueDevTools from 'vite-plugin-vue-devtools';
 import { VitePWA } from 'vite-plugin-pwa';
 
-export default defineConfig(({ command, mode }) => {
-  const env = loadEnv(mode, process.cwd(), '');
-  
+export default defineConfig(() => {
   return {
     plugins: [
       vue(),
@@ -43,21 +41,6 @@ export default defineConfig(({ command, mode }) => {
                 cacheableResponse: {
                   statuses: [0, 200],
                 },
-              },
-            },
-            {
-              urlPattern: /\/api\/.*/i,
-              handler: 'NetworkFirst',
-              options: {
-                cacheName: 'api-cache',
-                expiration: {
-                  maxEntries: 50,
-                  maxAgeSeconds: 60 * 60 * 24,
-                },
-                cacheableResponse: {
-                  statuses: [0, 200],
-                },
-                networkTimeoutSeconds: 10,
               },
             },
           ],
@@ -97,30 +80,22 @@ export default defineConfig(({ command, mode }) => {
       }),
       vueDevTools(),
     ],
-    
+
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url)),
       },
     },
-    
+
     server: {
       port: 5173,
-      proxy: {
-        '/api': {
-          target: 'http://localhost:8000',
-          changeOrigin: true,
-          secure: false,
-          rewrite: (path) => path,
-        },
-      },
     },
-    
+
     preview: {
       port: 5173,
       host: true,
     },
-    
+
     build: {
       outDir: 'dist',
       sourcemap: false,
@@ -130,14 +105,11 @@ export default defineConfig(({ command, mode }) => {
         output: {
           manualChunks: {
             'globe': ['globe.gl', 'd3', 'topojson-client'],
-            'vendor': ['vue', 'vue-router', 'axios'],
+            'supabase': ['@supabase/supabase-js'],
+            'vendor': ['vue', 'vue-router'],
           },
         },
       },
-    },
-    
-    define: {
-      __API_URL__: JSON.stringify(env.VITE_API_URL || ''),
     },
   };
 });

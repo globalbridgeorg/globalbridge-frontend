@@ -1,4 +1,4 @@
-import axios from '@/services/axios'
+import { getPaises, getAgencias } from '@/services/api'
 
 // ─── Cache de módulo: só faz fetch uma vez por sessão ───────────────────────
 let _worldCache = null
@@ -28,24 +28,22 @@ function agruparTagsPorCategoria(tags) {
   return grupos
 }
 
-const lista = (data) => (Array.isArray(data) ? data : (data.results ?? []))
-
-// Busca países e agências da API e já devolve no formato que o mapa usa.
+// Busca países e agências do Supabase e já devolve no formato que o mapa usa.
 export async function fetchMapData() {
-  const [resPaises, resAgencias] = await Promise.all([
-    axios.get('/paises/'),
-    axios.get('/agencia/')
+  const [paises, agencias] = await Promise.all([
+    getPaises(),
+    getAgencias()
   ])
 
   const countryMeta = {}
   const nomesPt = {}
-  for (const pais of lista(resPaises.data)) {
+  for (const pais of paises) {
     if (!pais.nome_ingles) continue
     countryMeta[pais.nome_ingles] = agruparTagsPorCategoria(pais.tags)
     nomesPt[pais.nome_ingles] = pais.nome
   }
 
-  const agencies = lista(resAgencias.data).map((a) => ({
+  const agencies = agencias.map((a) => ({
     id: a.id,
     name: a.nome,
     stars: Math.round(a.nota_media ?? 0),

@@ -1,34 +1,90 @@
 import { reactive } from 'vue'
-import axios from '@/services/axios'
+import { supabase } from '@/services/supabase'
+import { getContaAtual } from '@/services/api'
 
-// Estado compartilhado — evita chamar /usuarios/me/ de novo toda vez que
-// o header/tabbar re-renderiza. É assim que o menu sabe se deve mandar
-// "Perfil" pra /profile (estudante) ou /business (conta business), em
-// vez de sempre assumir estudante.
-const estado = reactive({ tipo: null, carregando: false, carregado: false })
+const estado = reactive({
+  logado: false,
+  carregando: false,
+  carregado: false,
+  id: null,
+  email: '',
+  username: '',
+  name: '',
+  avatar_url: '',
+  tipo: null,
+  agencia_id: null,
+  is_admin: false,
+})
 
-const getStoredToken = () => localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
+let promessaEmAndamento = null
+
+function limparDados() {
+  estado.logado = false
+  estado.id = null
+  estado.email = ''
+  estado.username = ''
+  estado.name = ''
+  estado.avatar_url = ''
+  estado.tipo = null
+  estado.agencia_id = null
+  estado.is_admin = false
+}
+
+function preencher(conta) {
+  if (!conta) {
+    limparDados()
+    return
+  }
+  estado.logado = true
+  estado.id = conta.id
+  estado.email = conta.email
+  estado.username = conta.username
+  estado.name = conta.name
+  estado.avatar_url = conta.avatar_url
+  estado.tipo = conta.tipo
+  estado.agencia_id = conta.agencia_id
+  estado.is_admin = conta.is_admin
+}
+
+export async function carregarConta(forcar = false) {
+  if (!forcar && estado.carregado) return estado
+  if (promessaEmAndamento && !forcar) return promessaEmAndamento
+
+  estado.carregando = true
+  promessaEmAndamento = getContaAtual()
+    .then((conta) => {
+      preencher(conta)
+      estado.carregado = true
+      return estado
+    })
+    .catch(() => {
+      limparDados()
+      estado.carregado = true
+      return estado
+    })
+    .finally(() => {
+      estado.carregando = false
+      promessaEmAndamento = null
+    })
+
+  return promessaEmAndamento
+}
+
+export function resetarConta() {
+  limparDados()
+  estado.carregado = false
+}
+
+// Mantém o estado sincronizado com qualquer login/logout/refresh do Supabase Auth
+supabase.auth.onAuthStateChange((event) => {
+  if (event === 'SIGNED_OUT') {
+    limparDados()
+    estado.carregado = true
+  } else if (event === 'SIGNED_IN' || event === 'USER_UPDATED' || event === 'TOKEN_REFRESHED') {
+    carregarConta(true)
+  }
+})
 
 export function useContaAtual() {
-  async function carregarConta() {
-    if (!getStoredToken() || estado.carregado || estado.carregando) return
-    estado.carregando = true
-    try {
-      const { data } = await axios.get('/usuarios/me/')
-      estado.tipo = data.tipo
-      estado.carregado = true
-    } catch (e) {
-      // Token inválido/expirado — deixa o interceptor do axios cuidar do
-      // redirect pro login, aqui só não trava o menu.
-    } finally {
-      estado.carregando = false
-    }
-  }
-
-  function resetarConta() {
-    estado.tipo = null
-    estado.carregado = false
-  }
-
   return { estado, carregarConta, resetarConta }
 }

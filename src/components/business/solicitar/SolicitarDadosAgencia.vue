@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import axios from '@/services/axios'
+import { getPaises } from '@/services/api'
 
 // form é o objeto reativo do pai — os campos são preenchidos direto nele.
 const props = defineProps({
@@ -13,7 +13,7 @@ const carregandoPaises = ref(true)
 
 async function carregarPaises() {
   try {
-    const { data } = await axios.get('/paises/')
+    const data = await getPaises()
     paises.value = [...data].sort((a, b) => a.nome.localeCompare(b.nome))
   } catch (e) {
     console.error('Erro ao buscar países:', e)
@@ -67,7 +67,7 @@ onMounted(carregarPaises)
     <p class="hint">Marque, além da sede, todo país onde a agência também tem unidade ou atuação — como a EF Education, que aparece em vários.</p>
     <div class="paises-grid">
       <label v-for="p in paises" :key="p.id" class="pais-chip" :class="{ active: form.paises_atendidos.includes(p.id) }">
-        <input type="checkbox" :checked="form.paises_atendidos.includes(p.id)" @change="toggleAtendido(p.id)" hidden>
+        <input type="checkbox" :checked="form.paises_atendidos.includes(p.id)" class="sr-only-input" @change="toggleAtendido(p.id)">
         {{ p.nome }}
       </label>
     </div>
@@ -166,6 +166,23 @@ onMounted(carregarPaises)
   border-color: var(--gb-magenta);
   background: rgba(176, 31, 176, 0.08);
   color: var(--gb-magenta-strong);
+}
+
+.pais-chip:focus-within {
+  outline: 2px solid var(--gb-magenta);
+  outline-offset: 2px;
+}
+
+.sr-only-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 @media (max-width: 640px) {

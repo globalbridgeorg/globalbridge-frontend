@@ -3,7 +3,7 @@ import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import axios from '@/services/axios'
+import { getAgenciaDetalhe } from '@/services/api'
 import { prefersReducedMotion } from '@/composables/usePageTransition'
 import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
 import ProgramaCard from '@/components/catalog/ProgramaCard.vue'
@@ -48,8 +48,7 @@ async function carregarAgencia() {
   carregando.value = true
   erro.value = false
   try {
-    const { data } = await axios.get(`/agencia/${route.params.id}/`)
-    agencia.value = data
+    agencia.value = await getAgenciaDetalhe(route.params.id)
   } catch (e) {
     console.error('Erro ao buscar agência:', e)
     erro.value = true

@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import axios from '@/services/axios'
+import { uploadCapaAgencia } from '@/services/api'
 
 const props = defineProps({
   agencia: { type: Object, required: true }
@@ -32,9 +32,6 @@ function iniciarArrastoFoco(event) {
   window.addEventListener('pointerup', onUp)
 }
 
-// Alternativa por teclado ao arrasto do ponto focal — sem isso, quem
-// navega só com teclado não conseguia ajustar o foco de jeito nenhum.
-// Setas movem 2%, Shift+seta move 10%.
 function ajustarFocoTeclado(event) {
   const teclas = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }
   const direcao = teclas[event.key]
@@ -48,21 +45,26 @@ function ajustarFocoTeclado(event) {
 
 async function trocarCapa(event) {
   const arquivo = event.target.files?.[0]
+  event.target.value = ''
   if (!arquivo) return
+  if (!arquivo.type.startsWith('image/')) {
+    emit('erro', 'Escolha um arquivo de imagem (JPG, PNG ou WebP).')
+    return
+  }
+  if (arquivo.size > 5 * 1024 * 1024) {
+    emit('erro', 'A imagem de capa precisa ter no máximo 5 MB.')
+    return
+  }
+
   enviandoCapa.value = true
   try {
-    const formData = new FormData()
-    formData.append('imagem_capa', arquivo)
-    const { data } = await axios.patch(`/agencia/${props.agencia.id}/capa/`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    })
-    emit('capa-atualizada', data)
+    const atualizada = await uploadCapaAgencia(props.agencia.id, arquivo)
+    emit('capa-atualizada', atualizada)
   } catch (e) {
     console.error('Erro ao trocar imagem de capa:', e)
     emit('erro', 'Não conseguimos subir essa imagem agora.')
   } finally {
     enviandoCapa.value = false
-    event.target.value = ''
   }
 }
 </script>

@@ -1,14 +1,12 @@
 <script setup>
 import { ref, computed } from 'vue'
-import axios from '@/services/axios'
+import { solicitarPaisAdicional } from '@/services/api'
 
 const props = defineProps({
   agenciaId: { type: [Number, String], required: true },
   painel: { type: Object, required: true },
   todosPaises: { type: Array, required: true }
 })
-// A mensagem fica no pai: depois do pedido o painel recarrega inteiro
-// (esse card é desmontado e montado de novo) e ela precisa sobreviver.
 const mensagemPedido = defineModel('mensagem', { type: String, default: '' })
 const emit = defineEmits(['atualizar'])
 
@@ -29,13 +27,16 @@ async function enviarPedidoPais() {
   enviandoPedido.value = true
   mensagemPedido.value = ''
   try {
-    await axios.post(`/agencia/${props.agenciaId}/paises/solicitar/`, { pais: paisSelecionado.value })
+    await solicitarPaisAdicional(props.agenciaId, paisSelecionado.value)
     mensagemPedido.value = 'Pedido enviado — vai aparecer como pendente até o time aprovar.'
     formularioAberto.value = false
     paisSelecionado.value = ''
     emit('atualizar')
   } catch (e) {
-    mensagemPedido.value = e.response?.data?.detail || 'Não conseguimos enviar o pedido agora.'
+    console.error('Erro ao solicitar país adicional:', e)
+    mensagemPedido.value = e?.code === '23505'
+      ? 'Já existe um pedido pendente para esse país.'
+      : 'Não conseguimos enviar o pedido agora.'
   } finally {
     enviandoPedido.value = false
   }
@@ -46,7 +47,7 @@ async function enviarPedidoPais() {
   <div class="card">
     <div class="card-head">
       <h2 class="card-titulo">Países atendidos</h2>
-      <button class="btn-adicionar" :aria-expanded="formularioAberto" aria-controls="form-pais-solicitar" @click="formularioAberto = !formularioAberto">
+      <button type="button" class="btn-adicionar" :aria-expanded="formularioAberto" aria-controls="form-pais-solicitar" @click="formularioAberto = !formularioAberto">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
         Solicitar novo país
       </button>
@@ -81,7 +82,7 @@ async function enviarPedidoPais() {
               <option value="">Selecione um país...</option>
               <option v-for="p in paisesDisponiveis" :key="p.id" :value="p.id">{{ p.nome }}</option>
             </select>
-            <button :disabled="!paisSelecionado || enviandoPedido" @click="enviarPedidoPais">{{ enviandoPedido ? 'Enviando...' : 'Enviar pedido' }}</button>
+            <button type="button" :disabled="!paisSelecionado || enviandoPedido" @click="enviarPedidoPais">{{ enviandoPedido ? 'Enviando...' : 'Enviar pedido' }}</button>
           </div>
         </div>
       </div>
@@ -93,9 +94,9 @@ async function enviarPedidoPais() {
 <style scoped>
 .chips-paises { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip-pais { display: inline-flex; align-items: center; gap: 6px; background: rgba(176,31,176,0.06); color: var(--gb-magenta-strong); border-radius: 20px; padding: 7px 14px 7px 8px; font-size: 0.84rem; font-weight: 600; }
-.chip-pais.pendente { background: #F4F4F5; color: var(--gb-ink-soft); }
+.chip-pais.pendente { background: var(--gb-cream); color: var(--gb-ink-soft); }
 .chip-sigla { width: 20px; height: 20px; border-radius: 50%; background: var(--gb-dark); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; }
-.chip-sigla.pendente { background: #D4D4D8; color: var(--gb-ink-soft); }
+.chip-sigla.pendente { background: var(--gb-purple-deep-16); color: var(--gb-ink-soft); }
 .chip-pendente-tag { display: inline-flex; align-items: center; gap: 3px; font-family: var(--gb-font-eyebrow); font-weight: 700; font-size: 9px; letter-spacing: 0.04em; text-transform: uppercase; }
 
 .btn-adicionar { display: inline-flex; align-items: center; gap: 6px; background: none; border: 1.5px dashed var(--gb-purple-deep-16); border-radius: 20px; padding: 7px 14px; font-size: 0.8rem; font-weight: 600; color: var(--gb-ink-soft); cursor: pointer; }

@@ -20,7 +20,7 @@ defineProps({
       <h3 class="nome">{{ nome }}</h3>
       <p class="descricao">{{ descricao }}</p>
     </div>
-    <div class="card-footer">
+    <div v-if="footerMeta || to" class="card-footer">
       <span class="footer-meta">{{ footerMeta }}</span>
       <router-link v-if="to" :to="to" class="cta">{{ ctaText }}</router-link>
     </div>

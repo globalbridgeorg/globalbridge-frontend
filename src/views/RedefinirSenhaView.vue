@@ -1,20 +1,40 @@
 <script setup>
-import { ref, computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import axios from '@/services/axios'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { supabase } from '@/services/supabase'
+import { atualizarSenha } from '@/services/api'
 
-const route = useRoute()
 const router = useRouter()
 
-const uid = computed(() => route.query.uid || '')
-const token = computed(() => route.query.token || '')
-const linkValido = computed(() => Boolean(uid.value && token.value))
-
+const verificando = ref(true)
+const linkValido = ref(false)
 const novaSenha = ref('')
 const confirmarSenha = ref('')
 const loading = ref(false)
 const erro = ref('')
 const sucesso = ref(false)
+
+let subscription = null
+
+onMounted(async () => {
+  const { data } = supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session)) {
+      linkValido.value = true
+      verificando.value = false
+    }
+  })
+  subscription = data.subscription
+
+  const { data: { session } } = await supabase.auth.getSession()
+  if (session) {
+    linkValido.value = true
+  }
+  verificando.value = false
+})
+
+onUnmounted(() => {
+  subscription?.unsubscribe()
+})
 
 async function redefinir() {
   erro.value = ''
@@ -23,11 +43,11 @@ async function redefinir() {
 
   loading.value = true
   try {
-    await axios.post('/auth/redefinir-senha/', { uid: uid.value, token: token.value, nova_senha: novaSenha.value })
+    await atualizarSenha(novaSenha.value)
     sucesso.value = true
     setTimeout(() => router.push({ name: 'login' }), 2500)
-  } catch (e) {
-    erro.value = e.response?.data?.detail || 'Não foi possível redefinir a senha.'
+  } catch {
+    erro.value = 'Não foi possível redefinir a senha. Peça um novo link se este tiver expirado.'
   } finally {
     loading.value = false
   }
@@ -38,9 +58,14 @@ async function redefinir() {
   <div class="redefinir-view gb-section">
     <span class="eyebrow">Redefinição de senha</span>
 
-    <template v-if="!linkValido">
+    <template v-if="verificando">
+      <h1 class="gb-heading">Validando<br />seu link...</h1>
+      <p class="desc">Aguarde um instante.</p>
+    </template>
+
+    <template v-else-if="!linkValido">
       <h1 class="gb-heading">Link<br />inválido</h1>
-      <p class="desc">Esse link de redefinição está incompleto ou expirou. Pede um novo.</p>
+      <p class="desc">Esse link de redefinição está incompleto ou expirou. Peça um novo.</p>
       <router-link class="voltar" to="/esqueci-senha">Pedir novo link</router-link>
     </template>
 
@@ -57,7 +82,7 @@ async function redefinir() {
 
       <div class="form-group">
         <label for="rs-nova-senha">Nova senha</label>
-        <input id="rs-nova-senha" type="password" v-model="novaSenha" placeholder="Mínimo 8 caracteres">
+        <input id="rs-nova-senha" type="password" v-model="novaSenha" placeholder="Mínimo 8 caracteres" @keyup.enter="redefinir">
       </div>
       <div class="form-group">
         <label for="rs-confirmar-senha">Confirmar senha</label>
@@ -107,7 +132,7 @@ async function redefinir() {
   justify-content: center;
   margin: 8px auto 20px;
   background: rgba(61, 154, 75, 0.12);
-  color: #3D9A4B;
+  color: var(--gb-green);
 }
 
 .form-group { text-align: left; margin-bottom: 20px; }
@@ -121,4 +146,10 @@ async function redefinir() {
 .btn-primary:disabled { opacity: 0.6; cursor: default; }
 
 .voltar { display: block; margin-top: 24px; font-size: 13px; color: var(--gb-magenta); font-weight: 600; text-decoration: underline; }
+
+@media (max-width: 768px) {
+  .redefinir-view {
+    padding: 16px 16px 72px;
+  }
+}
 </style>

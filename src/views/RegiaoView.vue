@@ -3,7 +3,7 @@ import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import axios from '@/services/axios'
+import { getPaises, getAgencias } from '@/services/api'
 import { prefersReducedMotion } from '@/composables/usePageTransition'
 import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
 import PaisCard from '@/components/catalog/PaisCard.vue'
@@ -43,12 +43,12 @@ async function carregarRegiao() {
   erro.value = false
   try {
     const params = { regiao: route.params.regiao }
-    const [resPaises, resAgencias] = await Promise.all([
-      axios.get('/paises/', { params }),
-      axios.get('/agencia/', { params })
+    const [listaPaises, listaAgencias] = await Promise.all([
+      getPaises(params),
+      getAgencias(params)
     ])
-    paises.value = Array.isArray(resPaises.data) ? resPaises.data : (resPaises.data.results ?? [])
-    agencias.value = Array.isArray(resAgencias.data) ? resAgencias.data : (resAgencias.data.results ?? [])
+    paises.value = listaPaises
+    agencias.value = listaAgencias
   } catch (e) {
     console.error('Erro ao buscar região:', e)
     erro.value = true
@@ -165,7 +165,7 @@ onBeforeUnmount(() => ctx?.revert())
             <span role="cell">{{ pais.custo_de_vida }}</span>
             <span role="cell">{{ pais.idioma }}</span>
             <span role="cell">{{ pais.universidades }}</span>
-            <span role="cell">{{ pais.intercambistas.toLocaleString('pt-BR') }}</span>
+            <span role="cell">{{ (pais.intercambistas ?? 0).toLocaleString('pt-BR') }}</span>
           </div>
         </div>
       </section>

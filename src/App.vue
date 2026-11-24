@@ -5,17 +5,23 @@ import MobileTabBar from "@/components/layout/MobileTabBar.vue";
 import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { initSmoothScroll } from '@/utils/lenis'
+import { carregarConta } from '@/composables/useContaAtual'
 
 const route = useRoute()
 
-const shouldShowFooter = computed(() => !['mapview', 'profile', 'login'].includes(route.name))
+const shouldShowFooter = computed(
+  () => !['mapview', 'profile', 'login', 'esqueci-senha', 'redefinir-senha', 'business', 'business-editor', 'admin'].includes(route.name)
+)
 // MobileTabBar já se esconde nessas rotas — sem isso o layout reservava
 // 74px de espaço embaixo pra uma barra que não estava lá, sobrando um
 // vão vazio (e mais scroll) no celular.
-const shouldShowTabBar = computed(() => route.name !== 'login')
+const shouldShowTabBar = computed(
+  () => !['login', 'esqueci-senha', 'redefinir-senha'].includes(route.name)
+)
 
 onMounted(() => {
   initSmoothScroll()
+  carregarConta()
 })
 </script>
 

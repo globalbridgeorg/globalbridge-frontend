@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import axios from '@/services/axios'
+import { getPaises } from '@/services/api'
 import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
 
 // Mapa em projeção ortográfica de cada continente (Wikimedia Commons, uso
@@ -41,8 +41,7 @@ async function carregarContagens() {
   carregando.value = true
   erro.value = false
   try {
-    const { data } = await axios.get('/paises/')
-    const paises = Array.isArray(data) ? data : (data.results ?? [])
+    const paises = await getPaises()
     const porRegiao = {}
     for (const pais of paises) {
       if (!pais.regiao) continue

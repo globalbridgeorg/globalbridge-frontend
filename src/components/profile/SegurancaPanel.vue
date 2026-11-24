@@ -1,24 +1,53 @@
 <script setup>
 import { ref } from 'vue'
-import axios from '@/services/axios'
+import { atualizarSenha, excluirMinhaConta } from '@/services/api'
 import { useAuth } from '@/composables/useAuth'
 
 const { logout } = useAuth()
 
-// Sem endpoint de senha/sessões ainda — fica só na tela.
+const novaSenha = ref('')
+const confirmarSenha = ref('')
+const salvandoSenha = ref(false)
 const pwSaved = ref(false)
-const twoFa = ref(false)
+const erroSenha = ref('')
 
 const confirmandoExclusao = ref(false)
 const excluindoConta = ref(false)
 const erroExclusao = ref('')
 
+async function salvarNovaSenha() {
+  erroSenha.value = ''
+  pwSaved.value = false
+
+  if (novaSenha.value.length < 8) {
+    erroSenha.value = 'A nova senha precisa ter no mínimo 8 caracteres.'
+    return
+  }
+  if (novaSenha.value !== confirmarSenha.value) {
+    erroSenha.value = 'As senhas não coincidem.'
+    return
+  }
+
+  salvandoSenha.value = true
+  try {
+    await atualizarSenha(novaSenha.value)
+    novaSenha.value = ''
+    confirmarSenha.value = ''
+    pwSaved.value = true
+  } catch (e) {
+    console.error('Erro ao atualizar senha:', e)
+    erroSenha.value = 'Não foi possível atualizar a senha agora. Tente novamente.'
+  } finally {
+    salvandoSenha.value = false
+  }
+}
+
 async function excluirConta() {
   excluindoConta.value = true
   erroExclusao.value = ''
   try {
-    await axios.delete('/usuarios/me/')
-    logout()
+    await excluirMinhaConta()
+    await logout()
   } catch (e) {
     console.error('Erro ao excluir conta:', e)
     erroExclusao.value = 'Não conseguimos excluir sua conta agora. Tente novamente em instantes.'
@@ -30,27 +59,26 @@ async function excluirConta() {
 <template>
   <div class="panel">
     <h2>Segurança</h2>
-    <p class="panel-sub">Senha, autenticação e dispositivos conectados</p>
-    <div class="field" style="margin-bottom:14px; max-width:360px;"><label for="seg-senha-atual">Senha atual</label><input id="seg-senha-atual" type="password" autocomplete="current-password" placeholder="••••••••" /></div>
+    <p class="panel-sub">Alteração de senha e gerenciamento definitivo da conta</p>
+
     <div class="field-row">
-      <div class="field"><label for="seg-senha-nova">Nova senha</label><input id="seg-senha-nova" type="password" autocomplete="new-password" placeholder="Crie uma nova senha" /></div>
-      <div class="field"><label for="seg-senha-confirmar">Confirmar nova senha</label><input id="seg-senha-confirmar" type="password" autocomplete="new-password" placeholder="Digite novamente" /></div>
+      <div class="field">
+        <label for="seg-senha-nova">Nova senha</label>
+        <input id="seg-senha-nova" v-model="novaSenha" type="password" autocomplete="new-password" placeholder="Mínimo 8 caracteres" />
+      </div>
+      <div class="field">
+        <label for="seg-senha-confirmar">Confirmar nova senha</label>
+        <input id="seg-senha-confirmar" v-model="confirmarSenha" type="password" autocomplete="new-password" placeholder="Digite novamente" @keyup.enter="salvarNovaSenha" />
+      </div>
     </div>
-    <button class="btn-save" @click="pwSaved = true">Atualizar senha</button>
-    <span v-if="pwSaved" class="saved-flash">Senha atualizada ✓</span>
 
-    <div class="toggle-row" style="margin-top:20px;">
-      <div><div class="toggle-label">Verificação em duas etapas</div><div class="toggle-sub">Adiciona uma etapa de confirmação por e-mail no login</div></div>
-      <button class="toggle-sw" :class="{ on: twoFa }" :aria-pressed="twoFa" aria-label="Verificação em duas etapas" @click="twoFa = !twoFa"></button>
-    </div>
+    <p v-if="erroSenha" class="erro-senha" role="alert">{{ erroSenha }}</p>
 
-    <div class="session-row" style="margin-top:8px;">
-      <div><div class="session-device">Este dispositivo</div><div class="session-meta">Sessão atual</div></div>
-      <span class="session-tag">Atual</span>
-    </div>
-    <div class="session-row">
-      <div><div class="session-device">iPhone 13 · Safari</div><div class="session-meta">há 2 dias</div></div>
-      <button class="link-danger">Encerrar</button>
+    <div class="acoes-linha">
+      <button type="button" class="btn-save" :disabled="salvandoSenha" @click="salvarNovaSenha">
+        {{ salvandoSenha ? 'Atualizando...' : 'Atualizar senha' }}
+      </button>
+      <span v-if="pwSaved" class="saved-flash">Senha atualizada ✓</span>
     </div>
 
     <div class="danger-zone">
@@ -74,49 +102,18 @@ async function excluirConta() {
 </template>
 
 <style scoped>
-.session-row {
+.erro-senha {
+  margin: 0 0 12px;
+  font-size: 12.5px;
+  color: #b3261e;
+  font-weight: 600;
+}
+
+.acoes-linha {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 11px 0;
-  border-top: 1px solid var(--gb-purple-deep-16);
-}
-
-.session-row:first-of-type {
-  border-top: none;
-}
-
-.session-device {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--gb-dark);
-}
-
-.session-meta {
-  font-size: 11.5px;
-  color: var(--gb-ink-faint);
-}
-
-.session-tag {
-  font-size: 10px;
-  font-family: var(--gb-font-eyebrow);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--gb-green);
-  background: rgba(61, 154, 75, 0.12);
-  padding: 3px 9px;
-  border-radius: var(--gb-radius-pill);
-}
-
-.link-danger {
-  background: none;
-  border: none;
-  color: #b3261e;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  text-decoration: underline;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .danger-zone {

@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import axios from '@/services/axios'
+import { excluirMinhaConta } from '@/services/api'
 import { useAuth } from '@/composables/useAuth'
 
 const { logout } = useAuth()
@@ -13,8 +13,8 @@ async function excluirConta() {
   excluindoConta.value = true
   erroExclusao.value = ''
   try {
-    await axios.delete('/usuarios/me/')
-    logout()
+    await excluirMinhaConta()
+    await logout()
   } catch (e) {
     console.error('Erro ao excluir conta:', e)
     erroExclusao.value = 'Não conseguimos excluir sua conta agora. Tente novamente em instantes.'

@@ -1,133 +1,89 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue'
-import axios from '@/services/axios'
-import { openCloudinaryWidget } from '@/services/cloudinary'
+import { ref, watch } from 'vue'
+import { uploadAvatar } from '@/services/api'
 
 const props = defineProps({
-  initialPreview: {
-    type: String,
-    default: ''
-  },
-  fetchUrl: {
-    type: String,
-    default: '/usuarios/me/'
-  }
+  initialPreview: { type: String, default: '' },
+  userId: { type: String, default: '' },
 })
 
 const emit = defineEmits(['avatar-updated'])
 
+const fileInput = ref(null)
 const fotoPreview = ref(props.initialPreview || null)
 const loading = ref(false)
 const imageError = ref(false)
-const temporaryPreview = ref(null)
+const erroUpload = ref('')
 
-function getToken() {
-  return localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
+function abrirSeletor() {
+  if (loading.value) return
+  erroUpload.value = ''
+  fileInput.value?.click()
 }
 
-function normalizeAvatarUrl(data) {
-  return data?.avatar_url || data?.foto_url || data?.photo_url || data?.avatar || ''
-}
+async function aoEscolherArquivo(event) {
+  const file = event.target.files?.[0]
+  event.target.value = ''
+  if (!file || !props.userId) return
 
-function revokeTemporaryPreview() {
-  if (temporaryPreview.value) {
-    URL.revokeObjectURL(temporaryPreview.value)
-    temporaryPreview.value = null
+  if (!file.type.startsWith('image/')) {
+    erroUpload.value = 'Escolha uma imagem (JPG, PNG ou WebP).'
+    return
   }
-}
-
-async function loadCurrentPhoto() {
-  if (!getToken()) return
-
-  try {
-    const response = await axios.get(props.fetchUrl)
-
-    const avatarUrl = normalizeAvatarUrl(response.data)
-    if (avatarUrl) {
-      imageError.value = false
-      revokeTemporaryPreview()
-      fotoPreview.value = avatarUrl
-      emit('avatar-updated', avatarUrl)
-    }
-  } catch (err) {
-    console.error('Erro ao buscar foto do usuário:', err)
+  if (file.size > 3 * 1024 * 1024) {
+    erroUpload.value = 'A foto precisa ter no máximo 3 MB.'
+    return
   }
-}
 
-async function saveAvatarToBackend(imageUrl) {
-  if (!getToken()) return
-
+  loading.value = true
+  erroUpload.value = ''
   try {
-    loading.value = true
-
-    const response = await axios.patch('/usuarios/me/avatar/', { avatar_url: imageUrl })
-
-    const avatarUrl = normalizeAvatarUrl(response.data)
-
-    if (avatarUrl) {
-      imageError.value = false
-      revokeTemporaryPreview()
-      fotoPreview.value = avatarUrl
-      emit('avatar-updated', avatarUrl)
-    }
+    const avatarUrl = await uploadAvatar(props.userId, file)
+    imageError.value = false
+    fotoPreview.value = avatarUrl
+    emit('avatar-updated', avatarUrl)
   } catch (err) {
-    console.error('Erro ao salvar foto no backend:', err)
+    console.error('Erro ao enviar avatar:', err)
+    erroUpload.value = 'Não conseguimos salvar sua foto agora.'
   } finally {
     loading.value = false
   }
 }
 
-function handleImageError() {
-  imageError.value = true
-}
-
-function openPhotoUpload() {
-  loading.value = true
-
-  openCloudinaryWidget(
-    (imageUrl) => {
-      loading.value = false
-      revokeTemporaryPreview()
-
-      fotoPreview.value = imageUrl
-      saveAvatarToBackend(imageUrl)
-    },
-    (error) => {
-      loading.value = false
-      console.error("Erro no upload:", error)
-    }
-  )
-}
-
 watch(() => props.initialPreview, (value) => {
-  if (value) {
-    imageError.value = false
-    revokeTemporaryPreview()
-    fotoPreview.value = value
-  }
-})
-
-onMounted(() => {
-  if (props.initialPreview) {
-    fotoPreview.value = props.initialPreview
-  }
-  loadCurrentPhoto()
+  imageError.value = false
+  fotoPreview.value = value || null
 })
 </script>
 
 <template>
   <div class="photo-card">
-    <button @click="openPhotoUpload" class="foto-container" :class="{ loading: loading }" type="button">
+    <input
+      ref="fileInput"
+      type="file"
+      accept="image/png,image/jpeg,image/webp"
+      aria-label="Selecionar foto de perfil"
+      class="sr-only-input"
+      @change="aoEscolherArquivo"
+    />
+    <button
+      type="button"
+      class="foto-container"
+      :class="{ loading }"
+      :disabled="loading"
+      aria-label="Alterar foto de perfil"
+      @click="abrirSeletor"
+    >
       <img
         v-if="fotoPreview && !imageError"
         :src="fotoPreview"
         alt="Avatar do usuário"
         class="foto-preview"
-        @error="handleImageError"
+        @error="imageError = true"
       />
 
       <div v-else class="foto-placeholder">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M4 8.5C4 7.67 4.67 7 5.5 7h2.4l1-1.6c.3-.5.85-.8 1.44-.8h3.32c.59 0 1.14.3 1.44.8l1 1.6h2.4c.83 0 1.5.67 1.5 1.5v9c0 .83-.67 1.5-1.5 1.5h-13C4.67 19 4 18.33 4 17.5v-9Z" />
           <circle cx="12" cy="13" r="3.2" />
         </svg>
@@ -138,10 +94,32 @@ onMounted(() => {
         <span>{{ loading ? 'Enviando...' : 'Editar' }}</span>
       </div>
     </button>
+    <p v-if="erroUpload" class="erro-upload" role="alert">{{ erroUpload }}</p>
   </div>
 </template>
 
 <style scoped>
+.sr-only-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.erro-upload {
+  margin: 0;
+  font-size: 11.5px;
+  color: #b3261e;
+  font-weight: 600;
+  text-align: center;
+  max-width: 160px;
+}
+
 .photo-card {
   display: flex;
   flex-direction: column;

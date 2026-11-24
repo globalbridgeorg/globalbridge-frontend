@@ -1,46 +1,34 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import axios from '@/services/axios'
+import { ref, onMounted } from 'vue'
+import { getMinhaSolicitacaoAgencia } from '@/services/api'
+import { useContaAtual } from '@/composables/useContaAtual'
 
-const route = useRoute()
+const { estado: conta, carregarConta } = useContaAtual()
 
 const carregando = ref(true)
 const erro = ref(false)
+const precisaLogin = ref(false)
 const solicitacao = ref(null)
-
-const solicitacaoId = computed(() => route.query.id || localStorage.getItem('solicitacao_agencia_id'))
-const getStoredToken = () => localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
 
 async function carregar() {
   carregando.value = true
   erro.value = false
+  precisaLogin.value = false
 
-  // Caminho principal: quem já tem conta (criada junto com o pedido, ou
-  // uma conta business mais antiga) só precisa estar logado — não
-  // depende de guardar um link. O id na URL/localStorage é só um atalho
-  // pra logo depois de enviar o formulário, antes de qualquer coisa.
-  if (getStoredToken()) {
-    try {
-      const { data } = await axios.get('/solicitacoes-agencia/minha/')
-      solicitacao.value = data
-      carregando.value = false
-      return
-    } catch (e) {
-      // 404 aqui é normal pra quem nunca passou por esse fluxo (ex.:
-      // agência seed, sem SolicitacaoAgencia) — cai pro fallback por id.
-    }
-  }
-
-  if (!solicitacaoId.value) {
-    erro.value = true
+  const atual = await carregarConta(true)
+  if (!atual.logado) {
+    precisaLogin.value = true
     carregando.value = false
     return
   }
 
   try {
-    const { data } = await axios.get(`/solicitacoes-agencia/${solicitacaoId.value}/`)
-    solicitacao.value = data
+    const data = await getMinhaSolicitacaoAgencia()
+    if (!data) {
+      erro.value = true
+    } else {
+      solicitacao.value = data
+    }
   } catch (e) {
     console.error('Erro ao buscar status da solicitação:', e)
     erro.value = true
@@ -58,16 +46,25 @@ onMounted(carregar)
   <div class="analise-view gb-section">
     <div v-if="carregando" class="estado-tela">Carregando status do seu pedido...</div>
 
+    <div v-else-if="precisaLogin" class="estado-tela">
+      <h1 class="gb-heading">Acompanhar<br />solicitação</h1>
+      <p>Entre com a conta criada no seu pedido de verificação para acompanhar o status.</p>
+      <router-link to="/login" class="link-acao">Ir para o login</router-link>
+      <router-link to="/business/solicitar" class="link-acao-secundaria">Ainda não enviou pedido? Solicitar verificação</router-link>
+    </div>
+
     <div v-else-if="erro" class="estado-tela">
-      <p>Não encontramos nenhum pedido de verificação associado a esse link.</p>
-      <router-link to="/business/solicitar" class="link-acao">Fazer um novo pedido</router-link>
+      <h1 class="gb-heading">Nenhum pedido<br />encontrado</h1>
+      <p>Não encontramos nenhum pedido de verificação associado à sua conta.</p>
+      <router-link v-if="conta.tipo === 'agencia'" to="/business" class="link-acao">Abrir painel da agência</router-link>
+      <router-link v-else to="/business/solicitar" class="link-acao">Fazer um novo pedido</router-link>
     </div>
 
     <template v-else-if="solicitacao">
       <div class="icone-status" :class="solicitacao.status">
-        <svg v-if="solicitacao.status === 'pendente'" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
-        <svg v-else-if="solicitacao.status === 'aprovado'" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.5 2.5 5-5"/></svg>
-        <svg v-else width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+        <svg v-if="solicitacao.status === 'pendente'" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
+        <svg v-else-if="solicitacao.status === 'aprovado'" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.5 2.5 5-5"/></svg>
+        <svg v-else width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
       </div>
 
       <span class="eyebrow">{{ solicitacao.nome }}</span>
@@ -77,10 +74,10 @@ onMounted(carregar)
       <h1 v-else class="gb-heading">Seu pedido não<br />foi aprovado</h1>
 
       <p v-if="solicitacao.status === 'pendente'" class="desc">
-        Recebemos tudo certinho e um alguém do nosso time vai conferir os dados. A análise costuma levar até 5 dias úteis — não precisa ficar atualizando essa página.
+        Recebemos tudo certinho e alguém do nosso time vai conferir os dados. A análise costuma levar até 5 dias úteis — não precisa ficar atualizando essa página.
       </p>
       <p v-else-if="solicitacao.status === 'aprovado'" class="desc">
-        Sua conta business já foi criada e um e-mail de confirmação foi enviado pra você. Já pode logar com o e-mail e a senha que você escolheu no pedido.
+        Sua conta business já foi liberada! Você já pode acessar o painel da sua agência para editar dados, cadastrar programas e montar sua página pública.
       </p>
       <p v-else class="desc">
         {{ solicitacao.motivo_recusa || 'Não conseguimos aprovar o pedido com as informações enviadas.' }}
@@ -103,7 +100,9 @@ onMounted(carregar)
       </div>
 
       <div class="acoes">
-        <router-link v-if="solicitacao.status === 'aprovado'" to="/login" class="link-acao">Ir pro login</router-link>
+        <router-link v-if="solicitacao.status === 'aprovado'" :to="conta.logado ? '/business' : '/login'" class="link-acao">
+          {{ conta.logado ? 'Abrir painel da agência' : 'Ir pro login' }}
+        </router-link>
         <router-link v-else-if="solicitacao.status === 'recusado'" to="/business/solicitar" class="link-acao">Enviar um novo pedido</router-link>
         <router-link v-else to="/contato" class="link-acao-secundaria">Precisa corrigir alguma informação? Fale com a gente</router-link>
       </div>
@@ -115,6 +114,10 @@ onMounted(carregar)
 .analise-view {
   padding: 120px 5% 90px;
   max-width: 560px;
+  min-height: calc(100dvh - 220px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   text-align: center;
 }
 
@@ -141,7 +144,7 @@ onMounted(carregar)
 
 .icone-status.aprovado {
   background: rgba(61, 154, 75, 0.12);
-  color: #3D9A4B;
+  color: var(--gb-green);
 }
 
 .icone-status.recusado {
@@ -238,5 +241,11 @@ onMounted(carregar)
   font-size: 0.85rem;
   color: var(--gb-magenta);
   font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .analise-view {
+    padding: 16px 16px 72px;
+  }
 }
 </style>

@@ -1,25 +1,26 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from '@/services/axios'
+import { getMinhasAvaliacoes, removerAvaliacao } from '@/services/api'
 import PhotoComponent from '@/components/profile/PhotoComponent.vue'
 import NotificationBanner from '@/components/profile/NotificationBanner.vue'
 import ProfileSideNav from '@/components/profile/ProfileSideNav.vue'
 import PerfilPanel from '@/components/profile/PerfilPanel.vue'
 import SegurancaPanel from '@/components/profile/SegurancaPanel.vue'
 import FavoritosPanel from '@/components/profile/FavoritosPanel.vue'
-import PreferenciasPanel from '@/components/profile/PreferenciasPanel.vue'
-import ContaDetalhes from '@/components/profile/ContaDetalhes.vue'
 import { useAuth } from '@/composables/useAuth'
+import { useContaAtual } from '@/composables/useContaAtual'
 import { useFavoritos } from '@/composables/useFavoritos'
 import { useTrocaAnimada } from '@/composables/useTrocaAnimada'
 
 const router = useRouter()
 const { logout } = useAuth()
-const { favoritos } = useFavoritos()
+const { estado: conta, carregarConta } = useContaAtual()
+const { favoritos, carregarFavoritos } = useFavoritos()
+
 const loading = ref(true)
 const error = ref('')
-const profile = ref({ id: null, name: '', email: '', avatar_url: '' })
+const profile = ref({ id: null, name: '', email: '', username: '', avatar_url: '' })
 
 const section = ref('perfil')
 const sidebarItems = [
@@ -27,77 +28,83 @@ const sidebarItems = [
   { key: 'seguranca', label: 'Segurança', image: '/images/profile_secure.png' },
   { key: 'favoritos', label: 'Favoritos', image: '/images/profile_favorite.png' },
   { key: 'avaliacoes', label: 'Avaliações', image: '/images/profile_saved.png' },
-  { key: 'preferencias', label: 'Preferências', image: '/images/profile_settings.png' }
 ]
 
-// Avaliações: o backend só tem avaliação de agência hoje — isto aqui é só demonstrativo.
-const reviews = [
-  { country: 'Irlanda · Dublin', date: 'publicada há 3 meses', rating: 4, text: 'Cidade acolhedora e universidade muito organizada com estudantes internacionais.' }
-]
-// Preferências ficam aqui (e não só no painel) porque aparecem no menu lateral.
-const idioma = ref('Inglês')
-const programa = ref('Intercâmbio acadêmico')
+const reviews = ref([])
+const reviewsLoading = ref(true)
+const removendoAvaliacaoId = ref(null)
 
 const sidebarMeta = computed(() => ({
   perfil: 'Dados pessoais',
-  seguranca: 'Senha e sessões',
-  favoritos: favoritos.length + ' destino' + (favoritos.length === 1 ? '' : 's') + ' salvo' + (favoritos.length === 1 ? '' : 's'),
-  avaliacoes: reviews.length + ' publicada' + (reviews.length === 1 ? '' : 's'),
-  preferencias: (idioma.value || 'Sem idioma') + ' · ' + (programa.value || 'sem programa')
+  seguranca: 'Senha e exclusão',
+  favoritos: favoritos.length + ' item' + (favoritos.length === 1 ? '' : 's') + ' salvo' + (favoritos.length === 1 ? '' : 's'),
+  avaliacoes: reviews.value.length + ' publicada' + (reviews.value.length === 1 ? '' : 's'),
 }))
 
 const panelShell = ref(null)
 const selectSection = useTrocaAnimada(panelShell, section)
 
-// Busca sempre de novo ao abrir o perfil (o useFavoritos guarda cache entre telas).
 const favoritesLoading = ref(true)
-async function fetchFavorites() {
-  favoritesLoading.value = true
+const showWelcome = ref(false)
+
+function aoAtualizarAvatar(url) {
+  profile.value.avatar_url = url
+  conta.avatar_url = url
+}
+
+function aoSalvarNome(nome) {
+  profile.value.name = nome
+  conta.name = nome
+}
+
+async function excluirAvaliacao(id) {
+  removendoAvaliacaoId.value = id
   try {
-    const { data } = await axios.get('/favoritos/')
-    favoritos.splice(0, favoritos.length, ...data)
+    await removerAvaliacao(id)
+    reviews.value = reviews.value.filter((r) => r.id !== id)
   } catch (e) {
-    console.error('Erro ao buscar favoritos:', e)
+    console.error('Erro ao excluir avaliação:', e)
   } finally {
-    favoritesLoading.value = false
+    removendoAvaliacaoId.value = null
   }
 }
 
-const showWelcome = ref(false)
-
-async function fetchProfile() {
-  if (!(localStorage.getItem('access_token') || sessionStorage.getItem('access_token'))) {
-    router.push({ name: 'login' })
-    return
-  }
+onMounted(async () => {
   try {
-    const data = (await axios.get('/usuarios/me/')).data || {}
-    profile.value.id = data.id ?? null
-    profile.value.name = data.name || data.full_name || ''
-    profile.value.email = data.email || ''
-    profile.value.avatar_url = data.avatar_url || data.avatar || data.photo_url || ''
-  } catch (err) {
-    if (err.response?.status === 401) {
-      router.push({ name: 'login' })
+    const atual = await carregarConta(true)
+    if (!atual.logado) {
+      router.replace({ name: 'login' })
       return
     }
+    profile.value = {
+      id: atual.id,
+      name: atual.name || '',
+      email: atual.email || '',
+      username: atual.username || '',
+      avatar_url: atual.avatar_url || '',
+    }
+
+    const [, avs] = await Promise.all([
+      carregarFavoritos(true).catch((e) => console.error('Erro ao buscar favoritos:', e)),
+      getMinhasAvaliacoes().catch((e) => { console.error('Erro ao buscar avaliações:', e); return [] }),
+    ])
+    reviews.value = avs
+  } catch (err) {
     error.value = 'Não foi possível carregar seu perfil. Tente novamente mais tarde.'
     console.error('Profile fetch error:', err)
   } finally {
     loading.value = false
+    favoritesLoading.value = false
+    reviewsLoading.value = false
   }
-}
 
-onMounted(() => {
-  fetchProfile()
-  fetchFavorites()
   try {
     if (!sessionStorage.getItem('seenProfileWelcome')) {
       showWelcome.value = true
       sessionStorage.setItem('seenProfileWelcome', '1')
     }
-  } catch (e) {
-    // sessionStorage pode falhar em alguns ambientes; falhar silenciosamente
+  } catch {
+    // sessionStorage indisponível
   }
 })
 </script>
@@ -114,12 +121,17 @@ onMounted(() => {
 
         <div class="profile-header">
           <PhotoComponent
+            :user-id="profile.id || ''"
             :initial-preview="profile.avatar_url"
-            @avatar-updated="(url) => (profile.avatar_url = url)"
+            @avatar-updated="aoAtualizarAvatar"
           />
           <div class="who">
             <h1>{{ profile.name || 'Usuário' }}</h1>
-            <p>{{ profile.email || 'email@exemplo.com' }}</p>
+            <p>{{ profile.email }}</p>
+            <div class="who-acoes" v-if="conta.is_admin || conta.tipo === 'agencia'">
+              <router-link v-if="conta.tipo === 'agencia'" to="/business" class="pill-atalho">Painel da agência →</router-link>
+              <router-link v-if="conta.is_admin" to="/admin" class="pill-atalho pill-atalho--admin">Painel administrativo →</router-link>
+            </div>
           </div>
         </div>
 
@@ -134,31 +146,48 @@ onMounted(() => {
 
           <div>
             <div class="panel-shell" ref="panelShell">
-              <!-- KeepAlive: o que foi digitado/alternado num painel continua lá ao voltar pra ele. -->
               <KeepAlive>
-                <PerfilPanel v-if="section === 'perfil'" :profile="profile" @nome-salvo="(nome) => (profile.name = nome)" />
+                <PerfilPanel v-if="section === 'perfil'" :profile="profile" @nome-salvo="aoSalvarNome" />
                 <SegurancaPanel v-else-if="section === 'seguranca'" />
                 <FavoritosPanel v-else-if="section === 'favoritos'" :loading="favoritesLoading" />
                 <div v-else-if="section === 'avaliacoes'" class="panel">
                   <h2>Avaliações</h2>
-                  <p class="panel-sub">Experiências que você compartilhou com outros estudantes</p>
-                  <div v-for="(rev, i) in reviews" :key="i" class="review-item">
-                    <div class="review-top"><span class="review-country">{{ rev.country }}</span><span class="review-date">{{ rev.date }}</span></div>
-                    <div class="review-stars" role="img" :aria-label="`${rev.rating} de 5 estrelas`">
-                      <svg v-for="n in 5" :key="n" viewBox="0 0 24 24" :class="{ empty: n > rev.rating }" aria-hidden="true"><path d="M12 17.3l-5.3 3 1.4-6-4.6-4 6-.5L12 4l2.5 5.8 6 .5-4.6 4 1.4 6z"/></svg>
+                  <p class="panel-sub">Experiências que você compartilhou sobre agências de intercâmbio</p>
+                  <p v-if="reviewsLoading" class="panel-empty">Carregando suas avaliações...</p>
+                  <template v-else>
+                    <div v-for="rev in reviews" :key="rev.id" class="review-item">
+                      <div class="review-top">
+                        <div>
+                          <router-link :to="{ name: 'agencia', params: { id: rev.agencia_id } }" class="review-country">
+                            {{ rev.agencia_nome }}
+                          </router-link>
+                          <span v-if="rev.local" class="review-local"> · {{ rev.local }}</span>
+                        </div>
+                        <div class="review-top-right">
+                          <span class="review-date">{{ new Date(rev.created_at).toLocaleDateString('pt-BR') }}</span>
+                          <button
+                            type="button"
+                            class="review-remove"
+                            :disabled="removendoAvaliacaoId === rev.id"
+                            @click="excluirAvaliacao(rev.id)"
+                          >
+                            {{ removendoAvaliacaoId === rev.id ? 'Removendo...' : 'Remover' }}
+                          </button>
+                        </div>
+                      </div>
+                      <div class="review-stars" role="img" :aria-label="`${rev.nota} de 5 estrelas`">
+                        <svg v-for="n in 5" :key="n" viewBox="0 0 24 24" :class="{ empty: n > rev.nota }" aria-hidden="true"><path d="M12 17.3l-5.3 3 1.4-6-4.6-4 6-.5L12 4l2.5 5.8 6 .5-4.6 4 1.4 6z"/></svg>
+                      </div>
+                      <p class="review-text">{{ rev.comentario }}</p>
                     </div>
-                    <p class="review-text">{{ rev.text }}</p>
-                  </div>
-                  <p v-if="!reviews.length" class="panel-empty">Você ainda não escreveu nenhuma avaliação.</p>
-                  <button class="cta-write">Escrever nova avaliação</button>
+                    <p v-if="!reviews.length" class="panel-empty">Você ainda não avaliou nenhuma agência.</p>
+                  </template>
+                  <router-link to="/destinos" class="cta-write">Explorar agências para avaliar</router-link>
                 </div>
-                <PreferenciasPanel v-else-if="section === 'preferencias'" v-model:idioma="idioma" v-model:programa="programa" />
               </KeepAlive>
             </div>
           </div>
         </div>
-
-        <ContaDetalhes :email="profile.email" />
       </template>
     </div>
   </div>
@@ -213,6 +242,37 @@ onMounted(() => {
   margin: 0;
   font-size: 13px;
   color: var(--gb-ink-soft);
+}
+
+.who-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.pill-atalho {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: var(--gb-radius-pill);
+  background: var(--gb-dark);
+  color: #fff;
+  font-family: var(--gb-font-eyebrow);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.pill-atalho:hover {
+  background: var(--gb-magenta);
+}
+
+.pill-atalho--admin {
+  background: var(--gb-purple-deep);
 }
 
 .layout {
@@ -420,6 +480,38 @@ onMounted(() => {
   font-size: 13px;
   font-weight: 700;
   color: var(--gb-dark);
+  text-decoration: none;
+}
+
+.review-country:hover {
+  color: var(--gb-magenta);
+}
+
+.review-local {
+  font-size: 12px;
+  color: var(--gb-ink-faint);
+}
+
+.review-top-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.review-remove {
+  background: none;
+  border: none;
+  color: #b3261e;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.review-remove:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 .review-date {
@@ -453,6 +545,8 @@ onMounted(() => {
 }
 
 .cta-write {
+  display: inline-block;
+  text-decoration: none;
   margin-top: 16px;
   background: transparent;
   border: 1px solid var(--gb-purple-deep-16);
@@ -469,6 +563,12 @@ onMounted(() => {
 
 .cta-write:hover {
   background: rgba(46, 10, 46, 0.05);
+}
+
+@media (max-width: 768px) {
+  .top-banner {
+    height: 92px;
+  }
 }
 
 @media (max-width: 640px) {

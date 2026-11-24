@@ -84,6 +84,7 @@ function onDropSecao(index) {
       @dragend="arrastandoIndex = null; sobreIndex = null"
     >
       <button
+        type="button"
         class="secao-bloco-head"
         :id="`secao-cabecalho-${bloco.tipo}`"
         :aria-expanded="secaoAberta === bloco.tipo"
@@ -109,20 +110,21 @@ function onDropSecao(index) {
           <div :id="`secao-corpo-${bloco.tipo}`" :aria-labelledby="`secao-cabecalho-${bloco.tipo}`" class="secao-corpo">
             <div class="secao-corpo-actions">
               <div v-if="bloco.tipo !== 'hero'" class="reorder-btns">
-                <button class="reorder-btn" :disabled="index <= 1" @click.stop="mover(bloco.tipo, -1)" :aria-label="`Mover ${LABELS[bloco.tipo]} pra cima`">
+                <button type="button" class="reorder-btn" :disabled="index <= 1" @click.stop="mover(bloco.tipo, -1)" :aria-label="`Mover ${LABELS[bloco.tipo]} pra cima`">
                   <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 10l4-4 4 4"/></svg>
                 </button>
-                <button class="reorder-btn" :disabled="index >= layout.length - 1" @click.stop="mover(bloco.tipo, 1)" :aria-label="`Mover ${LABELS[bloco.tipo]} pra baixo`">
+                <button type="button" class="reorder-btn" :disabled="index >= layout.length - 1" @click.stop="mover(bloco.tipo, 1)" :aria-label="`Mover ${LABELS[bloco.tipo]} pra baixo`">
                   <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>
                 </button>
               </div>
-              <button v-if="!VARIANTES[bloco.tipo]" class="btn-remover-secao" @click.stop="emit('remover', bloco.tipo)">Remover seção</button>
+              <button v-if="!VARIANTES[bloco.tipo]" type="button" class="btn-remover-secao" @click.stop="emit('remover', bloco.tipo)">Remover seção</button>
             </div>
 
             <div v-if="VARIANTES[bloco.tipo]" class="variant-row">
               <button
                 v-for="v in VARIANTES[bloco.tipo]"
                 :key="v.valor"
+                type="button"
                 class="variant-thumb"
                 :class="{ active: bloco.variante === v.valor }"
                 @click="setVariante(bloco, v.valor)"
@@ -141,7 +143,7 @@ function onDropSecao(index) {
 
     <template v-if="secoesDisponiveis.length">
       <div class="group-header">Mostre mais</div>
-      <button v-for="s in secoesDisponiveis" :key="s.tipo" class="secao-collapsed" @click="adicionarSecao(s.tipo)">
+      <button v-for="s in secoesDisponiveis" :key="s.tipo" type="button" class="secao-collapsed" @click="adicionarSecao(s.tipo)">
         <span class="add-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path :d="s.icone"/></svg></span>
         <span class="secao-label">{{ LABELS[s.tipo] }}</span>
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#757067" stroke-width="1.6"><path d="M4 6l4 4 4-4"/></svg>

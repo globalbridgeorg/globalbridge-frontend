@@ -10,13 +10,9 @@ import { useContaAtual } from '@/composables/useContaAtual'
 const route = useRoute()
 const { estado: conta, carregarConta } = useContaAtual()
 
-const isLoggedIn = computed(() => {
-  route.fullPath
-  const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
-  return !!token
-})
+const isLoggedIn = computed(() => conta.logado)
 
-watchEffect(() => { if (isLoggedIn.value) carregarConta() })
+watchEffect(() => { carregarConta() })
 
 // Mesma lógica do HeaderComponent — conta business vai pro painel dela,
 // não pro perfil de estudante.
@@ -28,18 +24,19 @@ const perfilLink = computed(() => {
 // Em rotas de tela cheia (login/cadastro) a barra atrapalha mais do que
 // ajuda — o /mapview já tem seu próprio layout mobile (globo + folha de
 // agências) que reserva espaço embaixo pra ela.
-const rotasOcultas = ['login']
+const rotasOcultas = ['login', 'esqueci-senha', 'redefinir-senha']
 const mostrar = computed(() => !rotasOcultas.includes(route.name))
 
 const abas = computed(() => [
   { to: '/', nome: 'home', label: 'Início' },
   { to: '/destinos', nome: 'destinos', label: 'Destinos' },
   { to: '/mapview', nome: 'mapview', label: 'Meu destino' },
-  { to: perfilLink.value, nome: isLoggedIn.value ? 'profile' : 'login', label: 'Perfil' }
+  { to: perfilLink.value, nome: isLoggedIn.value ? 'profile' : 'login', label: conta.tipo === 'agencia' ? 'Painel' : 'Perfil' }
 ])
 
 const ativa = (aba) => {
   if (aba.nome === 'destinos') return ['destinos', 'regiao', 'pais', 'agencia'].includes(route.name)
+  if (aba.nome === 'profile') return ['profile', 'business', 'business-editor', 'business-analise', 'admin'].includes(route.name)
   return route.name === aba.nome
 }
 </script>

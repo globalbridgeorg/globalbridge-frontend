@@ -12,8 +12,10 @@ const emit = defineEmits(['select', 'logout'])
     <button
       v-for="item in items"
       :key="item.key"
+      type="button"
       class="side-item"
       :class="{ active: section === item.key }"
+      :aria-current="section === item.key ? 'true' : undefined"
       @click="emit('select', item.key)"
     >
       <div class="side-thumb">

@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, nextTick } from "vue"
-import axios from '@/services/axios'
+import { getPaisesMaisProcurados } from '@/services/api'
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
@@ -52,11 +52,9 @@ const calcularPercentual = (pais, key) => {
 
 onMounted(async () => {
   try {
-    const response = await axios.get("/paises/mais-procurados/", {
-      params: { quantidade: 6 }
-    })
+    const lista = await getPaisesMaisProcurados(6)
 
-    paises.value = response.data.map(p => ({
+    paises.value = lista.map(p => ({
       ...p,
       programasDisponiveis: p.agencias_count ?? 0
     }))

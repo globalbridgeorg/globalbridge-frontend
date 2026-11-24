@@ -2,7 +2,8 @@
 import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { onBeforeRouteLeave } from 'vue-router'
 import gsap from 'gsap'
-import axios from '@/services/axios'
+import { getAgenciaDetalhe, atualizarAgencia } from '@/services/api'
+import { sanitizarUrl } from '@/utils/url'
 import { prefersReducedMotion } from '@/composables/usePageTransition'
 import { useContaBusiness } from '@/composables/useContaBusiness'
 import { LAYOUT_PADRAO, LABELS, normalizarConteudo, secaoTemConteudo } from '@/components/business/secoes'
@@ -23,6 +24,8 @@ const conteudoBlocos = ref(normalizarConteudo({}))
 const galeria = ref([])
 const focoX = ref(50)
 const focoY = ref(50)
+const descricao = ref('')
+const comoFunciona = ref('')
 const secaoAberta = ref('hero')
 const alterado = ref(false)
 let timerSalvo = null
@@ -32,10 +35,6 @@ function marcarAlterado() {
   alterado.value = true
 }
 
-// Dispara em qualquer edição de texto (campos com v-model direto em
-// conteudoBlocos, que não passam pelas funções mutadoras) — a primeira
-// execução é sempre o carregamento inicial dos dados, não uma edição de
-// verdade, por isso é ignorada.
 let primeiraExecucaoWatch = true
 watch(conteudoBlocos, () => {
   if (primeiraExecucaoWatch) { primeiraExecucaoWatch = false; return }
@@ -55,36 +54,59 @@ function removerSecao(tipo) {
 }
 
 const carregar = () => carregarConta(async (agenciaId) => {
-  const { data } = await axios.get(`/agencia/${agenciaId}/`)
+  const data = await getAgenciaDetalhe(agenciaId)
   agencia.value = data
   layout.value = data.layout?.length ? data.layout.map((b) => ({ ...b })) : [...LAYOUT_PADRAO]
   conteudoBlocos.value = normalizarConteudo(data.conteudo_blocos || {})
   galeria.value = data.galeria || []
   focoX.value = data.imagem_capa_foco_x ?? 50
   focoY.value = data.imagem_capa_foco_y ?? 50
+  descricao.value = data.descricao || ''
+  comoFunciona.value = data.como_funciona || ''
 })
+
+function normalizarUrlsBlocos(blocos) {
+  const pares = [
+    [blocos.video, 'url'],
+    [blocos.localizacao, 'link_mapa'],
+    ...Object.keys(blocos.redes_sociais || {}).map((k) => [blocos.redes_sociais, k]),
+  ]
+  for (const [obj, chave] of pares) {
+    const valor = obj?.[chave]?.trim()
+    if (!valor) continue
+    const limpa = sanitizarUrl(valor)
+    if (!limpa) return false
+    obj[chave] = limpa
+  }
+  return true
+}
 
 async function publicar() {
   if (!agencia.value) return
+  erro.value = ''
+  if (!normalizarUrlsBlocos(conteudoBlocos.value)) {
+    erro.value = 'Verifique os links informados (redes sociais, vídeo ou mapa). Use endereços válidos começando com https://'
+    return
+  }
   salvando.value = true
   salvo.value = false
   try {
-    await axios.patch(`/agencia/${agencia.value.id}/`, {
+    const atualizada = await atualizarAgencia(agencia.value.id, {
       layout: layout.value,
       conteudo_blocos: conteudoBlocos.value,
       imagem_capa_foco_x: focoX.value,
       imagem_capa_foco_y: focoY.value,
+      descricao: descricao.value.trim(),
+      como_funciona: comoFunciona.value.trim(),
     })
+    agencia.value = atualizada
     salvo.value = true
     alterado.value = false
-    // Some sozinho — antes ficava na tela pra sempre, e depois de uma
-    // segunda edição virava informação errada ("Publicado!" ao lado de
-    // alterações não publicadas).
     clearTimeout(timerSalvo)
     timerSalvo = setTimeout(() => { salvo.value = false }, 2600)
   } catch (e) {
     console.error('Erro ao publicar layout:', e)
-    erro.value = 'Não conseguimos salvar agora — tenta de novo em instantes.'
+    erro.value = 'Não conseguimos salvar agora — tente de novo em instantes.'
   } finally {
     salvando.value = false
   }
@@ -162,10 +184,12 @@ onBeforeRouteLeave(() => {
               @capa-atualizada="agencia = $event"
               @erro="erro = $event"
             />
-            <GaleriaEditor v-else-if="bloco.tipo === 'galeria'" v-model="galeria" :agencia-id="agencia.id" @erro="erro = $event" />
+            <GaleriaEditor v-if="bloco.tipo === 'galeria'" v-model="galeria" :agencia-id="agencia.id" @erro="erro = $event" />
             <SecaoConteudoEditor
-              v-else-if="bloco.tipo !== 'hero'"
+              v-else
               v-model="conteudoBlocos"
+              v-model:descricao="descricao"
+              v-model:como-funciona="comoFunciona"
               :tipo="bloco.tipo"
               :endereco="agencia.endereco"
               @alterado="marcarAlterado"
@@ -173,7 +197,16 @@ onBeforeRouteLeave(() => {
           </template>
         </EditorSidebar>
 
-        <PreviaPagina :agencia="agencia" :layout="layout" :galeria="galeria" :conteudo="conteudoBlocos" :foco-x="focoX" :foco-y="focoY" />
+        <PreviaPagina
+          :agencia="agencia"
+          :layout="layout"
+          :galeria="galeria"
+          :conteudo="conteudoBlocos"
+          :foco-x="focoX"
+          :foco-y="focoY"
+          :descricao="descricao"
+          :como-funciona="comoFunciona"
+        />
       </div>
     </template>
   </div>
@@ -181,13 +214,11 @@ onBeforeRouteLeave(() => {
 
 <style scoped>
 .business-view {
-  min-height: 100vh;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
   background: #FFFFFF;
   font-family: 'Montserrat', sans-serif;
-  /* Sem padding-top: o fundo escuro do topbar vai até o topo de verdade
-     da página, e o header do site (fixed, flutuando por cima de tudo)
-     sobrepõe a parte de cima dele — mesma pílula branca que já flutua
-     sobre o resto do conteúdo em qualquer outra página. */
 }
 
 .estado-tela {
@@ -209,7 +240,7 @@ onBeforeRouteLeave(() => {
 
 .erro-inline {
   max-width: 720px;
-  margin: 16px auto 0;
+  margin: 12px auto 0;
   padding: 12px 16px;
   background: rgba(220, 38, 38, 0.08);
   color: #b91c1c;
@@ -219,11 +250,13 @@ onBeforeRouteLeave(() => {
 
 /* ───────────── Layout de duas colunas: barra lateral + prévia ───────────── */
 .editor-layout {
+  flex: 1;
+  min-height: 0;
   display: flex;
-  height: calc(100vh - 64px - 96px);
 }
 
 @media (max-width: 1024px) {
-  .editor-layout { flex-direction: column; height: auto; }
+  .business-view { height: auto; min-height: 100vh; }
+  .editor-layout { flex-direction: column; }
 }
 </style>

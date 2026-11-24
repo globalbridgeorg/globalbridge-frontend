@@ -122,9 +122,9 @@ const paraAgencias = [
               <div><h3>{{ b.titulo }}</h3><p>{{ b.texto }}</p></div>
             </div>
           </div>
-          <a href="mailto:contato@globalbridge.com?subject=Login%20business" class="cta-link">
-            <ButtonComponent tag="span" text="Login business" class="btn-outline-light" />
-          </a>
+          <router-link to="/business/solicitar" class="cta-link">
+            <ButtonComponent tag="span" text="Solicitar conta business" class="btn-outline-light" />
+          </router-link>
         </div>
       </div>
 

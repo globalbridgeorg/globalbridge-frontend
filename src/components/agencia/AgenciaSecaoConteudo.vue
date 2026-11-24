@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
 import { iniciaisDe } from '@/utils/iniciais'
+import { sanitizarUrl } from '@/utils/url'
 
 const props = defineProps({
   agencia: { type: Object, required: true },
@@ -20,7 +21,7 @@ function linkWhatsapp(numero, mensagem) {
 
 function videoEmbedUrl(url) {
   if (!url) return null
-  const youtube = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([\w-]+)/)
+  const youtube = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]+)/)
   if (youtube) return `https://www.youtube.com/embed/${youtube[1]}`
   const vimeo = url.match(/vimeo\.com\/(\d+)/)
   if (vimeo) return `https://player.vimeo.com/video/${vimeo[1]}`
@@ -43,7 +44,7 @@ function videoEmbedUrl(url) {
     <div v-if="videoEmbedUrl(conteudo.video.url)" class="video-embed-wrap">
       <iframe :src="videoEmbedUrl(conteudo.video.url)" title="Vídeo institucional" frameborder="0" allowfullscreen loading="lazy"></iframe>
     </div>
-    <a v-else :href="conteudo.video.url" target="_blank" rel="noopener" class="btn-outline-lg">Assistir vídeo</a>
+    <a v-else-if="sanitizarUrl(conteudo.video.url)" :href="sanitizarUrl(conteudo.video.url)" target="_blank" rel="noopener noreferrer" class="btn-outline-lg">Assistir vídeo</a>
   </section>
 
   <section v-else-if="bloco.tipo === 'equipe' && conteudo.equipe?.membros?.length" class="equipe-secao reveal-section">
@@ -83,18 +84,18 @@ function videoEmbedUrl(url) {
     <SectionEyebrow label="Localização" />
     <h2 class="gb-heading">Onde fica<br />a agência</h2>
     <p class="localizacao-endereco">{{ agencia.endereco }}</p>
-    <a v-if="conteudo.localizacao?.link_mapa" :href="conteudo.localizacao.link_mapa" target="_blank" rel="noopener" class="btn-outline-lg">Ver no mapa</a>
+    <a v-if="sanitizarUrl(conteudo.localizacao?.link_mapa)" :href="sanitizarUrl(conteudo.localizacao.link_mapa)" target="_blank" rel="noopener noreferrer" class="btn-outline-lg">Ver no mapa</a>
   </section>
 
-  <section v-else-if="bloco.tipo === 'redes_sociais' && Object.values(conteudo.redes_sociais || {}).some(Boolean)" class="redes-secao reveal-section">
+  <section v-else-if="bloco.tipo === 'redes_sociais' && Object.values(conteudo.redes_sociais || {}).some((u) => sanitizarUrl(u))" class="redes-secao reveal-section">
     <SectionEyebrow label="Redes sociais" />
     <h2 class="gb-heading">Acompanhe<br />de perto</h2>
     <div class="redes-links">
-      <a v-if="conteudo.redes_sociais.instagram" :href="conteudo.redes_sociais.instagram" target="_blank" rel="noopener">Instagram</a>
-      <a v-if="conteudo.redes_sociais.facebook" :href="conteudo.redes_sociais.facebook" target="_blank" rel="noopener">Facebook</a>
-      <a v-if="conteudo.redes_sociais.tiktok" :href="conteudo.redes_sociais.tiktok" target="_blank" rel="noopener">TikTok</a>
-      <a v-if="conteudo.redes_sociais.linkedin" :href="conteudo.redes_sociais.linkedin" target="_blank" rel="noopener">LinkedIn</a>
-      <a v-if="conteudo.redes_sociais.youtube" :href="conteudo.redes_sociais.youtube" target="_blank" rel="noopener">YouTube</a>
+      <a v-if="sanitizarUrl(conteudo.redes_sociais.instagram)" :href="sanitizarUrl(conteudo.redes_sociais.instagram)" target="_blank" rel="noopener noreferrer">Instagram</a>
+      <a v-if="sanitizarUrl(conteudo.redes_sociais.facebook)" :href="sanitizarUrl(conteudo.redes_sociais.facebook)" target="_blank" rel="noopener noreferrer">Facebook</a>
+      <a v-if="sanitizarUrl(conteudo.redes_sociais.tiktok)" :href="sanitizarUrl(conteudo.redes_sociais.tiktok)" target="_blank" rel="noopener noreferrer">TikTok</a>
+      <a v-if="sanitizarUrl(conteudo.redes_sociais.linkedin)" :href="sanitizarUrl(conteudo.redes_sociais.linkedin)" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+      <a v-if="sanitizarUrl(conteudo.redes_sociais.youtube)" :href="sanitizarUrl(conteudo.redes_sociais.youtube)" target="_blank" rel="noopener noreferrer">YouTube</a>
     </div>
   </section>
 

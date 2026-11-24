@@ -1,16 +1,19 @@
 import { useRouter } from 'vue-router'
+import { signOutConta } from '@/services/api'
+import { resetarConta } from '@/composables/useContaAtual'
+import { resetarFavoritos } from '@/composables/useFavoritos'
 
-// Limpa os tokens dos dois storages (localStorage do "manter conectado" e
-// sessionStorage do login normal) e manda pro login — usado tanto no
-// perfil de estudante quanto nas telas de conta business (painel/editor).
 export function useAuth() {
   const router = useRouter()
 
-  function logout() {
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('refresh_token')
-    sessionStorage.removeItem('access_token')
-    sessionStorage.removeItem('refresh_token')
+  async function logout() {
+    try {
+      await signOutConta()
+    } catch {
+      // mesmo se falhar rede, limpa estado local
+    }
+    resetarConta()
+    resetarFavoritos()
     router.push({ name: 'login' })
   }
 

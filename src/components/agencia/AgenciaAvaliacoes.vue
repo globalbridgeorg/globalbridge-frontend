@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import axios from '@/services/axios'
+import { salvarAvaliacao } from '@/services/api'
 import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
 import { useFavoritos } from '@/composables/useFavoritos'
 import { iniciaisDe } from '@/utils/iniciais'
@@ -30,10 +30,10 @@ async function enviarAvaliacao() {
   }
   enviandoAvaliacao.value = true
   try {
-    await axios.post('/avaliacao/', {
+    await salvarAvaliacao({
       nota: novaNota.value,
       comentario: novoComentario.value.trim(),
-      id_agencia: props.agencia.id
+      agenciaId: props.agencia.id
     })
     novaNota.value = 0
     novoComentario.value = ''
@@ -89,13 +89,20 @@ async function enviarAvaliacao() {
           <template v-for="n in 5" :key="n"><span aria-hidden="true">{{ n <= avaliacao.nota ? '★' : '☆' }}</span></template>
         </span>
         <p class="review-text">{{ avaliacao.comentario }}</p>
-        <router-link :to="{ name: 'perfil-publico', params: { username: avaliacao.autor_username } }" class="review-autor">
+        <router-link v-if="avaliacao.autor_username" :to="{ name: 'perfil-publico', params: { username: avaliacao.autor_username } }" class="review-autor">
           <span class="review-avatar">
             <img v-if="avaliacao.autor_foto" :src="avaliacao.autor_foto" :alt="avaliacao.autor" />
             <span v-else aria-hidden="true">{{ iniciaisDe(avaliacao.autor) }}</span>
           </span>
           <strong>{{ avaliacao.autor }}</strong>
         </router-link>
+        <span v-else class="review-autor">
+          <span class="review-avatar">
+            <img v-if="avaliacao.autor_foto" :src="avaliacao.autor_foto" :alt="avaliacao.autor" />
+            <span v-else aria-hidden="true">{{ iniciaisDe(avaliacao.autor) }}</span>
+          </span>
+          <strong>{{ avaliacao.autor }}</strong>
+        </span>
       </article>
     </div>
     <p v-else class="estado-vazio">Essa agência ainda não recebeu avaliações.</p>

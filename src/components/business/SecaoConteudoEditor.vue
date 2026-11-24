@@ -1,12 +1,11 @@
 <script setup>
-// Campos das seções opcionais de texto (vídeo, equipe, FAQ...). Edita
-// conteudoBlocos direto via v-model — o watch profundo do BusinessView é
-// que marca a página como alterada.
 defineProps({
   tipo: { type: String, required: true },
   endereco: { type: String, default: '' }
 })
 const conteudo = defineModel({ type: Object, required: true })
+const descricao = defineModel('descricao', { type: String, default: '' })
+const comoFunciona = defineModel('comoFunciona', { type: String, default: '' })
 const emit = defineEmits(['alterado'])
 
 function adicionarItem(tipoBloco, campo, vazio) {
@@ -21,8 +20,42 @@ function removerItem(tipoBloco, campo, index) {
 </script>
 
 <template>
+  <!-- Apresentação (descrição) -->
+  <div v-if="tipo === 'hero'" class="bloco-conteudo" style="margin-top: 12px;">
+    <label class="campo-label" for="campo-hero-desc">Descrição da agência</label>
+    <textarea
+      id="campo-hero-desc"
+      v-model="descricao"
+      rows="3"
+      class="campo-textarea"
+      placeholder="Resumo curto sobre a agência exibido na apresentação..."
+      @input="emit('alterado')"
+    ></textarea>
+  </div>
+
+  <!-- Como funciona -->
+  <div v-else-if="tipo === 'como_funciona'" class="bloco-conteudo">
+    <label class="campo-label" for="campo-como-funciona">Texto de "Como funciona"</label>
+    <textarea
+      id="campo-como-funciona"
+      v-model="comoFunciona"
+      rows="4"
+      class="campo-textarea"
+      placeholder="Conte passo a passo como o estudante faz o intercâmbio com vocês..."
+      @input="emit('alterado')"
+    ></textarea>
+  </div>
+
+  <!-- Catálogo (atalho para o painel) -->
+  <div v-else-if="tipo === 'catalogo'" class="bloco-conteudo">
+    <p class="bloco-dica">
+      Os programas e preços são gerenciados na aba <strong>Programas</strong> do
+      <router-link :to="{ name: 'business' }" class="link-dica">Painel da agência</router-link>.
+    </p>
+  </div>
+
   <!-- Vídeo institucional -->
-  <div v-if="tipo === 'video'" class="bloco-conteudo">
+  <div v-else-if="tipo === 'video'" class="bloco-conteudo">
     <label class="campo-label" for="campo-video-url">Link do vídeo (YouTube, Vimeo...)</label>
     <input id="campo-video-url" type="text" v-model="conteudo.video.url" placeholder="https://youtube.com/watch?v=..." class="campo-input">
   </div>
@@ -136,4 +169,5 @@ function removerItem(tipoBloco, campo, index) {
   cursor: pointer;
 }
 .btn-add-item:hover { border-color: var(--gb-magenta); color: var(--gb-magenta-strong); }
+.link-dica { color: var(--gb-magenta-strong); font-weight: 600; text-decoration: underline; }
 </style>

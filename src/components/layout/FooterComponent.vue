@@ -8,15 +8,14 @@ import gsap from 'gsap'
 const route = useRoute()
 const { estado: conta, carregarConta } = useContaAtual()
 
-const isLoggedIn = computed(() => {
-  route.fullPath
-  const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
-  return !!token
+const isLoggedIn = computed(() => conta.logado)
+
+watchEffect(() => { carregarConta() })
+
+const buttonText = computed(() => {
+  if (!isLoggedIn.value) return 'Entrar'
+  return conta.tipo === 'agencia' ? 'Painel' : 'Perfil'
 })
-
-watchEffect(() => { if (isLoggedIn.value) carregarConta() })
-
-const buttonText = computed(() => isLoggedIn.value ? 'Perfil' : 'Entrar')
 // Mesma lógica do HeaderComponent — conta business vai pro painel dela.
 const buttonLink = computed(() => {
   if (!isLoggedIn.value) return '/login'
@@ -88,8 +87,8 @@ onBeforeUnmount(() => marqueeTween?.kill())
           <div class="footer-links-col">
             <span class="footer-links-label">Contato</span>
             <a href="mailto:contato@globalbridge.com">contato@globalbridge.com</a>
-            <a href="#" target="_blank" rel="noopener">Instagram</a>
-            <a href="#" target="_blank" rel="noopener">LinkedIn</a>
+            <span class="footer-link-soon">Instagram (em breve)</span>
+            <span class="footer-link-soon">LinkedIn (em breve)</span>
           </div>
         </div>
 
@@ -104,7 +103,7 @@ onBeforeUnmount(() => marqueeTween?.kill())
 
       <div class="footer-bottom">
         <span>© 2026 GlobalBridge®</span>
-        <span class="footer-legal"><a href="#">Termos</a> · <a href="#">Privacidade</a></span>
+        <span class="footer-legal">Termos e privacidade em breve</span>
       </div>
     </div>
 
@@ -238,6 +237,11 @@ onBeforeUnmount(() => marqueeTween?.kill())
   text-decoration: underline;
 }
 
+.footer-link-soon {
+  color: var(--gb-mauve-muted);
+  font-size: 0.9rem;
+}
+
 .footer-contact-btn {
   align-self: flex-start;
 }
@@ -254,18 +258,6 @@ onBeforeUnmount(() => marqueeTween?.kill())
   border-top: 1px solid rgba(23, 17, 26, 0.15);
   font-size: 0.8rem;
   color: var(--gb-mauve-muted);
-}
-
-.footer-legal a {
-  color: inherit;
-  text-decoration: none;
-  display: inline-block;
-  padding-block: 5px;
-  margin-block: -5px;
-}
-
-.footer-legal a:hover {
-  text-decoration: underline;
 }
 
 /* --- Marquee infinito --- */

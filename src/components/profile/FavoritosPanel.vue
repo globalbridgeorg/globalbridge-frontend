@@ -10,31 +10,38 @@ const { favoritos, toggleFavorito } = useFavoritos()
   <div class="panel">
     <h2>Favoritos</h2>
     <p class="panel-sub">Países e agências que você salvou para comparar depois</p>
-    <table v-if="favoritos.length" class="fav-table">
-      <thead>
-        <tr><th>Destino</th><th>Detalhe</th><th>Salvo em</th><th><span class="sr-only">Remover</span></th></tr>
-      </thead>
-      <tbody>
-        <tr v-for="fav in favoritos" :key="fav.id">
-          <td>
-            <div class="fav-country">
-              <span class="fav-dot" :style="{ background: fav.tipo === 'pais' ? 'var(--gb-blue)' : 'var(--gb-magenta-strong)' }">{{ fav.tipo === 'pais' ? 'P' : 'A' }}</span>
-              <router-link
-                :to="fav.tipo === 'pais' ? { name: 'pais', params: { id: fav.objeto_id } } : { name: 'agencia', params: { id: fav.objeto_id } }"
-              >{{ fav.nome }}</router-link>
-            </div>
-          </td>
-          <td>{{ fav.subtitulo || '—' }}</td>
-          <td>{{ new Date(fav.criado_em).toLocaleDateString('pt-BR') }}</td>
-          <td><button class="fav-remove" :aria-label="`Remover ${fav.nome} dos favoritos`" @click="toggleFavorito(fav.tipo, fav.objeto_id)"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke-width="1.8" stroke-linecap="round"/></svg></button></td>
-        </tr>
-      </tbody>
-    </table>
+    <div v-if="favoritos.length" class="fav-table-wrap">
+      <table class="fav-table">
+        <thead>
+          <tr><th>Destino</th><th>Detalhe</th><th>Salvo em</th><th><span class="sr-only">Remover</span></th></tr>
+        </thead>
+        <tbody>
+          <tr v-for="fav in favoritos" :key="fav.id">
+            <td>
+              <div class="fav-country">
+                <span class="fav-dot" :style="{ background: fav.tipo === 'pais' ? 'var(--gb-blue)' : 'var(--gb-magenta-strong)' }">{{ fav.tipo === 'pais' ? 'P' : 'A' }}</span>
+                <router-link
+                  :to="fav.tipo === 'pais' ? { name: 'pais', params: { id: fav.objeto_id } } : { name: 'agencia', params: { id: fav.objeto_id } }"
+                >{{ fav.nome }}</router-link>
+              </div>
+            </td>
+            <td>{{ fav.subtitulo || '—' }}</td>
+            <td>{{ new Date(fav.criado_em).toLocaleDateString('pt-BR') }}</td>
+            <td><button type="button" class="fav-remove" :aria-label="`Remover ${fav.nome} dos favoritos`" @click="toggleFavorito(fav.tipo, fav.objeto_id)"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke-width="1.8" stroke-linecap="round"/></svg></button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <p v-else-if="!loading" class="panel-empty">Você ainda não salvou nenhum país ou agência.</p>
   </div>
 </template>
 
 <style scoped>
+.fav-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .fav-table {
   width: 100%;
   border-collapse: collapse;

@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
-import axios from '@/services/axios'
+import { getEstatisticas } from '@/services/api'
 import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -21,8 +21,7 @@ const CAMPOS = [
 
 async function carregarEstatisticas() {
   try {
-    const { data } = await axios.get('/estatisticas/')
-    dados.value = data
+    dados.value = await getEstatisticas()
   } catch (e) {
     console.error('Erro ao buscar estatísticas:', e)
   } finally {
@@ -78,6 +77,11 @@ onBeforeUnmount(() => ctx?.revert())
         <span class="numero-label">{{ campo.label }}</span>
       </div>
     </div>
+
+    <p v-else class="numeros-fallback">
+      Não foi possível carregar as estatísticas agora.
+      <router-link to="/mapview">Explore o mapa</router-link> para ver países e agências disponíveis.
+    </p>
   </section>
 </template>
 
@@ -113,6 +117,20 @@ onBeforeUnmount(() => ctx?.revert())
 .numero-label {
   font-size: 0.85rem;
   color: var(--gb-ink-soft);
+}
+
+.numeros-fallback {
+  margin-top: 24px;
+  padding: 24px 0;
+  border-top: 1px solid var(--gb-purple-deep-18);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--gb-ink-soft);
+}
+
+.numeros-fallback a {
+  color: var(--gb-magenta);
+  font-weight: 600;
 }
 
 .numeros-skeleton {

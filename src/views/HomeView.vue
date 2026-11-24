@@ -39,49 +39,51 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="content-header">
-    <VideoComponent src="/videos/overlayglobalbridge.mp4" animateOnScroll title="MOLDE SEU PRÓPRIO FUTURO"
-      description="Com uma plataforma acessível e centralizada, o GlobalBridge amplia oportunidades de intercâmbio e conecta usuários a destinos e agências confiáveis."
-      :pills="['Mais de 20 países', 'Use gratuitamente']" />
-  </section>
+  <div class="home-view">
+    <section class="content-header">
+      <VideoComponent src="/videos/overlayglobalbridge.mp4" animateOnScroll title="MOLDE SEU PRÓPRIO FUTURO"
+        description="Com uma plataforma acessível e centralizada, o GlobalBridge amplia oportunidades de intercâmbio e conecta usuários a destinos e agências confiáveis."
+        :pills="['Mais de 20 países', 'Use gratuitamente']" />
+    </section>
 
-  <section class="content-layout">
-    <PhotoGrid :imagesCol1="fotosEsquerda" :imagesCol2="fotosDireita" />
-  </section>
+    <section class="content-layout">
+      <PhotoGrid :imagesCol1="fotosEsquerda" :imagesCol2="fotosDireita" />
+    </section>
 
-  <section class="gb-section">
-    <Landing />
-  </section>
+    <section class="gb-section">
+      <Landing />
+    </section>
 
-  <section class="gb-section">
-    <Numeros />
-  </section>
+    <section class="gb-section">
+      <Numeros />
+    </section>
 
-  <section class="gb-section">
-    <MotorComponent />
-  </section>
+    <section class="gb-section">
+      <MotorComponent />
+    </section>
 
-  <section class="gb-section">
-    <Paises />
-  </section>
+    <section class="gb-section">
+      <Paises />
+    </section>
 
-  <section class="gb-section">
-    <FaqComponent />
-  </section>
+    <section class="gb-section">
+      <FaqComponent />
+    </section>
 
-  <section class="gb-section">
-    <CustoComponent />
-    <FormatoComponent />
-  </section>
+    <section class="gb-section">
+      <CustoComponent />
+      <FormatoComponent />
+    </section>
 
-  <section class="gb-section">
-    <PassosComponent />
-    <TimelineComponent />
-  </section>
+    <section class="gb-section">
+      <PassosComponent />
+      <TimelineComponent />
+    </section>
 
-  <section>
-    <TestemunhosComponent />
-  </section>
+    <section>
+      <TestemunhosComponent />
+    </section>
+  </div>
 </template>
 
 <style scoped>

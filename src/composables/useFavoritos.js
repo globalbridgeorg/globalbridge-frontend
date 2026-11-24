@@ -1,21 +1,24 @@
-import { reactive, ref } from 'vue'
-import axios from '@/services/axios'
+import { computed, reactive, ref } from 'vue'
+import { getFavoritos, adicionarFavorito, removerFavorito } from '@/services/api'
+import { useContaAtual } from '@/composables/useContaAtual'
 
-// Estado compartilhado entre todas as telas que usam o composable — evita
-// buscar /favoritos/ de novo toda vez que o usuário entra numa página de
-// país/agência diferente.
 const favoritos = reactive([])
 const carregado = ref(false)
 
-const getStoredToken = () => localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
+export function resetarFavoritos() {
+  favoritos.splice(0, favoritos.length)
+  carregado.value = false
+}
 
 export function useFavoritos() {
-  const estaLogado = ref(!!getStoredToken())
+  const { estado: conta, carregarConta } = useContaAtual()
+  const estaLogado = computed(() => conta.logado)
 
-  async function carregarFavoritos() {
-    if (!estaLogado.value || carregado.value) return
+  async function carregarFavoritos(forcar = false) {
+    await carregarConta()
+    if (!conta.logado || (carregado.value && !forcar)) return
     try {
-      const { data } = await axios.get('/favoritos/')
+      const data = await getFavoritos()
       favoritos.splice(0, favoritos.length, ...data)
       carregado.value = true
     } catch (e) {
@@ -32,21 +35,21 @@ export function useFavoritos() {
   }
 
   async function toggleFavorito(tipo, objetoId) {
-    if (!estaLogado.value) return
+    if (!conta.logado) return
     const existente = encontrarFavorito(tipo, objetoId)
     if (existente) {
       const idx = favoritos.indexOf(existente)
       favoritos.splice(idx, 1)
       try {
-        await axios.delete(`/favoritos/${existente.id}/`)
+        await removerFavorito(existente.id)
       } catch (e) {
         console.error('Erro ao remover favorito:', e)
         favoritos.push(existente)
       }
     } else {
       try {
-        const { data } = await axios.post('/favoritos/', { tipo, objeto_id: objetoId })
-        favoritos.push(data)
+        const criado = await adicionarFavorito(tipo, objetoId)
+        favoritos.push(criado)
       } catch (e) {
         console.error('Erro ao favoritar:', e)
       }

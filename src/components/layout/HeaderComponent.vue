@@ -20,15 +20,14 @@ const headerClass = computed(() => {
 // uma tarja em branco no topo da cena (ver LoginView.vue).
 const flutuanteNoMobile = computed(() => route.name === 'login')
 
-const isLoggedIn = computed(() => {
-  route.fullPath
-  const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
-  return !!token
+const isLoggedIn = computed(() => conta.logado)
+
+watchEffect(() => { carregarConta() })
+
+const buttonText = computed(() => {
+  if (!isLoggedIn.value) return 'Entrar'
+  return conta.tipo === 'agencia' ? 'Painel' : 'Perfil'
 })
-
-watchEffect(() => { if (isLoggedIn.value) carregarConta() })
-
-const buttonText = computed(() => isLoggedIn.value ? 'Perfil' : 'Entrar')
 // Conta business (tipo=agencia) tem painel próprio — manda pra lá em vez
 // do perfil de estudante, que não sabe nada sobre agência.
 const buttonLink = computed(() => {
@@ -76,7 +75,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
       <span></span>
     </button>
 
-    <router-link :to="buttonLink" class="mobile-action" @click="mobileMenuOpen = false">{{ buttonText }}</router-link>
+    <router-link v-if="route.name !== 'login'" :to="buttonLink" class="mobile-action" @click="mobileMenuOpen = false">{{ buttonText }}</router-link>
 
     <!-- nav desktop -->
     <nav class="navbar_links desktop-nav">
@@ -84,12 +83,12 @@ onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
       <router-link to="/mapview">Meu destino</router-link>
       <router-link to="/como-funciona">Como funciona</router-link>
       <router-link to="/contato">Contato</router-link>
-      <button type="button" @click="installPWA" class="install-link">
+      <button v-if="isInstallable" type="button" @click="installPWA" class="install-link">
         Instalar App
       </button>
     </nav>
 
-    <router-link :to="buttonLink" 
+    <router-link v-if="route.name !== 'login'" :to="buttonLink"
       class="desktop-btn"
       >
       <ButtonComponent tag="span" :text="buttonText" />
@@ -129,7 +128,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
           </nav>
 
           <div class="mobile-nav-bottom">
-            <button type="button" class="mobile-nav-sub" @click="installPWA">
+            <button v-if="isInstallable" type="button" class="mobile-nav-sub" @click="installPWA">
               <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="rgba(251,246,231,0.65)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12" /><path d="M8 11l4 4 4-4" /><path d="M4 19h16" /></svg>
               Instalar o app
             </button>
@@ -139,7 +138,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
             </a>
 
             <router-link :to="buttonLink" class="mobile-nav-cta" @click="toggleMenu">
-              {{ buttonText === 'Perfil' ? 'Ver meu perfil' : 'Entrar na conta' }}
+              {{ isLoggedIn ? (conta.tipo === 'agencia' ? 'Abrir painel' : 'Ver meu perfil') : 'Entrar na conta' }}
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12L12 4M12 4H5M12 4V11" /></svg>
             </router-link>
           </div>
@@ -150,8 +149,6 @@ onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
 </template>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
-
 .navbar {
   display: flex;
   align-items: center;

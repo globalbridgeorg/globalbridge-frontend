@@ -3,7 +3,7 @@ import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import axios from '@/services/axios'
+import { getPaisDetalhe } from '@/services/api'
 import { prefersReducedMotion } from '@/composables/usePageTransition'
 import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
 import ProgramaCard from '@/components/catalog/ProgramaCard.vue'
@@ -35,8 +35,7 @@ async function carregarPais() {
   carregando.value = true
   erro.value = false
   try {
-    const { data } = await axios.get(`/paises/${route.params.id}/`)
-    pais.value = data
+    pais.value = await getPaisDetalhe(route.params.id)
   } catch (e) {
     console.error('Erro ao buscar país:', e)
     erro.value = true
@@ -115,7 +114,7 @@ onBeforeUnmount(() => ctx?.revert())
       <PaisHero :pais="pais" :regiao-label="regiaoLabel" />
 
       <section class="stats reveal-section">
-        <div class="stat"><span class="stat-num">{{ pais.intercambistas.toLocaleString('pt-BR') }}</span><span class="stat-label">Intercambistas atendidos</span></div>
+        <div class="stat"><span class="stat-num">{{ (pais.intercambistas ?? 0).toLocaleString('pt-BR') }}</span><span class="stat-label">Intercambistas atendidos</span></div>
         <div class="stat"><span class="stat-num">{{ pais.universidades }}</span><span class="stat-label">Universidades parceiras</span></div>
         <div class="stat"><span class="stat-num">{{ pais.agencias.length }}</span><span class="stat-label">Agências parceiras</span></div>
         <div class="stat"><span class="stat-num">{{ pais.programas.length }}</span><span class="stat-label">Programas no catálogo</span></div>

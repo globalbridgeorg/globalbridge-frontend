@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
-import axios from '@/services/axios'
+import { solicitarRedefinicaoSenha } from '@/services/api'
+import { traduzirErroAuth } from '@/utils/authErrors'
 
 const email = ref('')
 const enviado = ref(false)
@@ -9,13 +10,13 @@ const erro = ref('')
 
 async function enviar() {
   erro.value = ''
-  if (!email.value) { erro.value = 'Informe seu e-mail.'; return }
+  if (!email.value.trim()) { erro.value = 'Informe seu e-mail.'; return }
   loading.value = true
   try {
-    await axios.post('/auth/esqueci-senha/', { email: email.value })
+    await solicitarRedefinicaoSenha(email.value)
     enviado.value = true
-  } catch (e) {
-    erro.value = 'Erro ao enviar. Tenta de novo em instantes.'
+  } catch (err) {
+    erro.value = traduzirErroAuth(err, 'Erro ao enviar. Tente novamente em instantes.')
   } finally {
     loading.value = false
   }
@@ -88,7 +89,7 @@ async function enviar() {
   justify-content: center;
   margin: 8px auto 20px;
   background: rgba(61, 154, 75, 0.12);
-  color: #3D9A4B;
+  color: var(--gb-green);
 }
 
 .form-group { text-align: left; margin-bottom: 20px; }
@@ -102,4 +103,10 @@ async function enviar() {
 .btn-primary:disabled { opacity: 0.6; cursor: default; }
 
 .voltar { display: block; margin-top: 24px; font-size: 13px; color: var(--gb-magenta); font-weight: 600; text-decoration: underline; }
+
+@media (max-width: 768px) {
+  .esqueci-view {
+    padding: 16px 16px 72px;
+  }
+}
 </style>

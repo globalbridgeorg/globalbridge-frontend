@@ -82,12 +82,14 @@ const routes = [
   },
   {
     path: '/destinos/:id',
+    alias: '/pais/:id',
     name: 'pais',
     component: PaisView,
     meta: { headerWidth: 'full' }
   },
   {
     path: '/agencias/:id',
+    alias: '/agencia/:id',
     name: 'agencia',
     component: AgenciaView,
     meta: { headerWidth: 'full' }
@@ -120,6 +122,12 @@ const routes = [
     path: '/business/analise',
     name: 'business-analise',
     component: AnaliseBusinessView,
+    meta: { headerWidth: 'full' }
+  },
+  {
+    path: '/admin',
+    name: 'admin',
+    component: () => import('@/views/AdminView.vue'),
     meta: { headerWidth: 'full' }
   },
 ];

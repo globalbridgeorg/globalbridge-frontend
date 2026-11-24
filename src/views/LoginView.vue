@@ -1,14 +1,26 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { useRouter } from 'vue-router'
+import { useContaAtual } from '@/composables/useContaAtual'
 import AuthCenario from '@/components/auth/AuthCenario.vue'
 import LoginForm from '@/components/auth/LoginForm.vue'
 import CadastroEtapas from '@/components/auth/CadastroEtapas.vue'
+
+const router = useRouter()
+const { carregarConta } = useContaAtual()
 
 const showRegister = ref(false)
 const cardPhase = ref('idle')
 const cardPhaseTimers = []
 const justMounted = ref(true)
-onMounted(() => { cardPhaseTimers.push(setTimeout(() => { justMounted.value = false }, 700)) })
+onMounted(async () => {
+  cardPhaseTimers.push(setTimeout(() => { justMounted.value = false }, 700))
+  const conta = await carregarConta()
+  if (conta.logado) {
+    const destino = conta.tipo === 'agencia' ? 'business' : conta.is_admin ? 'admin' : 'profile'
+    router.replace({ name: destino })
+  }
+})
 
 function switchAuthMode(toRegister) {
   if (cardPhase.value !== 'idle') return

@@ -16,12 +16,12 @@ const { logout } = useAuth()
   <div class="topbar">
     <div class="topbar-info">
       <router-link :to="{ name: 'business' }" class="link-voltar-painel">← Painel</router-link>
-      <span class="divisor"></span>
-      <h1 class="titulo-editando">Editando página — {{ agencia.nome }}</h1>
+      <span class="divisor" aria-hidden="true"></span>
+      <h1 class="titulo-editando">Editor da página · <strong>{{ agencia.nome }}</strong></h1>
     </div>
     <div class="topbar-actions">
       <span v-if="alterado" class="msg-pendente">Alterações não publicadas</span>
-      <router-link :to="{ name: 'agencia', params: { id: agencia.id } }" target="_blank" class="link-ver-pagina">Ver página pública</router-link>
+      <router-link :to="{ name: 'agencia', params: { id: agencia.id } }" target="_blank" rel="noopener noreferrer" class="link-ver-pagina">Ver página pública</router-link>
       <button type="button" class="link-sair" @click="logout">Sair da conta</button>
       <span aria-live="polite">
         <Transition name="toast">
@@ -31,22 +31,22 @@ const { logout } = useAuth()
           </span>
         </Transition>
       </span>
-      <button class="btn-publicar" :disabled="salvando" @click="$emit('publicar')">{{ salvando ? 'Publicando...' : 'Publicar alterações' }}</button>
+      <button type="button" class="btn-publicar" :disabled="salvando" @click="$emit('publicar')">{{ salvando ? 'Publicando...' : 'Publicar alterações' }}</button>
     </div>
   </div>
 </template>
 
 <style scoped>
 .topbar {
-  min-height: 190px;
-  background: var(--gb-dark);
+  min-height: 156px;
+  background: linear-gradient(120deg, var(--gb-purple-deep) 0%, var(--gb-dark) 100%);
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
   align-content: flex-end;
   justify-content: space-between;
-  gap: 16px 24px;
-  padding: 96px 24px 20px;
+  gap: 14px 24px;
+  padding: 92px 24px 18px;
   color: #fff;
   flex-shrink: 0;
 }
@@ -54,27 +54,40 @@ const { logout } = useAuth()
 .topbar-info {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
+  flex-wrap: wrap;
 }
 
 .link-voltar-painel {
-  font-size: 0.82rem;
-  font-weight: 600;
+  font-family: var(--gb-font-eyebrow);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
 }
 .link-voltar-painel:hover { color: #fff; }
 
 .divisor {
   width: 1px;
-  height: 20px;
-  background: rgba(255, 255, 255, 0.2);
+  height: 18px;
+  background: rgba(255, 255, 255, 0.22);
 }
 
 .titulo-editando {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.titulo-editando strong {
+  color: #fff;
+  font-family: var(--gb-font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
 }
 
 .topbar-actions {
@@ -86,14 +99,18 @@ const { logout } = useAuth()
 
 .link-ver-pagina {
   font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.75);
   text-decoration: underline;
+}
+
+.link-ver-pagina:hover {
+  color: #fff;
 }
 
 .link-sair {
   font-family: inherit;
   font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.75);
   text-decoration: underline;
   background: none;
   border: none;
@@ -110,7 +127,7 @@ const { logout } = useAuth()
   align-items: center;
   gap: 5px;
   font-size: 0.8rem;
-  color: #3D9A4B;
+  color: var(--gb-green);
   font-weight: 700;
   white-space: nowrap;
 }
@@ -130,21 +147,35 @@ const { logout } = useAuth()
   background: var(--gb-magenta);
   color: #fff;
   border: none;
-  border-radius: 8px;
+  border-radius: 9px;
   padding: 9px 18px;
   font-family: var(--gb-font-eyebrow);
   font-weight: 700;
-  font-size: 11px;
+  font-size: 11.5px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
 }
 
 .btn-publicar:disabled { opacity: 0.6; cursor: default; }
-
-.btn-publicar { transition: background 0.15s ease, transform 0.1s ease; }
 .btn-publicar:not(:disabled):hover { background: var(--gb-magenta-strong); }
-.btn-publicar:not(:disabled):active { transform: scale(0.96); }
+.btn-publicar:not(:disabled):active { transform: scale(0.97); }
+
+@media (max-width: 768px) {
+  .topbar {
+    min-height: auto;
+    padding: 16px;
+  }
+
+  .topbar-info {
+    gap: 8px 14px;
+  }
+
+  .divisor {
+    display: none;
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .btn-publicar, .toast-enter-active, .toast-leave-active { transition: none; }

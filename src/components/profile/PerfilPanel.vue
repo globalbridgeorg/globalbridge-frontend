@@ -1,26 +1,38 @@
 <script setup>
-import { ref, reactive } from 'vue'
-import axios from '@/services/axios'
+import { ref, reactive, watch } from 'vue'
+import { atualizarPerfil } from '@/services/api'
 
 const props = defineProps({
-  profile: { type: Object, required: true }
+  profile: { type: Object, required: true },
 })
 const emit = defineEmits(['nome-salvo'])
 
-// Nome é salvo de verdade; telefone/cidade/bio ainda não têm campo no backend.
-const editForm = reactive({ name: props.profile.name, telefone: '', cidade: '', sobre: '' })
+const editForm = reactive({ name: props.profile.name || '' })
 const savingProfile = ref(false)
 const profileSaved = ref(false)
+const erroSalvar = ref('')
+
+watch(() => props.profile.name, (novo) => {
+  editForm.name = novo || ''
+})
 
 async function saveProfile() {
-  savingProfile.value = true
+  erroSalvar.value = ''
   profileSaved.value = false
+  const nomeLimpo = editForm.name.trim()
+  if (!nomeLimpo) {
+    erroSalvar.value = 'Informe seu nome completo.'
+    return
+  }
+
+  savingProfile.value = true
   try {
-    await axios.patch(`/usuarios/${props.profile.id}/`, { name: editForm.name })
-    emit('nome-salvo', editForm.name)
+    await atualizarPerfil(props.profile.id, { name: nomeLimpo })
+    emit('nome-salvo', nomeLimpo)
     profileSaved.value = true
   } catch (err) {
     console.error('Erro ao salvar nome do perfil:', err)
+    erroSalvar.value = 'Não foi possível salvar agora. Tente novamente.'
   } finally {
     savingProfile.value = false
   }
@@ -32,16 +44,41 @@ async function saveProfile() {
     <h2>Dados pessoais</h2>
     <p class="panel-sub">Informações da sua conta e do seu perfil público</p>
     <div class="field-row">
-      <div class="field"><label for="perfil-nome">Nome completo</label><input id="perfil-nome" v-model="editForm.name" type="text" autocomplete="name" /></div>
-      <div class="field"><label for="perfil-email">E-mail</label><input id="perfil-email" :value="profile.email" type="email" disabled /></div>
-      <div class="field"><label for="perfil-telefone">Telefone</label><input id="perfil-telefone" v-model="editForm.telefone" type="tel" autocomplete="tel" placeholder="(11) 90000-0000" /></div>
-      <div class="field"><label for="perfil-cidade">Cidade / Estado</label><input id="perfil-cidade" v-model="editForm.cidade" type="text" autocomplete="address-level2" placeholder="Sua cidade" /></div>
+      <div class="field">
+        <label for="perfil-nome">Nome completo</label>
+        <input id="perfil-nome" v-model="editForm.name" type="text" autocomplete="name" />
+      </div>
+      <div class="field">
+        <label for="perfil-email">E-mail</label>
+        <input id="perfil-email" :value="profile.email" type="email" disabled />
+      </div>
+      <div v-if="profile.username" class="field">
+        <label for="perfil-username">Usuário público</label>
+        <input id="perfil-username" :value="`@${profile.username}`" type="text" disabled />
+      </div>
     </div>
-    <div class="field" style="margin-bottom:16px;">
-      <label for="perfil-sobre">Sobre você</label>
-      <textarea id="perfil-sobre" v-model="editForm.sobre" rows="3" placeholder="Conte um pouco sobre seus planos de intercâmbio..."></textarea>
+    <p v-if="erroSalvar" class="erro-campo" role="alert">{{ erroSalvar }}</p>
+    <div class="acoes-linha">
+      <button type="button" class="btn-save" :disabled="savingProfile" @click="saveProfile">
+        {{ savingProfile ? 'Salvando...' : 'Salvar alterações' }}
+      </button>
+      <span v-if="profileSaved" class="saved-flash">Perfil atualizado ✓</span>
     </div>
-    <button class="btn-save" :disabled="savingProfile" @click="saveProfile">{{ savingProfile ? 'Salvando...' : 'Salvar alterações' }}</button>
-    <span v-if="profileSaved" class="saved-flash">Perfil atualizado ✓</span>
   </div>
 </template>
+
+<style scoped>
+.erro-campo {
+  margin: 0 0 12px;
+  font-size: 12.5px;
+  color: #b3261e;
+  font-weight: 600;
+}
+
+.acoes-linha {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+</style>

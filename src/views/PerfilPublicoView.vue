@@ -1,15 +1,16 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import axios from '@/services/axios'
+import { getPerfilPublico } from '@/services/api'
+import { useContaAtual } from '@/composables/useContaAtual'
 import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
 
 const route = useRoute()
 const router = useRouter()
+const { estado: conta, carregarConta } = useContaAtual()
 const perfil = ref(null)
 const carregando = ref(true)
 const erro = ref(false)
-const precisaLogin = ref(false)
 
 function iniciaisDe(nome) {
   if (!nome) return ''
@@ -25,44 +26,28 @@ const iniciais = computed(() => iniciaisDe(perfil.value?.name))
 const foto = computed(() => perfil.value?.foto_url || perfil.value?.avatar_url || null)
 const ehAgencia = computed(() => perfil.value?.tipo === 'agencia')
 
-const getStoredToken = () => localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
-
 async function carregarPerfil() {
   carregando.value = true
   erro.value = false
-  precisaLogin.value = false
 
-  // Se o username da URL é o meu, isso É o meu perfil — pula direto pra
-  // /profile (a página privada) em vez de mostrar a versão pública de mim.
-  if (getStoredToken()) {
-    try {
-      const { data: eu } = await axios.get('/usuarios/me/')
-      if (eu.username === route.params.username) {
-        router.replace({ name: 'profile' })
-        return
-      }
-    } catch (e) {
-      // token inválido/expirado — segue o fluxo normal, o fetch abaixo
-      // vai lidar com o 401 se o perfil também exigir login.
-    }
+  await carregarConta()
+  if (conta.logado && conta.username && conta.username === route.params.username) {
+    router.replace({ name: conta.tipo === 'agencia' ? 'business' : 'profile' })
+    return
   }
 
   try {
-    const { data } = await axios.get(`/usuarios/u/${route.params.username}/`)
-    perfil.value = data
+    perfil.value = await getPerfilPublico(route.params.username)
   } catch (e) {
-    if (e.response?.status === 401) {
-      precisaLogin.value = true
-    } else {
-      console.error('Erro ao buscar perfil:', e)
-      erro.value = true
-    }
+    console.error('Erro ao buscar perfil:', e)
+    erro.value = true
   } finally {
     carregando.value = false
   }
 }
 
 onMounted(carregarPerfil)
+watch(() => route.params.username, carregarPerfil)
 </script>
 
 <template>
@@ -71,13 +56,10 @@ onMounted(carregarPerfil)
       <div class="skeleton-hero"></div>
     </div>
 
-    <div v-else-if="precisaLogin" class="estado-erro">
-      <p><router-link to="/login">Entre na sua conta</router-link> pra ver esse perfil.</p>
-    </div>
-
     <div v-else-if="erro" class="estado-erro">
       <p>Não conseguimos carregar esse perfil agora.</p>
       <button class="btn-tentar-novamente" @click="carregarPerfil">Tentar novamente</button>
+      <router-link to="/destinos">Voltar para todos os destinos</router-link>
     </div>
 
     <template v-else-if="perfil">

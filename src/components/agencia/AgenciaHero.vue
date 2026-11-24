@@ -1,12 +1,18 @@
 <script setup>
 import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useFavoritos } from '@/composables/useFavoritos'
 import { iniciaisDe } from '@/utils/iniciais'
+import { sanitizarUrl } from '@/utils/url'
+
+const router = useRouter()
 
 const props = defineProps({
   agencia: { type: Object, required: true },
   variante: { type: String, default: 'foto' }
 })
+
+const siteSeguro = computed(() => sanitizarUrl(props.agencia?.site))
 
 const { estaLogado, isFavorito, toggleFavorito } = useFavoritos()
 
@@ -18,6 +24,10 @@ function pulsarFavorito(el) {
   el.classList.add('pulso')
 }
 function handleFavoritar(event) {
+  if (!estaLogado.value) {
+    router.push('/login')
+    return
+  }
   toggleFavorito('agencia', props.agencia.id)
   pulsarFavorito(event.currentTarget.querySelector('.fav-icon'))
 }
@@ -43,7 +53,7 @@ const estrelas = computed(() => {
     <div class="hero-banner-content">
       <h1 class="agencia-title on-banner">{{ agencia.nome }}</h1>
       <div class="meta-row">
-        <span v-if="agencia.nota_media !== null" class="stars-lg" role="img" :aria-label="`${Math.round(agencia.nota_media)} de 5 estrelas`">
+        <span v-if="agencia.nota_media != null" class="stars-lg" role="img" :aria-label="`${Math.round(agencia.nota_media)} de 5 estrelas`">
           <span v-for="(preenchida, i) in estrelas" :key="i" class="filled" :class="{ empty: !preenchida }" aria-hidden="true">{{ preenchida ? '★' : '☆' }}</span>
           <span class="rating-num on-banner">{{ agencia.nota_media.toFixed(1) }} · {{ agencia.total_avaliacoes }} avaliaç{{ agencia.total_avaliacoes === 1 ? 'ão' : 'ões' }}</span>
         </span>
@@ -54,8 +64,8 @@ const estrelas = computed(() => {
       </div>
       <div class="hero-actions">
         <a v-if="agencia.contato" :href="`mailto:${agencia.contato}`" class="btn-primary-lg">Falar com a agência</a>
-        <a v-if="agencia.site" :href="agencia.site" target="_blank" rel="noopener" class="btn-outline-lg btn-outline-on-banner">Visitar site</a>
-        <button v-if="estaLogado" class="fav-btn fav-btn-on-banner" :class="{ active: favoritado }" :aria-pressed="favoritado" :aria-label="favoritado ? 'Remover dos favoritos' : 'Salvar nos favoritos'" @click="handleFavoritar">
+        <a v-if="siteSeguro" :href="siteSeguro" target="_blank" rel="noopener noreferrer" class="btn-outline-lg btn-outline-on-banner">Visitar site</a>
+        <button type="button" class="fav-btn fav-btn-on-banner" :class="{ active: favoritado }" :aria-pressed="estaLogado ? favoritado : undefined" :aria-label="!estaLogado ? 'Faça login para salvar nos favoritos' : (favoritado ? 'Remover dos favoritos' : 'Salvar nos favoritos')" @click="handleFavoritar">
           <svg width="18" height="18" viewBox="0 0 24 24" :fill="favoritado ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="fav-icon"><path d="M12 21s-7.5-4.6-10-9.1C.5 8.2 2.3 4.5 6 4c2.1-.3 3.9.9 6 3 2.1-2.1 3.9-3.3 6-3 3.7.5 5.5 4.2 4 7.9-2.5 4.5-10 9.1-10 9.1z" /></svg>
         </button>
       </div>
@@ -67,7 +77,7 @@ const estrelas = computed(() => {
     <div class="hero-info">
       <h1 class="agencia-title">{{ agencia.nome }}</h1>
       <div class="meta-row">
-        <span v-if="agencia.nota_media !== null" class="stars-lg" role="img" :aria-label="`${Math.round(agencia.nota_media)} de 5 estrelas`">
+        <span v-if="agencia.nota_media != null" class="stars-lg" role="img" :aria-label="`${Math.round(agencia.nota_media)} de 5 estrelas`">
           <span v-for="(preenchida, i) in estrelas" :key="i" class="filled" :class="{ empty: !preenchida }" aria-hidden="true">{{ preenchida ? '★' : '☆' }}</span>
           <span class="rating-num">{{ agencia.nota_media.toFixed(1) }} · {{ agencia.total_avaliacoes }} avaliaç{{ agencia.total_avaliacoes === 1 ? 'ão' : 'ões' }}</span>
         </span>
@@ -81,13 +91,13 @@ const estrelas = computed(() => {
     </div>
     <div class="hero-actions">
       <a v-if="agencia.contato" :href="`mailto:${agencia.contato}`" class="btn-primary-lg">Falar com a agência</a>
-      <a v-if="agencia.site" :href="agencia.site" target="_blank" rel="noopener" class="btn-outline-lg">Visitar site</a>
+      <a v-if="siteSeguro" :href="siteSeguro" target="_blank" rel="noopener noreferrer" class="btn-outline-lg">Visitar site</a>
       <button
-        v-if="estaLogado"
+        type="button"
         class="fav-btn"
         :class="{ active: favoritado }"
-        :aria-pressed="favoritado"
-        :aria-label="favoritado ? 'Remover dos favoritos' : 'Salvar nos favoritos'"
+        :aria-pressed="estaLogado ? favoritado : undefined"
+        :aria-label="!estaLogado ? 'Faça login para salvar nos favoritos' : (favoritado ? 'Remover dos favoritos' : 'Salvar nos favoritos')"
         @click="handleFavoritar"
       >
         <svg width="18" height="18" viewBox="0 0 24 24" :fill="favoritado ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="fav-icon">
@@ -149,6 +159,8 @@ const estrelas = computed(() => {
 
 .hero-banner .hero-actions {
   flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
   margin-top: 16px;
 }
 
@@ -259,6 +271,7 @@ const estrelas = computed(() => {
   align-self: center;
   width: 40px;
   height: 40px;
+  flex-shrink: 0;
   border-radius: 50%;
   border: 1px solid var(--gb-purple-deep-16);
   background: #fff;
@@ -333,7 +346,11 @@ const estrelas = computed(() => {
 
 @media (max-width: 768px) {
   .hero { flex-direction: column; align-items: flex-start; }
-  .hero-actions { flex-direction: row; width: 100%; }
+  .hero-actions { flex-direction: row; flex-wrap: wrap; align-items: center; width: 100%; }
   .hero-actions a { flex: 1; }
+}
+
+@media (max-width: 480px) {
+  .btn-primary-lg, .btn-outline-lg { padding: 12px 16px; }
 }
 </style>

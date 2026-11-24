@@ -1,8 +1,55 @@
 <script setup>
-import { ref, nextTick } from 'vue'
+import { ref, reactive, nextTick } from 'vue'
+import { enviarContato } from '@/services/api'
 
 const publico = ref('estudante')
 const formShell = ref(null)
+const enviando = ref(false)
+const enviado = ref(false)
+const erro = ref('')
+
+const form = reactive({
+  nome: '',
+  email: '',
+  nomeAgencia: '',
+  assunto: 'Dúvida sobre destino ou programa',
+  mensagem: '',
+})
+
+async function handleEnviar() {
+  erro.value = ''
+  enviado.value = false
+
+  if (!form.nome.trim()) { erro.value = 'Informe seu nome.'; return }
+  if (!form.email.trim() || !form.email.includes('@')) { erro.value = 'Informe um e-mail válido.'; return }
+  if (publico.value === 'agencia' && !form.nomeAgencia.trim()) {
+    erro.value = 'Informe o nome da agência ou instituição.'
+    return
+  }
+  if (form.mensagem.trim().length < 10) {
+    erro.value = 'Escreva sua mensagem com pelo menos 10 caracteres.'
+    return
+  }
+
+  enviando.value = true
+  try {
+    await enviarContato({
+      publico: publico.value,
+      nome: form.nome,
+      email: form.email,
+      nomeAgencia: publico.value === 'agencia' ? form.nomeAgencia : '',
+      assunto: form.assunto,
+      mensagem: form.mensagem,
+    })
+    enviado.value = true
+    form.mensagem = ''
+  } catch (e) {
+    console.error('Erro ao enviar mensagem de contato:', e)
+    erro.value = 'Não conseguimos enviar sua mensagem agora. Tente novamente em instantes.'
+  } finally {
+    enviando.value = false
+  }
+}
 
 async function pick(v) {
   if (v === publico.value) return
@@ -123,18 +170,27 @@ async function pick(v) {
 
       <div class="segmented">
         <div class="segmented-thumb" :class="{ right: publico === 'agencia' }"></div>
-        <button class="seg-btn" :class="{ active: publico === 'estudante' }" @click="pick('estudante')">Sou estudante</button>
-        <button class="seg-btn" :class="{ active: publico === 'agencia' }" @click="pick('agencia')">Sou agência</button>
+        <button type="button" class="seg-btn" :class="{ active: publico === 'estudante' }" :aria-pressed="publico === 'estudante'" @click="pick('estudante')">Sou estudante</button>
+        <button type="button" class="seg-btn" :class="{ active: publico === 'agencia' }" :aria-pressed="publico === 'agencia'" @click="pick('agencia')">Sou agência</button>
       </div>
 
       <div class="form-shell" ref="formShell">
-        <div class="form-grid">
-          <div class="field"><label for="contato-nome">Nome</label><input id="contato-nome" type="text" autocomplete="name" placeholder="Seu nome" /></div>
-          <div class="field"><label for="contato-email">E-mail</label><input id="contato-email" type="email" autocomplete="email" placeholder="seu@email.com" /></div>
-          <div v-if="publico === 'agencia'" class="field full"><label for="contato-agencia">Nome da agência</label><input id="contato-agencia" type="text" placeholder="Nome da sua agência ou instituição" /></div>
+        <form class="form-grid" @submit.prevent="handleEnviar" novalidate>
+          <div class="field">
+            <label for="contato-nome">Nome</label>
+            <input id="contato-nome" v-model="form.nome" type="text" autocomplete="name" placeholder="Seu nome" required />
+          </div>
+          <div class="field">
+            <label for="contato-email">E-mail</label>
+            <input id="contato-email" v-model="form.email" type="email" autocomplete="email" placeholder="seu@email.com" required />
+          </div>
+          <div v-if="publico === 'agencia'" class="field full">
+            <label for="contato-agencia">Nome da agência</label>
+            <input id="contato-agencia" v-model="form.nomeAgencia" type="text" placeholder="Nome da sua agência ou instituição" />
+          </div>
           <div class="field full">
             <label for="contato-assunto">Assunto</label>
-            <select id="contato-assunto">
+            <select id="contato-assunto" v-model="form.assunto">
               <option>Dúvida sobre destino ou programa</option>
               <option>Problema com uma agência</option>
               <option>Cadastro de programas</option>
@@ -143,12 +199,19 @@ async function pick(v) {
               <option>Sugestão pra plataforma</option>
             </select>
           </div>
-          <div class="field full"><label for="contato-mensagem">Mensagem</label><textarea id="contato-mensagem" rows="4" placeholder="Conte com detalhes o que você precisa"></textarea></div>
+          <div class="field full">
+            <label for="contato-mensagem">Mensagem</label>
+            <textarea id="contato-mensagem" v-model="form.mensagem" rows="4" placeholder="Conte com detalhes o que você precisa" required></textarea>
+          </div>
+          <p v-if="erro" class="form-feedback form-feedback--erro" role="alert">{{ erro }}</p>
+          <p v-if="enviado" class="form-feedback form-feedback--ok" role="status">Mensagem enviada! A gente retorna no e-mail informado.</p>
           <div class="form-actions">
-            <button class="btn btn-dark" type="button">Enviar mensagem</button>
+            <button class="btn btn-dark" type="submit" :disabled="enviando">
+              {{ enviando ? 'Enviando...' : 'Enviar mensagem' }}
+            </button>
             <p class="form-note">Respondemos pelo e-mail que você deixar aqui.</p>
           </div>
-        </div>
+        </form>
       </div>
     </section>
 
@@ -540,6 +603,32 @@ async function pick(v) {
   align-items: center;
   gap: 16px;
   margin-top: 6px;
+}
+
+.form-feedback {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 11px 14px;
+  border-radius: 9px;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.form-feedback--erro {
+  background: #fff4f4;
+  border: 1px solid rgba(179, 38, 30, 0.25);
+  color: #b3261e;
+}
+
+.form-feedback--ok {
+  background: rgba(61, 154, 75, 0.1);
+  border: 1px solid rgba(61, 154, 75, 0.3);
+  color: #266b30;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
 .form-note {

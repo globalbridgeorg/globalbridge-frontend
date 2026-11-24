@@ -1,10 +1,13 @@
 <script setup>
 import { ref, reactive, onDeactivated } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from '@/services/axios'
+import { signInPassword, signInOtp, verifyLoginOtp } from '@/services/api'
+import { useContaAtual } from '@/composables/useContaAtual'
+import { traduzirErroAuth } from '@/utils/authErrors'
 
 const emit = defineEmits(['criar-conta'])
 const router = useRouter()
+const { carregarConta } = useContaAtual()
 
 const loginMode = ref('estudante')
 const loading = ref(false)
@@ -21,40 +24,33 @@ function clearError() { errorField.value = ''; errorMessage.value = '' }
 function clearErrorForField(field) { if (errorField.value === field) clearError() }
 function setError(field, message) { errorField.value = field; errorMessage.value = message; successMessage.value = '' }
 
-// O card de login fica em <KeepAlive> (mantém e-mail/modo ao ir pro cadastro e voltar),
-// mas as mensagens somem na troca, como antes.
 onDeactivated(() => { clearError(); successMessage.value = '' })
 
-function salvarTokens(access, refresh) {
-  const storage = loginForm.keepLogged ? localStorage : sessionStorage
-  storage.setItem('access_token', access)
-  storage.setItem('refresh_token', refresh)
+async function irERedirecionarPosLogin() {
+  const conta = await carregarConta(true)
+  if (conta.tipo === 'agencia') {
+    router.push({ name: 'business' })
+  } else if (conta.is_admin) {
+    router.push({ name: 'admin' })
+  } else {
+    router.push({ name: 'profile' })
+  }
 }
 
 async function handleLogin() {
   clearError()
-  if (!loginForm.email) return setError('login.email', 'Informe seu e-mail')
+  if (!loginForm.email.trim()) return setError('login.email', 'Informe seu e-mail')
   if (!loginForm.password) return setError('login.password', 'Informe sua senha')
   loading.value = true
   try {
-    const res = await axios.post('/token/', { email: loginForm.email, password: loginForm.password })
-    salvarTokens(res.data.access, res.data.refresh)
+    await signInPassword(loginForm.email, loginForm.password, loginForm.keepLogged)
     successMessage.value = 'Login realizado com sucesso!'
-
-    // Conta business (tipo=agencia) tem um painel próprio — decide pra
-    // onde mandar depois de logar com base no que a conta realmente é,
-    // não em qual aba a pessoa escolheu (a aba é só uma dica visual).
     await irERedirecionarPosLogin()
   } catch (err) {
-    if (err.response?.status === 401) setError('login.email', 'E-mail ou senha inválidos')
-    else setError('login.email', 'Erro ao conectar com o servidor')
-  } finally { loading.value = false }
-}
-
-function irERedirecionarPosLogin() {
-  return axios.get('/usuarios/me/').then(({ data: eu }) => {
-    router.push({ name: eu.tipo === 'agencia' ? 'business' : 'profile' })
-  }).catch(() => router.push({ name: 'profile' }))
+    setError('login.email', traduzirErroAuth(err))
+  } finally {
+    loading.value = false
+  }
 }
 
 function trocarParaCodigo(ativo) {
@@ -66,14 +62,14 @@ function trocarParaCodigo(ativo) {
 
 async function solicitarCodigo() {
   clearError()
-  if (!loginForm.email) return setError('login.email', 'Informe seu e-mail')
+  if (!loginForm.email.trim()) return setError('login.email', 'Informe seu e-mail')
   loading.value = true
   try {
-    await axios.post('/auth/codigo/solicitar/', { email: loginForm.email })
+    await signInOtp(loginForm.email, loginForm.keepLogged)
     codigoEnviado.value = true
     successMessage.value = 'Se esse e-mail tiver conta, o código chega em instantes.'
-  } catch (e) {
-    setError('login.email', 'Erro ao enviar o código')
+  } catch (err) {
+    setError('login.email', traduzirErroAuth(err))
   } finally {
     loading.value = false
   }
@@ -81,14 +77,13 @@ async function solicitarCodigo() {
 
 async function confirmarCodigo() {
   clearError()
-  if (!codigoValor.value) return setError('login.codigo', 'Informe o código recebido')
+  if (!codigoValor.value.trim()) return setError('login.codigo', 'Informe o código recebido')
   codigoLoading.value = true
   try {
-    const { data } = await axios.post('/auth/codigo/verificar/', { email: loginForm.email, codigo: codigoValor.value })
-    salvarTokens(data.access, data.refresh)
+    await verifyLoginOtp(loginForm.email, codigoValor.value)
     await irERedirecionarPosLogin()
-  } catch (e) {
-    setError('login.codigo', 'Código inválido ou expirado')
+  } catch (err) {
+    setError('login.codigo', traduzirErroAuth(err, 'Código inválido ou expirado'))
   } finally {
     codigoLoading.value = false
   }
@@ -111,23 +106,23 @@ async function confirmarCodigo() {
     <div class="form-group">
       <label for="login-email">{{ loginMode === 'agencia' ? 'E-mail institucional' : 'E-mail' }}</label>
       <div v-if="errorField === 'login.email'" class="field-error">{{ errorMessage }}</div>
-      <input id="login-email" type="email" autocomplete="email" v-model="loginForm.email" placeholder="seu@email.com" @input="clearErrorForField('login.email')">
+      <input id="login-email" type="email" autocomplete="email" v-model="loginForm.email" placeholder="seu@email.com" @keyup.enter="!codigoModo ? handleLogin() : solicitarCodigo()" @input="clearErrorForField('login.email')">
     </div>
 
     <template v-if="!codigoModo">
       <div class="form-group">
         <label for="login-senha">Senha</label>
         <div v-if="errorField === 'login.password'" class="field-error">{{ errorMessage }}</div>
-        <input id="login-senha" type="password" autocomplete="current-password" v-model="loginForm.password" placeholder="••••••••" @input="clearErrorForField('login.password')">
+        <input id="login-senha" type="password" autocomplete="current-password" v-model="loginForm.password" placeholder="••••••••" @keyup.enter="handleLogin" @input="clearErrorForField('login.password')">
       </div>
       <div class="checkbox-group">
         <input type="checkbox" id="keepLogged" v-model="loginForm.keepLogged">
         <label for="keepLogged">Manter conectado</label>
       </div>
-      <button class="btn-primary" @click="handleLogin">{{ loginMode === 'agencia' ? 'Entrar como agência' : 'Entrar' }}</button>
+      <button class="btn-primary" :disabled="loading" @click="handleLogin">{{ loading ? 'Entrando...' : (loginMode === 'agencia' ? 'Entrar como agência' : 'Entrar') }}</button>
       <div class="login-extra-links">
         <router-link to="/esqueci-senha">Esqueceu a senha?</router-link>
-        <button class="link-inline" @click="trocarParaCodigo(true)">Entrar com código por e-mail</button>
+        <button type="button" class="link-inline" @click="trocarParaCodigo(true)">Entrar com código por e-mail</button>
       </div>
     </template>
 

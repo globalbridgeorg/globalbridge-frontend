@@ -1,19 +1,22 @@
 <script setup>
 import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from '@/services/axios'
+import { signUpConta, verifySignupOtp, resendSignupOtp } from '@/services/api'
+import { useContaAtual } from '@/composables/useContaAtual'
+import { traduzirErroAuth, ehRateLimitAuth } from '@/utils/authErrors'
 
 const emit = defineEmits(['voltar-login'])
 const router = useRouter()
+const { carregarConta } = useContaAtual()
 
 const steps = [
   { fields: ['email'], labels: ['E-mail'], placeholders: ['exemplo@dominio.com'], types: ['email'], label: 'E-mail' },
-  { fields: ['verificationCode'], labels: ['Código de verificação'], placeholders: ['000000'], types: ['text'], label: 'Código de verificação' },
   { fields: ['name'], labels: ['Nome completo'], placeholders: ['Seu nome'], types: ['text'], label: 'Dados pessoais' },
-  { fields: ['password', 'confirmPassword'], labels: ['Senha', 'Confirmar senha'], placeholders: ['Crie uma senha', 'Digite novamente'], types: ['password', 'password'], label: 'Senha' }
+  { fields: ['password', 'confirmPassword'], labels: ['Senha', 'Confirmar senha'], placeholders: ['Crie uma senha (mín. 8 caracteres)', 'Digite novamente'], types: ['password', 'password'], label: 'Senha' },
 ]
 
 const step = ref(1)
+const aguardandoConfirmacao = ref(false)
 const loading = ref(false)
 const processandoEtapa = ref(false)
 const errorField = ref('')
@@ -27,64 +30,37 @@ function clearError() { errorField.value = ''; errorMessage.value = '' }
 function clearErrorForField(field) { if (errorField.value === field) clearError() }
 function setError(field, message) { errorField.value = field; errorMessage.value = message; successMessage.value = '' }
 
-function goToStep(target) { if (target < 1 || target >= step.value) return; step.value = target; clearError() }
+function goToStep(target) {
+  if (aguardandoConfirmacao.value || target < 1 || target >= step.value) return
+  step.value = target
+  clearError()
+}
 function prevStep() { if (step.value > 1) { step.value--; clearError() } }
 function handleStepEnter() { step.value < steps.length ? nextStep() : handleRegister() }
 
-async function nextStep() {
+function nextStep() {
   clearError()
   const cur = currentStep.value
 
   for (const f of cur.fields) {
-    if (!registerData[f]) {
+    if (!registerData[f]?.trim()) {
       const label = cur.labels[cur.fields.indexOf(f)]
       setError(`register.${f}`, `Preencha ${label.toLowerCase()}`)
       return
     }
   }
 
-  if (cur.fields[0] === 'email') {
-    processandoEtapa.value = true
-    try {
-      await axios.post('/auth/cadastro/codigo/solicitar/', { email: registerData.email })
-    } catch (err) {
-      processandoEtapa.value = false
-      return setError('register.email', err.response?.data?.email?.[0] || err.response?.data?.detail || 'Não conseguimos enviar o código agora. Tente novamente.')
-    }
-    processandoEtapa.value = false
-  }
-
-  if (cur.fields[0] === 'verificationCode') {
-    processandoEtapa.value = true
-    try {
-      await axios.post('/auth/cadastro/codigo/verificar/', { email: registerData.email, codigo: registerData.verificationCode })
-    } catch (err) {
-      processandoEtapa.value = false
-      return setError('register.verificationCode', err.response?.data?.detail || 'Código inválido ou expirado.')
-    }
-    processandoEtapa.value = false
+  if (cur.fields[0] === 'email' && !registerData.email.includes('@')) {
+    return setError('register.email', 'Informe um e-mail válido')
   }
 
   if (step.value < steps.length) step.value++
 }
 
-async function reenviarCodigoCadastro() {
-  clearError()
-  processandoEtapa.value = true
-  try {
-    await axios.post('/auth/cadastro/codigo/solicitar/', { email: registerData.email })
-    successMessage.value = 'Código reenviado — confira seu e-mail.'
-  } catch (err) {
-    setError('register.verificationCode', err.response?.data?.email?.[0] || err.response?.data?.detail || 'Não conseguimos reenviar o código agora.')
-  } finally {
-    processandoEtapa.value = false
-  }
-}
-
 async function handleRegister() {
   clearError()
-  if (!registerData.email) return setError('register.email', 'Informe seu e-mail')
-  if (!registerData.name) return setError('register.name', 'Informe seu nome completo')
+  if (!registerData.email.trim()) return setError('register.email', 'Informe seu e-mail')
+  if (!registerData.name.trim()) return setError('register.name', 'Informe seu nome completo')
   if (!registerData.password) return setError('register.password', 'Crie uma senha')
   if (!registerData.confirmPassword) return setError('register.confirmPassword', 'Confirme sua senha')
   if (registerData.password !== registerData.confirmPassword) return setError('register.confirmPassword', 'As senhas não coincidem')
@@ -92,72 +68,159 @@ async function handleRegister() {
 
   loading.value = true
   try {
-    const res = await axios.post('/registro/', { email: registerData.email, name: registerData.name, password: registerData.password })
-    let { access, refresh } = res.data
-    if (!access || !refresh) {
-      const loginRes = await axios.post('/token/', { email: registerData.email, password: registerData.password })
-      ;({ access, refresh } = loginRes.data)
+    const data = await signUpConta({
+      email: registerData.email,
+      password: registerData.password,
+      name: registerData.name,
+    })
+
+    // Quando confirmação por e-mail está ativa e o e-mail já existe, o Supabase retorna identities vazio
+    if (data?.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+      step.value = 1
+      return setError('register.email', 'Este e-mail já está em uso. Tente fazer login.')
     }
-    localStorage.setItem('access_token', access); localStorage.setItem('refresh_token', refresh)
+
+    if (data?.session) {
+      await carregarConta(true)
+      router.push({ name: 'profile' })
+      return
+    }
+
+    aguardandoConfirmacao.value = true
+    successMessage.value = `Enviamos um código de confirmação para ${registerData.email.trim().toLowerCase()}.`
+  } catch (err) {
+    const msg = String(err?.message || '').toLowerCase()
+    if (msg.includes('already registered') || msg.includes('already exists')) {
+      step.value = 1
+      setError('register.email', 'Este e-mail já está em uso.')
+    } else if (ehRateLimitAuth(err)) {
+      setError('register.password', traduzirErroAuth(err))
+    } else if (msg.includes('password')) {
+      setError('register.password', 'A senha precisa ter pelo menos 8 caracteres.')
+    } else {
+      setError('register.password', 'Não foi possível criar sua conta agora. Tente novamente.')
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
+async function confirmarCodigoCadastro() {
+  clearError()
+  if (!registerData.verificationCode.trim()) {
+    return setError('register.verificationCode', 'Informe o código recebido no e-mail')
+  }
+  processandoEtapa.value = true
+  try {
+    await verifySignupOtp(registerData.email, registerData.verificationCode)
+    await carregarConta(true)
     router.push({ name: 'profile' })
   } catch (err) {
-    if (err.response?.data?.email) setError('register.email', 'Este e-mail já está em uso')
-    else if (err.response?.data?.password) setError('register.password', err.response.data.password[0])
-    else setError('register.email', 'Erro ao criar conta')
-  } finally { loading.value = false }
+    setError('register.verificationCode', traduzirErroAuth(err, 'Código inválido ou expirado.'))
+  } finally {
+    processandoEtapa.value = false
+  }
+}
+
+async function reenviarCodigoCadastro() {
+  clearError()
+  processandoEtapa.value = true
+  try {
+    await resendSignupOtp(registerData.email)
+    successMessage.value = 'Código reenviado — confira seu e-mail.'
+  } catch (err) {
+    setError('register.verificationCode', traduzirErroAuth(err, 'Não conseguimos reenviar o código agora.'))
+  } finally {
+    processandoEtapa.value = false
+  }
 }
 </script>
 
 <template>
   <div class="card-content">
-    <div class="stepper">
-      <div class="step-dots">
-        <button
-          v-for="(s, i) in steps"
-          :key="i"
-          type="button"
-          class="dot"
-          :class="{ active: step === i + 1, completed: step > i + 1 }"
-          :aria-current="step === i + 1 ? 'step' : undefined"
-          :aria-label="`Etapa ${i + 1}: ${s.label}`"
-          :disabled="i + 1 > step"
-          @click="goToStep(i + 1)"
-        ></button>
+    <template v-if="!aguardandoConfirmacao">
+      <div class="stepper">
+        <div class="step-dots">
+          <button
+            v-for="(s, i) in steps"
+            :key="i"
+            type="button"
+            class="dot"
+            :class="{ active: step === i + 1, completed: step > i + 1 }"
+            :aria-current="step === i + 1 ? 'step' : undefined"
+            :aria-label="`Etapa ${i + 1}: ${s.label}`"
+            :disabled="i + 1 > step"
+            @click="goToStep(i + 1)"
+          ></button>
+        </div>
+        <div class="step-info">
+          <span class="step-label">{{ currentStep.label }}</span>
+          <span class="step-count">Etapa {{ step }} de {{ steps.length }}</span>
+        </div>
       </div>
-      <div class="step-info">
-        <span class="step-label">{{ currentStep.label }}</span>
-        <span class="step-count">Etapa {{ step }} de {{ steps.length }}</span>
+
+      <div v-if="successMessage" class="field-success">{{ successMessage }}</div>
+
+      <div v-for="(field, index) in currentStep.fields" :key="field" class="form-group">
+        <label :for="`register-${field}`">{{ currentStep.labels[index] }}</label>
+        <div v-if="errorField === `register.${field}`" class="field-error">{{ errorMessage }}</div>
+        <input
+          :id="`register-${field}`"
+          :type="currentStep.types[index]"
+          v-model="registerData[field]"
+          :placeholder="currentStep.placeholders[index]"
+          @keyup.enter="handleStepEnter"
+          @input="clearErrorForField(`register.${field}`)"
+        >
       </div>
-    </div>
 
-    <div v-if="successMessage" class="field-success">{{ successMessage }}</div>
+      <div class="step-buttons">
+        <button v-if="step > 1" type="button" class="btn-secondary" :disabled="loading" @click="prevStep">Voltar</button>
+        <button v-if="step < steps.length" type="button" class="btn-primary" @click="nextStep">Próximo</button>
+        <button v-if="step === steps.length" type="button" class="btn-primary" :disabled="loading" @click="handleRegister">{{ loading ? 'Criando conta...' : 'Criar conta' }}</button>
+      </div>
+    </template>
 
-    <div v-for="(field, index) in currentStep.fields" :key="field" class="form-group">
-      <label :for="`register-${field}`">{{ currentStep.labels[index] }}</label>
-      <div v-if="errorField === `register.${field}`" class="field-error">{{ errorMessage }}</div>
-      <input
-        :id="`register-${field}`"
-        :type="currentStep.types[index]"
-        v-model="registerData[field]"
-        :placeholder="currentStep.placeholders[index]"
-        @keyup.enter="handleStepEnter"
-        @input="clearErrorForField(`register.${field}`)"
-      >
-    </div>
+    <template v-else>
+      <div class="stepper">
+        <div class="step-info">
+          <span class="step-label">Confirme seu e-mail</span>
+          <span class="step-count">Digite o código enviado ou clique no link recebido</span>
+        </div>
+      </div>
 
-    <div v-if="step === 2" class="verification-actions">
-      <button class="resend-link" :disabled="processandoEtapa" @click="reenviarCodigoCadastro">Reenviar código</button>
-    </div>
+      <div v-if="successMessage" class="field-success">{{ successMessage }}</div>
 
-    <div class="step-buttons">
-      <button v-if="step > 1" class="btn-secondary" :disabled="processandoEtapa" @click="prevStep">Voltar</button>
-      <button v-if="step < steps.length" class="btn-primary" :disabled="processandoEtapa" @click="nextStep">{{ processandoEtapa ? 'Enviando...' : 'Próximo' }}</button>
-      <button v-if="step === steps.length" class="btn-primary" :disabled="loading" @click="handleRegister">{{ loading ? 'Criando conta...' : 'Criar conta' }}</button>
-    </div>
+      <div class="form-group">
+        <label for="register-verificationCode">Código de verificação</label>
+        <div v-if="errorField === 'register.verificationCode'" class="field-error">{{ errorMessage }}</div>
+        <input
+          id="register-verificationCode"
+          type="text"
+          inputmode="numeric"
+          autocomplete="one-time-code"
+          maxlength="6"
+          v-model="registerData.verificationCode"
+          placeholder="000000"
+          @keyup.enter="confirmarCodigoCadastro"
+          @input="clearErrorForField('register.verificationCode')"
+        >
+      </div>
+
+      <div class="verification-actions">
+        <button type="button" class="resend-link" :disabled="processandoEtapa" @click="reenviarCodigoCadastro">Reenviar código</button>
+      </div>
+
+      <div class="step-buttons">
+        <button type="button" class="btn-primary" :disabled="processandoEtapa" @click="confirmarCodigoCadastro">
+          {{ processandoEtapa ? 'Confirmando...' : 'Confirmar conta' }}
+        </button>
+      </div>
+    </template>
 
     <div class="back-to-login">
       <span>Já possui uma conta?</span>
-      <button class="back-login-link" @click="emit('voltar-login')">Fazer Login</button>
+      <button type="button" class="back-login-link" @click="emit('voltar-login')">Fazer Login</button>
     </div>
   </div>
 </template>
