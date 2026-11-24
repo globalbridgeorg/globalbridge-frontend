@@ -321,11 +321,10 @@ function onDropSecao(index) {
   background: none;
   padding: 0;
   overflow: hidden;
-  transition: border-color 0.2s ease, transform 0.18s cubic-bezier(.16,1,.3,1);
+  transition: border-color 0.2s ease, background-color 0.2s ease;
 }
-.variant-thumb:hover { transform: translateY(-2px); }
-.variant-thumb:active { transform: scale(0.97); }
-.variant-thumb.active { border-color: var(--gb-magenta); transform: scale(1.02); }
+.variant-thumb:hover { border-color: rgba(176, 31, 176, 0.35); }
+.variant-thumb.active { border-color: var(--gb-magenta); }
 .variant-thumb.active .variant-name { color: var(--gb-magenta-strong); }
 
 .variant-thumb-inner {

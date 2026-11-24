@@ -1,18 +1,25 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import {
   signUpConta,
   verifySignupOtp,
   resendSignupOtp,
   enviarSolicitacaoAgencia,
 } from '@/services/api'
+import { prefersReducedMotion } from '@/composables/usePageTransition'
 import { useContaAtual } from '@/composables/useContaAtual'
 import { traduzirErroAuth } from '@/utils/authErrors'
 import SolicitarDadosAgencia from '@/components/business/solicitar/SolicitarDadosAgencia.vue'
 
+gsap.registerPlugin(ScrollTrigger)
+
 const router = useRouter()
 const { carregarConta } = useContaAtual()
+const viewRef = ref(null)
+let ctx
 
 const form = ref({
   nome: '',
@@ -139,10 +146,39 @@ async function reenviarCodigo() {
     enviando.value = false
   }
 }
+
+onMounted(() => {
+  if (prefersReducedMotion()) return
+  setTimeout(() => {
+    if (!viewRef.value) return
+    ctx = gsap.context(() => {
+      const tl = gsap.timeline({ defaults: { ease: 'power3.out', clearProps: 'transform,opacity' } })
+      tl.from('.hero .badge, .hero .gb-heading, .hero .hero-desc', {
+        opacity: 0,
+        y: 18,
+        duration: 0.5,
+        stagger: 0.08,
+      }).from('.card-form', { opacity: 0, y: 22, duration: 0.55 }, '-=0.25')
+
+      gsap.utils.toArray('.bloco').forEach((bloco) => {
+        gsap.from(bloco, {
+          opacity: 0,
+          y: 18,
+          duration: 0.48,
+          ease: 'power3.out',
+          clearProps: 'transform,opacity',
+          scrollTrigger: { trigger: bloco, start: 'top 88%' },
+        })
+      })
+    }, viewRef.value)
+  }, 260)
+})
+
+onBeforeUnmount(() => ctx?.revert())
 </script>
 
 <template>
-  <div class="solicitar-view gb-section">
+  <div ref="viewRef" class="solicitar-view gb-section">
     <div class="hero">
       <span class="badge">Conta business</span>
       <h1 class="gb-heading">Coloque sua<br />agência na GlobalBridge</h1>

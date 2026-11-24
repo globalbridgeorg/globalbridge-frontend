@@ -1,10 +1,14 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import gsap from 'gsap'
 import { supabase } from '@/services/supabase'
 import { atualizarSenha } from '@/services/api'
+import { prefersReducedMotion } from '@/composables/usePageTransition'
 
 const router = useRouter()
+const viewRef = ref(null)
+let ctx
 
 const verificando = ref(true)
 const linkValido = ref(false)
@@ -15,6 +19,26 @@ const erro = ref('')
 const sucesso = ref(false)
 
 let subscription = null
+
+function animar() {
+  if (prefersReducedMotion() || !viewRef.value) return
+  ctx?.revert()
+  ctx = gsap.context(() => {
+    gsap.from('.redefinir-view > *', {
+      opacity: 0,
+      y: 16,
+      duration: 0.45,
+      stagger: 0.06,
+      ease: 'power3.out',
+      clearProps: 'transform,opacity',
+    })
+  }, viewRef.value)
+}
+
+watch([verificando, sucesso], async () => {
+  await nextTick()
+  animar()
+})
 
 onMounted(async () => {
   const { data } = supabase.auth.onAuthStateChange((event, session) => {
@@ -30,10 +54,13 @@ onMounted(async () => {
     linkValido.value = true
   }
   verificando.value = false
+  await nextTick()
+  animar()
 })
 
 onUnmounted(() => {
   subscription?.unsubscribe()
+  ctx?.revert()
 })
 
 async function redefinir() {
@@ -55,7 +82,7 @@ async function redefinir() {
 </script>
 
 <template>
-  <div class="redefinir-view gb-section">
+  <div ref="viewRef" class="redefinir-view gb-section">
     <span class="eyebrow">Redefinição de senha</span>
 
     <template v-if="verificando">

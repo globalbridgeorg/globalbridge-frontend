@@ -1,14 +1,43 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, nextTick, onMounted, onBeforeUnmount } from 'vue'
+import gsap from 'gsap'
 import { getMinhaSolicitacaoAgencia } from '@/services/api'
+import { prefersReducedMotion } from '@/composables/usePageTransition'
 import { useContaAtual } from '@/composables/useContaAtual'
 
 const { estado: conta, carregarConta } = useContaAtual()
+
+const viewRef = ref(null)
+let ctx
 
 const carregando = ref(true)
 const erro = ref(false)
 const precisaLogin = ref(false)
 const solicitacao = ref(null)
+
+function animarEntrada() {
+  if (prefersReducedMotion() || !viewRef.value) return
+  ctx?.revert()
+  ctx = gsap.context(() => {
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out', clearProps: 'transform,opacity' } })
+    const icone = viewRef.value.querySelector('.icone-status')
+    if (icone) tl.from(icone, { opacity: 0, y: 14, duration: 0.45 })
+    tl.from('.eyebrow, .gb-heading, .desc, .estado-tela > *', {
+      opacity: 0,
+      y: 16,
+      duration: 0.45,
+      stagger: 0.07,
+    }, icone ? '-=0.25' : 0)
+    const etapas = viewRef.value.querySelectorAll('.etapa')
+    if (etapas.length) {
+      tl.from(etapas, { opacity: 0, x: -16, duration: 0.42, stagger: 0.1 }, '-=0.2')
+    }
+    const acoes = viewRef.value.querySelector('.acoes')
+    if (acoes) {
+      tl.from(acoes, { opacity: 0, y: 12, duration: 0.35 }, '-=0.18')
+    }
+  }, viewRef.value)
+}
 
 async function carregar() {
   carregando.value = true
@@ -19,6 +48,8 @@ async function carregar() {
   if (!atual.logado) {
     precisaLogin.value = true
     carregando.value = false
+    await nextTick()
+    animarEntrada()
     return
   }
 
@@ -34,16 +65,19 @@ async function carregar() {
     erro.value = true
   } finally {
     carregando.value = false
+    await nextTick()
+    animarEntrada()
   }
 }
 
 const dataFormatada = (iso) => iso ? new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' }) : ''
 
 onMounted(carregar)
+onBeforeUnmount(() => ctx?.revert())
 </script>
 
 <template>
-  <div class="analise-view gb-section">
+  <div ref="viewRef" class="analise-view gb-section">
     <div v-if="carregando" class="estado-tela">Carregando status do seu pedido...</div>
 
     <div v-else-if="precisaLogin" class="estado-tela">

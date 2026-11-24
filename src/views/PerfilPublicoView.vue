@@ -1,16 +1,23 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, nextTick, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { getPerfilPublico } from '@/services/api'
+import { prefersReducedMotion } from '@/composables/usePageTransition'
 import { useContaAtual } from '@/composables/useContaAtual'
 import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
+
+gsap.registerPlugin(ScrollTrigger)
 
 const route = useRoute()
 const router = useRouter()
 const { estado: conta, carregarConta } = useContaAtual()
+const viewRef = ref(null)
 const perfil = ref(null)
 const carregando = ref(true)
 const erro = ref(false)
+let ctx
 
 function iniciaisDe(nome) {
   if (!nome) return ''
@@ -26,6 +33,39 @@ const iniciais = computed(() => iniciaisDe(perfil.value?.name))
 const foto = computed(() => perfil.value?.foto_url || perfil.value?.avatar_url || null)
 const ehAgencia = computed(() => perfil.value?.tipo === 'agencia')
 
+function animarEntrada() {
+  if (prefersReducedMotion() || !viewRef.value) return
+  ctx?.revert()
+  ctx = gsap.context(() => {
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out', clearProps: 'transform,opacity' } })
+    const hero = viewRef.value.querySelector('.hero-a, .hero-ag')
+    if (hero) tl.from(hero, { opacity: 0, y: 20, duration: 0.55 })
+
+    const stats = viewRef.value.querySelectorAll('.stat-box, .ag-stat-box')
+    if (stats.length) {
+      tl.from(stats, { opacity: 0, y: 16, duration: 0.45, stagger: 0.06 }, '-=0.28')
+    }
+
+    const agCard = viewRef.value.querySelector('.agencia-card-link')
+    if (agCard) {
+      tl.from(agCard, { opacity: 0, y: 18, duration: 0.5 }, '-=0.25')
+    }
+
+    const reviews = viewRef.value.querySelectorAll('.review-card')
+    if (reviews.length) {
+      gsap.from(reviews, {
+        opacity: 0,
+        y: 22,
+        duration: 0.5,
+        stagger: 0.07,
+        ease: 'power3.out',
+        clearProps: 'transform,opacity',
+        scrollTrigger: { trigger: '.review-cards', start: 'top 85%' },
+      })
+    }
+  }, viewRef.value)
+}
+
 async function carregarPerfil() {
   carregando.value = true
   erro.value = false
@@ -37,21 +77,30 @@ async function carregarPerfil() {
   }
 
   try {
-    perfil.value = await getPerfilPublico(route.params.username)
+    const [data] = await Promise.all([
+      getPerfilPublico(route.params.username),
+      new Promise((r) => setTimeout(r, 260)),
+    ])
+    perfil.value = data
   } catch (e) {
     console.error('Erro ao buscar perfil:', e)
     erro.value = true
   } finally {
     carregando.value = false
+    if (!erro.value && perfil.value) {
+      await nextTick()
+      animarEntrada()
+    }
   }
 }
 
 onMounted(carregarPerfil)
 watch(() => route.params.username, carregarPerfil)
+onBeforeUnmount(() => ctx?.revert())
 </script>
 
 <template>
-  <div class="perfil-publico-view gb-section">
+  <div ref="viewRef" class="perfil-publico-view gb-section">
     <div v-if="carregando" class="estado-skeleton" aria-hidden="true">
       <div class="skeleton-hero"></div>
     </div>

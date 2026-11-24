@@ -1,12 +1,17 @@
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
+import gsap from 'gsap'
 import { getProgramas, criarPlano, atualizarPlano, removerPlano } from '@/services/api'
+import { prefersReducedMotion } from '@/composables/usePageTransition'
 
 const props = defineProps({
   agenciaId: { type: [Number, String], required: true },
   planos: { type: Array, required: true },
 })
 const emit = defineEmits(['atualizar'])
+
+const formRef = ref(null)
+let ctxForm
 
 const programas = ref([])
 const carregandoProgramas = ref(true)
@@ -122,6 +127,22 @@ async function excluirPlano(plano) {
   }
 }
 
+watch(formAberto, async (aberto) => {
+  if (!aberto || prefersReducedMotion()) return
+  await nextTick()
+  if (!formRef.value) return
+  ctxForm?.revert()
+  ctxForm = gsap.context(() => {
+    gsap.from(formRef.value, {
+      opacity: 0,
+      y: -12,
+      duration: 0.35,
+      ease: 'power3.out',
+      clearProps: 'transform,opacity',
+    })
+  })
+})
+
 onMounted(async () => {
   try {
     programas.value = await getProgramas()
@@ -131,6 +152,8 @@ onMounted(async () => {
     carregandoProgramas.value = false
   }
 })
+
+onBeforeUnmount(() => ctxForm?.revert())
 </script>
 
 <template>
@@ -148,7 +171,7 @@ onMounted(async () => {
     <p v-if="feedback" class="msg-ok" role="status">{{ feedback }}</p>
     <p v-if="erro && !formAberto" class="msg-erro" role="alert">{{ erro }}</p>
 
-    <form v-if="formAberto" class="plano-form" @submit.prevent="salvarPlano">
+    <form v-if="formAberto" ref="formRef" class="plano-form" @submit.prevent="salvarPlano">
       <div class="plano-form-head">
         <strong>{{ editandoId ? 'Editar programa' : 'Novo programa' }}</strong>
       </div>

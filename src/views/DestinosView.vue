@@ -1,6 +1,8 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, nextTick, onMounted, onBeforeUnmount } from 'vue'
+import gsap from 'gsap'
 import { getPaises } from '@/services/api'
+import { prefersReducedMotion } from '@/composables/usePageTransition'
 import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
 
 // Mapa em projeção ortográfica de cada continente (Wikimedia Commons, uso
@@ -33,9 +35,21 @@ const REGIOES = [
   }
 ]
 
+const viewRef = ref(null)
 const contagens = ref({})
 const carregando = ref(true)
 const erro = ref(false)
+let ctx
+
+function animarEntrada() {
+  if (prefersReducedMotion() || !viewRef.value) return
+  ctx?.revert()
+  ctx = gsap.context(() => {
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out', clearProps: 'transform,opacity' } })
+    tl.from('.hero > *', { opacity: 0, y: 18, duration: 0.5, stagger: 0.08 })
+      .from('.continente-card-link', { opacity: 0, y: 24, duration: 0.52, stagger: 0.065 }, '-=0.25')
+  }, viewRef.value)
+}
 
 async function carregarContagens() {
   carregando.value = true
@@ -53,6 +67,10 @@ async function carregarContagens() {
     erro.value = true
   } finally {
     carregando.value = false
+    if (!erro.value) {
+      await nextTick()
+      animarEntrada()
+    }
   }
 }
 
@@ -61,10 +79,11 @@ const regioesComContagem = computed(() =>
 )
 
 onMounted(carregarContagens)
+onBeforeUnmount(() => ctx?.revert())
 </script>
 
 <template>
-  <div class="destinos-view gb-section">
+  <div ref="viewRef" class="destinos-view gb-section">
     <div class="hero">
       <span class="hero-eyebrow">Explore o mapa</span>
       <h1 class="gb-heading">Por onde você <span class="accent">quer ir</span>?</h1>
