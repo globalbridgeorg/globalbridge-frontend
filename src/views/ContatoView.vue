@@ -1,7 +1,14 @@
 <script setup>
-import { ref, reactive, nextTick } from 'vue'
+import { ref, reactive, nextTick, onMounted, onBeforeUnmount } from 'vue'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { enviarContato } from '@/services/api'
+import { prefersReducedMotion } from '@/composables/usePageTransition'
 
+gsap.registerPlugin(ScrollTrigger)
+
+const viewRef = ref(null)
+let ctx
 const publico = ref('estudante')
 const formShell = ref(null)
 const enviando = ref(false)
@@ -96,10 +103,79 @@ async function pick(v) {
     setTimeout(cleanup, 320)
   }
 }
+
+onMounted(() => {
+  if (prefersReducedMotion()) return
+  setTimeout(() => {
+    if (!viewRef.value) return
+    ctx = gsap.context(() => {
+      gsap.from('.hero > *', {
+        opacity: 0,
+        y: 20,
+        duration: 0.55,
+        stagger: 0.08,
+        ease: 'power3.out',
+        clearProps: 'transform,opacity',
+      })
+
+      gsap.from('.historia > *', {
+        opacity: 0,
+        y: 24,
+        duration: 0.6,
+        stagger: 0.12,
+        ease: 'power3.out',
+        clearProps: 'transform,opacity',
+        scrollTrigger: { trigger: '.historia', start: 'top 84%' },
+      })
+
+      gsap.from('.fork .fork-panel', {
+        opacity: 0,
+        y: 22,
+        duration: 0.55,
+        stagger: 0.12,
+        ease: 'power3.out',
+        clearProps: 'transform,opacity',
+        scrollTrigger: { trigger: '.fork', start: 'top 85%' },
+      })
+
+      gsap.from('.form-wrap .form-head, .form-wrap .segmented, .form-wrap .form-shell', {
+        opacity: 0,
+        y: 20,
+        duration: 0.5,
+        stagger: 0.09,
+        ease: 'power3.out',
+        clearProps: 'transform,opacity',
+        scrollTrigger: { trigger: '.form-wrap', start: 'top 84%' },
+      })
+
+      gsap.from('.canais .canal', {
+        opacity: 0,
+        y: 18,
+        duration: 0.48,
+        stagger: 0.08,
+        ease: 'power3.out',
+        clearProps: 'transform,opacity',
+        scrollTrigger: { trigger: '.canais', start: 'top 88%' },
+      })
+
+      gsap.from('.faq .faq-item', {
+        opacity: 0,
+        y: 16,
+        duration: 0.45,
+        stagger: 0.07,
+        ease: 'power3.out',
+        clearProps: 'transform,opacity',
+        scrollTrigger: { trigger: '.faq', start: 'top 85%' },
+      })
+    }, viewRef.value)
+  }, 260)
+})
+
+onBeforeUnmount(() => ctx?.revert())
 </script>
 
 <template>
-  <div class="contato">
+  <div ref="viewRef" class="contato">
     <section class="gb-section hero">
       <div class="eyebrow"><span class="eyebrow-label">Contato</span></div>
       <h1 class="gb-heading hero-heading">Quem quer que você seja,<br />a gente escuta</h1>

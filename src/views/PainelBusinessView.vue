@@ -1,7 +1,9 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
+import gsap from 'gsap'
 import { getAgenciaDetalhe, getPainelAgencia, getPaises } from '@/services/api'
+import { prefersReducedMotion } from '@/composables/usePageTransition'
 import { useAuth } from '@/composables/useAuth'
 import { useContaAtual } from '@/composables/useContaAtual'
 import { useContaBusiness } from '@/composables/useContaBusiness'
@@ -18,6 +20,7 @@ const { logout } = useAuth()
 const { estado: conta } = useContaAtual()
 const { carregando, erro, carregarConta } = useContaBusiness('Não conseguimos carregar seu painel agora.')
 
+const pageRef = ref(null)
 const agencia = ref(null)
 const painel = ref(null)
 const todosPaises = ref([])
@@ -117,11 +120,127 @@ function navegarChecklist(destino) {
   }
 }
 
-onMounted(carregar)
+let ctx
+let ctxAba
+
+function animarAba() {
+  if (prefersReducedMotion() || !panelShell.value) return
+  ctxAba?.revert()
+  ctxAba = gsap.context(() => {
+    const cards = panelShell.value.querySelectorAll('.card')
+    if (cards.length) {
+      gsap.from(cards, {
+        opacity: 0,
+        y: 18,
+        duration: 0.45,
+        stagger: 0.06,
+        ease: 'power3.out',
+        clearProps: 'transform,opacity',
+      })
+    }
+
+    const barras = panelShell.value.querySelectorAll('.completude-preenchido, .linha-nota-preenchido')
+    if (barras.length) {
+      gsap.from(barras, {
+        scaleX: 0,
+        transformOrigin: 'left center',
+        duration: 0.75,
+        stagger: 0.05,
+        delay: 0.15,
+        ease: 'power3.out',
+        clearProps: 'transform',
+      })
+    }
+
+    const itensLista = panelShell.value.querySelectorAll(
+      '.completude-item, .plano-item, .chip-pais, .chip-tag, .linha-avaliacao, .linha-favorito, .linha-info',
+    )
+    if (itensLista.length) {
+      gsap.from(itensLista, {
+        opacity: 0,
+        x: -10,
+        duration: 0.36,
+        stagger: 0.035,
+        delay: 0.1,
+        ease: 'power2.out',
+        clearProps: 'transform,opacity',
+      })
+    }
+
+    panelShell.value.querySelectorAll('.stat-numero[data-valor]').forEach((el) => {
+      const bruto = el.getAttribute('data-valor')
+      if (bruto === '' || bruto === null) return
+      const alvo = Number(bruto)
+      if (!Number.isFinite(alvo) || alvo <= 0) return
+      const decimais = Number(el.getAttribute('data-decimal') || 0)
+      const obj = { v: 0 }
+      gsap.to(obj, {
+        v: alvo,
+        duration: 0.75,
+        delay: 0.12,
+        ease: 'power2.out',
+        onUpdate: () => {
+          el.textContent = decimais ? obj.v.toFixed(decimais) : String(Math.round(obj.v))
+        },
+        onComplete: () => {
+          el.textContent = decimais ? String(alvo) : String(Math.round(alvo))
+        },
+      })
+    })
+
+    const pctEl = panelShell.value.querySelector('.completude-percentual[data-percentual]')
+    if (pctEl) {
+      const alvoPct = Number(pctEl.getAttribute('data-percentual'))
+      if (Number.isFinite(alvoPct) && alvoPct > 0) {
+        const obj = { v: 0 }
+        gsap.to(obj, {
+          v: alvoPct,
+          duration: 0.75,
+          delay: 0.15,
+          ease: 'power2.out',
+          onUpdate: () => { pctEl.textContent = `${Math.round(obj.v)}%` },
+          onComplete: () => { pctEl.textContent = `${alvoPct}%` },
+        })
+      }
+    }
+  }, panelShell.value)
+}
+
+function animarEntrada() {
+  if (prefersReducedMotion() || !pageRef.value) return
+  ctx?.revert()
+  ctx = gsap.context(() => {
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out', clearProps: 'transform,opacity' } })
+    tl.from('.top-banner span', { opacity: 0, x: -22, duration: 0.48 })
+      .from('.agency-identity', { opacity: 0, y: 16, duration: 0.45 }, '-=0.3')
+      .from('.agency-actions > *', { opacity: 0, y: 12, duration: 0.36, stagger: 0.06 }, '-=0.3')
+      .from('.side-nav', { opacity: 0, x: -16, duration: 0.42 }, '-=0.28')
+      .from('.side-nav .side-item', { opacity: 0, x: -8, duration: 0.3, stagger: 0.04 }, '-=0.28')
+  }, pageRef.value)
+  animarAba()
+}
+
+watch(secao, async () => {
+  await nextTick()
+  animarAba()
+})
+
+onMounted(async () => {
+  await carregar()
+  if (agencia.value && painel.value) {
+    await nextTick()
+    animarEntrada()
+  }
+})
+
+onBeforeUnmount(() => {
+  ctx?.revert()
+  ctxAba?.revert()
+})
 </script>
 
 <template>
-  <div class="painel-page">
+  <div ref="pageRef" class="painel-page">
     <div class="top-banner"><span>Painel da agência</span></div>
 
     <div class="content gb-section">

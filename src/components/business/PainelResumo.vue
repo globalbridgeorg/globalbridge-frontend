@@ -17,19 +17,19 @@ function destinoDoItem(texto) {
   <!-- Estatísticas -->
   <div class="grid-stats">
     <div class="card stat">
-      <span class="stat-numero">{{ painel.stats.nota ?? '—' }}</span>
+      <span class="stat-numero" :data-valor="painel.stats.nota ?? ''" data-decimal="1">{{ painel.stats.nota ?? '—' }}</span>
       <span class="stat-label">Nota média · {{ painel.stats.total_avaliacoes }} avaliaç{{ painel.stats.total_avaliacoes === 1 ? 'ão' : 'ões' }}</span>
     </div>
     <div class="card stat">
-      <span class="stat-numero">{{ painel.stats.favoritos }}</span>
+      <span class="stat-numero" :data-valor="painel.stats.favoritos">{{ painel.stats.favoritos }}</span>
       <span class="stat-label">Favoritaram · {{ painel.stats.favoritos_30_dias }} nos últimos 30 dias</span>
     </div>
     <div class="card stat">
-      <span class="stat-numero">{{ painel.stats.programas }}</span>
+      <span class="stat-numero" :data-valor="painel.stats.programas">{{ painel.stats.programas }}</span>
       <span class="stat-label">Programas cadastrados</span>
     </div>
     <div class="card stat">
-      <span class="stat-numero">{{ painel.stats.paises }}</span>
+      <span class="stat-numero" :data-valor="painel.stats.paises">{{ painel.stats.paises }}</span>
       <span class="stat-label">Países atendidos</span>
     </div>
   </div>
@@ -49,7 +49,7 @@ function destinoDoItem(texto) {
     <div class="card">
       <div class="completude-head">
         <h2 class="card-titulo">Completude da página</h2>
-        <span class="completude-percentual">{{ painel.completude.percentual }}%</span>
+        <span class="completude-percentual" :data-percentual="painel.completude.percentual">{{ painel.completude.percentual }}%</span>
       </div>
       <div class="completude-barra"><div class="completude-preenchido" :style="{ width: painel.completude.percentual + '%' }"></div></div>
       <div v-for="item in painel.completude.itens" :key="item.texto" class="completude-item">

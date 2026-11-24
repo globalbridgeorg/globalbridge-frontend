@@ -1,16 +1,80 @@
 <script setup>
-import { onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { prefersReducedMotion } from '@/composables/usePageTransition'
 import { scrollToTarget } from '@/utils/lenis'
 import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
 import ButtonComponent from '@/components/common/ButtonComponent.vue'
 
+gsap.registerPlugin(ScrollTrigger)
+
 const route = useRoute()
+const viewRef = ref(null)
+let ctx
 
 onMounted(() => {
-  if (!route.hash) return
-  setTimeout(() => scrollToTarget(route.hash), 400)
+  if (route.hash) {
+    setTimeout(() => scrollToTarget(route.hash), 400)
+  }
+  if (prefersReducedMotion()) return
+  setTimeout(() => {
+    if (!viewRef.value) return
+    ctx = gsap.context(() => {
+      gsap.from('.hero > *', {
+        opacity: 0,
+        y: 20,
+        duration: 0.55,
+        stagger: 0.08,
+        ease: 'power3.out',
+        clearProps: 'transform,opacity',
+      })
+
+      gsap.from('.tiles .tile', {
+        opacity: 0,
+        y: 28,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: 'power3.out',
+        clearProps: 'transform,opacity',
+        scrollTrigger: { trigger: '.tiles', start: 'top 84%' },
+      })
+
+      gsap.from('.detalhes > div', {
+        opacity: 0,
+        y: 20,
+        duration: 0.5,
+        stagger: 0.09,
+        ease: 'power3.out',
+        clearProps: 'transform,opacity',
+        scrollTrigger: { trigger: '.detalhes', start: 'top 86%' },
+      })
+
+      gsap.from('.fork .fork-panel', {
+        opacity: 0,
+        y: 24,
+        duration: 0.55,
+        stagger: 0.12,
+        ease: 'power3.out',
+        clearProps: 'transform,opacity',
+        scrollTrigger: { trigger: '.fork', start: 'top 84%' },
+      })
+
+      gsap.from('.final-inner > *', {
+        opacity: 0,
+        y: 20,
+        duration: 0.5,
+        stagger: 0.1,
+        ease: 'power3.out',
+        clearProps: 'transform,opacity',
+        scrollTrigger: { trigger: '.final-cta', start: 'top 85%' },
+      })
+    }, viewRef.value)
+  }, 260)
 })
+
+onBeforeUnmount(() => ctx?.revert())
 
 const tiles = [
   {
@@ -51,7 +115,7 @@ const paraAgencias = [
 </script>
 
 <template>
-  <div class="como-funciona">
+  <div ref="viewRef" class="como-funciona">
     <section class="gb-section hero">
       <SectionEyebrow label="Como funciona" />
       <h1 class="gb-heading hero-heading">Três decisões,<br />um caminho claro</h1>

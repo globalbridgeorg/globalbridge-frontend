@@ -1,12 +1,32 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
+import gsap from 'gsap'
 import { solicitarRedefinicaoSenha } from '@/services/api'
+import { prefersReducedMotion } from '@/composables/usePageTransition'
 import { traduzirErroAuth } from '@/utils/authErrors'
+
+const viewRef = ref(null)
+let ctx
 
 const email = ref('')
 const enviado = ref(false)
 const loading = ref(false)
 const erro = ref('')
+
+function animar() {
+  if (prefersReducedMotion() || !viewRef.value) return
+  ctx?.revert()
+  ctx = gsap.context(() => {
+    gsap.from('.esqueci-view > *', {
+      opacity: 0,
+      y: 16,
+      duration: 0.45,
+      stagger: 0.06,
+      ease: 'power3.out',
+      clearProps: 'transform,opacity',
+    })
+  }, viewRef.value)
+}
 
 async function enviar() {
   erro.value = ''
@@ -21,10 +41,18 @@ async function enviar() {
     loading.value = false
   }
 }
+
+watch(enviado, async () => {
+  await nextTick()
+  animar()
+})
+
+onMounted(animar)
+onBeforeUnmount(() => ctx?.revert())
 </script>
 
 <template>
-  <div class="esqueci-view gb-section">
+  <div ref="viewRef" class="esqueci-view gb-section">
     <span class="eyebrow">Redefinição de senha</span>
 
     <template v-if="!enviado">

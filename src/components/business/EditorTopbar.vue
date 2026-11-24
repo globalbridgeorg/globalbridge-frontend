@@ -155,12 +155,11 @@ const { logout } = useAuth()
   letter-spacing: 0.06em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.1s ease;
+  transition: background 0.15s ease;
 }
 
 .btn-publicar:disabled { opacity: 0.6; cursor: default; }
 .btn-publicar:not(:disabled):hover { background: var(--gb-magenta-strong); }
-.btn-publicar:not(:disabled):active { transform: scale(0.97); }
 
 @media (max-width: 768px) {
   .topbar {

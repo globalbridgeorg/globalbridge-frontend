@@ -1,6 +1,7 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
+import gsap from 'gsap'
 import {
   getAdminDados,
   getDocumentoAssinadoUrl,
@@ -10,6 +11,7 @@ import {
   recusarPaisAdicional,
   marcarMensagemLida,
 } from '@/services/api'
+import { prefersReducedMotion } from '@/composables/usePageTransition'
 import { useContaAtual } from '@/composables/useContaAtual'
 import { useAuth } from '@/composables/useAuth'
 import { sanitizarUrl } from '@/utils/url'
@@ -18,6 +20,10 @@ import { formatarData } from '@/components/business/formatarData'
 const router = useRouter()
 const { estado: conta, carregarConta } = useContaAtual()
 const { logout } = useAuth()
+
+const pageRef = ref(null)
+let ctx
+let ctxAba
 
 const carregando = ref(true)
 const erro = ref('')
@@ -150,6 +156,50 @@ async function alternarLida(msg) {
   }
 }
 
+function animarLista() {
+  if (prefersReducedMotion() || !pageRef.value) return
+  ctxAba?.revert()
+  ctxAba = gsap.context(() => {
+    const itens = pageRef.value.querySelectorAll('.lista .item-card, .lista .vazio')
+    if (itens.length) {
+      gsap.from(itens, {
+        opacity: 0,
+        y: 18,
+        duration: 0.44,
+        stagger: 0.06,
+        ease: 'power3.out',
+        clearProps: 'transform,opacity',
+      })
+    }
+  }, pageRef.value)
+}
+
+function animarEntrada() {
+  if (prefersReducedMotion() || !pageRef.value) return
+  ctx?.revert()
+  ctx = gsap.context(() => {
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out', clearProps: 'transform,opacity' } })
+    tl.from('.top-banner span', { opacity: 0, x: -22, duration: 0.48 })
+      .from('.admin-header', { opacity: 0, y: 16, duration: 0.42 }, '-=0.3')
+      .from('.tabs .tab-btn', { opacity: 0, y: 10, duration: 0.34, stagger: 0.05 }, '-=0.25')
+  }, pageRef.value)
+  animarLista()
+}
+
+watch(aba, async () => {
+  await nextTick()
+  animarLista()
+})
+
+watch([erro, feedback], async ([e, f]) => {
+  if ((!e && !f) || prefersReducedMotion() || !pageRef.value) return
+  await nextTick()
+  const alertas = pageRef.value.querySelectorAll('.alerta')
+  if (alertas.length) {
+    gsap.from(alertas, { opacity: 0, y: -8, duration: 0.28, ease: 'power2.out', clearProps: 'transform,opacity' })
+  }
+})
+
 onMounted(async () => {
   const atual = await carregarConta(true)
   if (!atual.logado) {
@@ -160,11 +210,20 @@ onMounted(async () => {
     await carregarTudo()
   }
   carregando.value = false
+  if (atual.is_admin) {
+    await nextTick()
+    animarEntrada()
+  }
+})
+
+onBeforeUnmount(() => {
+  ctx?.revert()
+  ctxAba?.revert()
 })
 </script>
 
 <template>
-  <div class="admin-page">
+  <div ref="pageRef" class="admin-page">
     <div class="top-banner"><span>Painel administrativo</span></div>
 
     <div class="content gb-section">

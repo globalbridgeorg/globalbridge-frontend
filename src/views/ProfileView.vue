@@ -1,7 +1,9 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
+import gsap from 'gsap'
 import { getMinhasAvaliacoes, removerAvaliacao } from '@/services/api'
+import { prefersReducedMotion } from '@/composables/usePageTransition'
 import PhotoComponent from '@/components/profile/PhotoComponent.vue'
 import NotificationBanner from '@/components/profile/NotificationBanner.vue'
 import ProfileSideNav from '@/components/profile/ProfileSideNav.vue'
@@ -17,6 +19,10 @@ const router = useRouter()
 const { logout } = useAuth()
 const { estado: conta, carregarConta } = useContaAtual()
 const { favoritos, carregarFavoritos } = useFavoritos()
+
+const pageRef = ref(null)
+let ctx
+let ctxAba
 
 const loading = ref(true)
 const error = ref('')
@@ -69,6 +75,47 @@ async function excluirAvaliacao(id) {
   }
 }
 
+function animarPainel() {
+  if (prefersReducedMotion() || !panelShell.value) return
+  ctxAba?.revert()
+  ctxAba = gsap.context(() => {
+    const panel = panelShell.value.querySelector('.panel')
+    if (panel) {
+      gsap.from(panel, { opacity: 0, y: 16, duration: 0.42, ease: 'power3.out', clearProps: 'transform,opacity' })
+    }
+    const itens = panelShell.value.querySelectorAll('.field, .review-item, .fav-table tbody tr, .danger-zone')
+    if (itens.length) {
+      gsap.from(itens, {
+        opacity: 0,
+        y: 10,
+        duration: 0.34,
+        stagger: 0.04,
+        delay: 0.08,
+        ease: 'power2.out',
+        clearProps: 'transform,opacity',
+      })
+    }
+  }, panelShell.value)
+}
+
+function animarEntrada() {
+  if (prefersReducedMotion() || !pageRef.value) return
+  ctx?.revert()
+  ctx = gsap.context(() => {
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out', clearProps: 'transform,opacity' } })
+    tl.from('.top-banner span', { opacity: 0, x: -22, duration: 0.48 })
+      .from('.profile-header', { opacity: 0, y: 16, duration: 0.45 }, '-=0.3')
+      .from('.side-nav', { opacity: 0, x: -16, duration: 0.4 }, '-=0.26')
+      .from('.side-nav .side-item', { opacity: 0, x: -8, duration: 0.3, stagger: 0.04 }, '-=0.25')
+  }, pageRef.value)
+  animarPainel()
+}
+
+watch(section, async () => {
+  await nextTick()
+  animarPainel()
+})
+
 onMounted(async () => {
   try {
     const atual = await carregarConta(true)
@@ -106,11 +153,19 @@ onMounted(async () => {
   } catch {
     // sessionStorage indisponível
   }
+
+  await nextTick()
+  animarEntrada()
+})
+
+onBeforeUnmount(() => {
+  ctx?.revert()
+  ctxAba?.revert()
 })
 </script>
 
 <template>
-  <div class="profile-page">
+  <div ref="pageRef" class="profile-page">
     <div class="top-banner"><span>Minha conta</span></div>
 
     <div class="content gb-section">

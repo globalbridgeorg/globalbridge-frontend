@@ -118,11 +118,16 @@ async function publicar() {
 let ctx
 function animarEntrada() {
   if (prefersReducedMotion()) return
+  ctx?.revert()
   ctx = gsap.context(() => {
-    const tl = gsap.timeline({ defaults: { ease: 'power2.out', clearProps: 'transform,opacity' } })
-    tl.from('.sidebar', { opacity: 0, x: -16, duration: 0.4 })
-      .from('.phone', { opacity: 0, y: 20, scale: 0.98, duration: 0.5 }, '-=0.3')
-      .from('.sidebar .secao-bloco', { opacity: 0, y: 10, duration: 0.35, stagger: 0.04 }, '-=0.35')
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out', clearProps: 'transform,opacity' } })
+    tl.from('.topbar-info', { opacity: 0, x: -18, duration: 0.42 })
+      .from('.topbar-actions > *', { opacity: 0, y: 10, duration: 0.34, stagger: 0.05 }, '-=0.28')
+      .from('.sidebar', { opacity: 0, x: -18, duration: 0.45 }, '-=0.25')
+      .from('.sidebar .secao-bloco, .sidebar .secao-collapsed', { opacity: 0, y: 10, duration: 0.34, stagger: 0.035 }, '-=0.32')
+      .from('.preview-toolbar', { opacity: 0, y: -10, duration: 0.35 }, '-=0.35')
+      .from('.phone', { opacity: 0, y: 22, duration: 0.5 }, '-=0.3')
+      .from('.phone .p-block', { opacity: 0, y: 12, duration: 0.35, stagger: 0.05 }, '-=0.25')
   })
 }
 
