@@ -84,7 +84,8 @@ onBeforeUnmount(() => ctx?.revert())
             <router-link
               v-if="dep.autor_username"
               :to="{ name: 'perfil-publico', params: { username: dep.autor_username } }"
-              class="autor-link"
+              class="avatar-link"
+              :aria-label="`Ver perfil de ${dep.autor}`"
             >
               <span class="avatar">
                 <img
@@ -96,28 +97,33 @@ onBeforeUnmount(() => ctx?.revert())
                 />
                 <span v-else aria-hidden="true">{{ iniciaisDe(dep.autor) }}</span>
               </span>
-              <strong>{{ dep.autor }}</strong>
             </router-link>
-            <div v-else class="autor-link">
-              <span class="avatar">
-                <img
-                  v-if="dep.autor_foto && !fotosComErro[dep.id]"
-                  :src="dep.autor_foto"
-                  :alt="dep.autor"
-                  loading="lazy"
-                  @error="fotosComErro[dep.id] = true"
-                />
-                <span v-else aria-hidden="true">{{ iniciaisDe(dep.autor) }}</span>
-              </span>
-              <strong>{{ dep.autor }}</strong>
-            </div>
+            <span v-else class="avatar">
+              <img
+                v-if="dep.autor_foto && !fotosComErro[dep.id]"
+                :src="dep.autor_foto"
+                :alt="dep.autor"
+                loading="lazy"
+                @error="fotosComErro[dep.id] = true"
+              />
+              <span v-else aria-hidden="true">{{ iniciaisDe(dep.autor) }}</span>
+            </span>
 
-            <router-link
-              :to="{ name: 'agencia', params: { id: dep.agencia_id } }"
-              class="curso"
-            >
-              {{ dep.agencia_nome }}<template v-if="dep.pais"> · {{ dep.pais }}</template>
-            </router-link>
+            <div class="autor-meta">
+              <router-link
+                v-if="dep.autor_username"
+                :to="{ name: 'perfil-publico', params: { username: dep.autor_username } }"
+                class="autor-nome"
+              >{{ dep.autor }}</router-link>
+              <strong v-else class="autor-nome">{{ dep.autor }}</strong>
+
+              <router-link
+                :to="{ name: 'agencia', params: { id: dep.agencia_id } }"
+                class="curso"
+              >
+                {{ dep.agencia_nome }}<template v-if="dep.pais"> · {{ dep.pais }}</template>
+              </router-link>
+            </div>
           </div>
         </article>
       </div>
@@ -167,18 +173,20 @@ onBeforeUnmount(() => ctx?.revert())
 
 .autor {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  align-items: center;
+  gap: 12px;
   padding-top: 14px;
   border-top: 1px solid var(--gb-purple-deep-16);
+  margin-top: auto;
+  min-height: 70px;
+  box-sizing: border-box;
 }
 
-.autor-link {
+.avatar-link {
   display: inline-flex;
-  align-items: center;
-  gap: 11px;
+  flex-shrink: 0;
   text-decoration: none;
-  width: fit-content;
+  border-radius: 50%;
 }
 
 .avatar {
@@ -204,22 +212,33 @@ onBeforeUnmount(() => ctx?.revert())
   display: block;
 }
 
-.autor strong {
+.autor-meta {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.autor-nome {
   display: block;
   font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1.25;
   color: var(--gb-dark);
+  text-decoration: none;
+  width: fit-content;
   transition: color 0.15s ease;
 }
 
-.autor-link:hover strong {
+.autor-nome:hover {
   color: var(--gb-magenta);
 }
 
 .autor .curso {
-  display: inline-block;
-  margin-left: 51px;
-  margin-top: -8px;
+  display: block;
   font-size: 0.78rem;
+  line-height: 1.35;
   color: var(--gb-mauve-muted);
   text-decoration: none;
   width: fit-content;
@@ -243,7 +262,7 @@ onBeforeUnmount(() => ctx?.revert())
 .sk-body { width: 100%; height: 14px; }
 .sk-body.short { width: 72%; }
 .sk-avatar { background: rgba(46, 10, 46, 0.08); }
-.sk-meta { display: flex; flex-direction: column; gap: 6px; margin-left: 51px; margin-top: -36px; }
+.sk-meta { display: flex; flex-direction: column; gap: 6px; flex: 1; }
 .sk-name { width: 110px; height: 12px; }
 .sk-sub { width: 150px; height: 10px; }
 
