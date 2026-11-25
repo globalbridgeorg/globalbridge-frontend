@@ -188,7 +188,8 @@ onBeforeUnmount(() => {
 
 .btn-stage {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
 
   /* reserva espaço do ícone da direita no estado normal */
   padding-right: calc(var(--icon-size) + var(--gap));
@@ -203,13 +204,14 @@ onBeforeUnmount(() => {
 
 .btn-icon {
   position: absolute;
-  top: 50%;
+  top: 0;
+  bottom: 0;
+  margin: auto 0;
   left: 0;
   width: var(--icon-size);
   height: var(--icon-size);
   display: block;
   object-fit: contain;
-  transform: translateY(-50%);
   will-change: transform, opacity;
   pointer-events: none;
 }
