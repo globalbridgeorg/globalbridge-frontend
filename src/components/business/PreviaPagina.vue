@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue'
+import { sanitizarUrl } from '@/utils/url'
 
 defineProps({
   agencia: { type: Object, required: true },
@@ -127,7 +128,10 @@ function formatarPreco(valor) {
           <span class="p-eyebrow">Equipe</span>
           <div class="p-equipe-grid">
             <div v-for="(m, i) in conteudo.equipe.membros" :key="i" class="p-card p-equipe-card">
-              <div class="p-avatar-sm">{{ iniciaisDe(m.nome) || '?' }}</div>
+              <div
+                class="p-avatar-sm"
+                :style="sanitizarUrl(m.foto) ? { backgroundImage: `url(${sanitizarUrl(m.foto)})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}"
+              >{{ sanitizarUrl(m.foto) ? '' : (iniciaisDe(m.nome) || '?') }}</div>
               <strong>{{ m.nome || 'Nome' }}</strong>
               <span>{{ m.cargo || 'Cargo' }}</span>
             </div>
