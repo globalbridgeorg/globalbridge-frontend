@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, watch, onBeforeUnmount } from 'vue'
 import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
 import { iniciaisDe } from '@/utils/iniciais'
 import { sanitizarUrl } from '@/utils/url'
@@ -12,6 +12,49 @@ const props = defineProps({
 // Conteúdo das seções "simples" do editor de blocos (ver BusinessView) —
 // sempre um objeto, mesmo pra agências que nunca abriram o editor.
 const conteudo = computed(() => props.agencia.conteudo_blocos || {})
+
+// Lightbox da galeria para ver cada foto inteira (sem o recorte quadrado 1:1)
+const indiceLightbox = ref(null)
+const galeriaLista = computed(() => props.agencia.galeria || [])
+const fotoLightbox = computed(() =>
+  indiceLightbox.value !== null ? galeriaLista.value[indiceLightbox.value] ?? null : null
+)
+
+function abrirLightbox(idx) {
+  indiceLightbox.value = idx
+}
+
+function fecharLightbox() {
+  indiceLightbox.value = null
+}
+
+function navegarLightbox(delta) {
+  const total = galeriaLista.value.length
+  if (!total || indiceLightbox.value === null) return
+  indiceLightbox.value = (indiceLightbox.value + delta + total) % total
+}
+
+function aoTeclarLightbox(e) {
+  if (indiceLightbox.value === null) return
+  if (e.key === 'Escape') fecharLightbox()
+  else if (e.key === 'ArrowRight') navegarLightbox(1)
+  else if (e.key === 'ArrowLeft') navegarLightbox(-1)
+}
+
+watch(indiceLightbox, (aberto) => {
+  if (aberto !== null) {
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', aoTeclarLightbox)
+  } else {
+    document.body.style.overflow = ''
+    window.removeEventListener('keydown', aoTeclarLightbox)
+  }
+})
+
+onBeforeUnmount(() => {
+  document.body.style.overflow = ''
+  window.removeEventListener('keydown', aoTeclarLightbox)
+})
 
 function linkWhatsapp(numero, mensagem) {
   const somenteDigitos = (numero || '').replace(/\D/g, '')
@@ -34,8 +77,60 @@ function videoEmbedUrl(url) {
     <SectionEyebrow label="Galeria" />
     <h2 class="gb-heading">Conheça um<br />pouco mais</h2>
     <div class="galeria-grid-publica reveal-grid">
-      <img v-for="img in agencia.galeria" :key="img.id" :src="img.url" alt="" loading="lazy">
+      <button
+        v-for="(img, idx) in agencia.galeria"
+        :key="img.id"
+        type="button"
+        class="galeria-thumb"
+        :aria-label="`Abrir foto ${idx + 1} de ${agencia.galeria.length} em tamanho inteiro`"
+        @click="abrirLightbox(idx)"
+      >
+        <img :src="img.url" :alt="`Foto ${idx + 1} de ${agencia.nome}`" loading="lazy">
+      </button>
     </div>
+
+    <Teleport to="body">
+      <Transition name="lightbox-fade">
+        <div
+          v-if="fotoLightbox"
+          class="lightbox-overlay"
+          role="dialog"
+          aria-modal="true"
+          :aria-label="`Foto ${indiceLightbox + 1} de ${galeriaLista.length} — ${agencia.nome}`"
+          data-lenis-prevent
+          @click.self="fecharLightbox"
+        >
+          <button type="button" class="lightbox-btn lightbox-close" aria-label="Fechar foto" @click="fecharLightbox">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+
+          <button
+            v-if="galeriaLista.length > 1"
+            type="button"
+            class="lightbox-btn lightbox-prev"
+            aria-label="Foto anterior"
+            @click="navegarLightbox(-1)"
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+
+          <div class="lightbox-stage" @click.self="fecharLightbox">
+            <img :src="fotoLightbox.url" :alt="`Foto ${indiceLightbox + 1} de ${agencia.nome}`" class="lightbox-img" />
+            <span v-if="galeriaLista.length > 1" class="lightbox-counter">{{ indiceLightbox + 1 }} / {{ galeriaLista.length }}</span>
+          </div>
+
+          <button
+            v-if="galeriaLista.length > 1"
+            type="button"
+            class="lightbox-btn lightbox-next"
+            aria-label="Próxima foto"
+            @click="navegarLightbox(1)"
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+      </Transition>
+    </Teleport>
   </section>
 
   <section v-else-if="bloco.tipo === 'video' && conteudo.video?.url" class="video-secao reveal-section">
@@ -143,11 +238,147 @@ function videoEmbedUrl(url) {
   grid-template-columns: repeat(4, 1fr);
   gap: 12px;
 }
-.galeria-grid-publica img {
-  width: 100%;
-  aspect-ratio: 1;
-  object-fit: cover;
+.galeria-thumb {
+  display: block;
+  padding: 0;
+  border: none;
+  background: #ece9e3;
   border-radius: 12px;
+  overflow: hidden;
+  aspect-ratio: 1;
+  cursor: zoom-in;
+  position: relative;
+}
+.galeria-thumb:focus-visible {
+  outline: 2px solid var(--gb-magenta);
+  outline-offset: 2px;
+}
+.galeria-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease, filter 0.25s ease;
+}
+.galeria-thumb:hover img {
+  transform: scale(1.03);
+  filter: brightness(0.94);
+}
+
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(18, 12, 22, 0.92);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 68px;
+}
+
+.lightbox-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.lightbox-img {
+  max-width: min(90vw, 1280px);
+  max-height: 82vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+  display: block;
+}
+
+.lightbox-counter {
+  font-family: var(--gb-font-eyebrow);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.12);
+  padding: 5px 12px;
+  border-radius: 999px;
+}
+
+.lightbox-btn {
+  position: fixed;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(23, 17, 26, 0.72);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.lightbox-btn:hover {
+  background: var(--gb-magenta);
+  border-color: var(--gb-magenta);
+}
+
+.lightbox-btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.lightbox-close {
+  top: 20px;
+  right: 20px;
+}
+
+.lightbox-prev {
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.lightbox-next {
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.lightbox-fade-enter-active,
+.lightbox-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.lightbox-fade-enter-from,
+.lightbox-fade-leave-to {
+  opacity: 0;
+}
+
+@media (max-width: 768px) {
+  .lightbox-overlay {
+    padding: 64px 16px 24px;
+  }
+  .lightbox-prev {
+    left: 10px;
+  }
+  .lightbox-next {
+    right: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .galeria-thumb img,
+  .lightbox-fade-enter-active,
+  .lightbox-fade-leave-active {
+    transition: none;
+  }
 }
 
 .video-embed-wrap {
