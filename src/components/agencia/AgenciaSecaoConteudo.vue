@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref, watch, onBeforeUnmount } from 'vue'
 import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
+import FaqComponent from '@/components/home/FaqComponent.vue'
 import { iniciaisDe } from '@/utils/iniciais'
 import { sanitizarUrl } from '@/utils/url'
 
@@ -12,6 +13,16 @@ const props = defineProps({
 // Conteúdo das seções "simples" do editor de blocos (ver BusinessView) —
 // sempre um objeto, mesmo pra agências que nunca abriram o editor.
 const conteudo = computed(() => props.agencia.conteudo_blocos || {})
+
+const faqsFormatados = computed(() =>
+  (conteudo.value.faq?.perguntas || [])
+    .filter((item) => item?.pergunta || item?.resposta)
+    .map((item, i) => ({
+      id: i + 1,
+      question: item.pergunta,
+      answer: item.resposta,
+    }))
+)
 
 // Lightbox da galeria para ver cada foto inteira (sem o recorte quadrado 1:1)
 const indiceLightbox = ref(null)
@@ -166,14 +177,12 @@ function videoEmbedUrl(url) {
     </div>
   </section>
 
-  <section v-else-if="bloco.tipo === 'faq' && conteudo.faq?.perguntas?.length" class="faq-secao reveal-section">
-    <SectionEyebrow label="Perguntas frequentes" />
-    <h2 class="gb-heading">Dúvidas<br />comuns</h2>
-    <details v-for="(item, i) in conteudo.faq.perguntas" :key="i" class="faq-item">
-      <summary>{{ item.pergunta }}</summary>
-      <p>{{ item.resposta }}</p>
-    </details>
-  </section>
+  <FaqComponent
+    v-else-if="bloco.tipo === 'faq' && faqsFormatados.length"
+    class="faq-secao reveal-section"
+    title="Dúvidas comuns"
+    :faqs="faqsFormatados"
+  />
 
   <section v-else-if="bloco.tipo === 'localizacao'" class="localizacao-secao reveal-section">
     <SectionEyebrow label="Localização" />
@@ -445,23 +454,8 @@ function videoEmbedUrl(url) {
 .certificacao-card strong { color: var(--gb-dark); font-size: 0.92rem; }
 .certificacao-card span { color: var(--gb-ink-faint); font-size: 0.82rem; }
 
-.faq-item {
-  border-top: 1px solid var(--gb-purple-deep-16);
-  padding: 16px 0;
-  max-width: 720px;
-}
-.faq-item:last-child { border-bottom: 1px solid var(--gb-purple-deep-16); }
-.faq-item summary {
-  cursor: pointer;
-  font-weight: 700;
-  font-size: 0.94rem;
-  color: var(--gb-dark);
-}
-.faq-item p {
-  margin: 10px 0 0;
-  font-size: 0.9rem;
-  color: var(--gb-ink-soft);
-  line-height: 1.6;
+.faq-section.faq-secao {
+  padding: 48px 0 0;
 }
 
 .localizacao-endereco {
