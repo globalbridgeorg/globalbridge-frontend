@@ -111,35 +111,35 @@ onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
           <nav class="mobile-nav-links">
             <router-link to="/destinos" @click="toggleMenu">
               <span>Destinos</span>
-              <svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="#FF7DEE" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12L12 4M12 4H5M12 4V11" /></svg>
+              <i class="fi fi-rr-arrow-up-right mobile-nav-arrow" aria-hidden="true"></i>
             </router-link>
             <router-link to="/mapview" @click="toggleMenu">
               <span>Meu destino</span>
-              <svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="#FF7DEE" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12L12 4M12 4H5M12 4V11" /></svg>
+              <i class="fi fi-rr-arrow-up-right mobile-nav-arrow" aria-hidden="true"></i>
             </router-link>
             <router-link to="/como-funciona" @click="toggleMenu">
               <span>Como funciona</span>
-              <svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="#FF7DEE" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12L12 4M12 4H5M12 4V11" /></svg>
+              <i class="fi fi-rr-arrow-up-right mobile-nav-arrow" aria-hidden="true"></i>
             </router-link>
             <router-link to="/contato" @click="toggleMenu">
               <span>Contato</span>
-              <svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="#FF7DEE" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12L12 4M12 4H5M12 4V11" /></svg>
+              <i class="fi fi-rr-arrow-up-right mobile-nav-arrow" aria-hidden="true"></i>
             </router-link>
           </nav>
 
           <div class="mobile-nav-bottom">
             <button v-if="isInstallable" type="button" class="mobile-nav-sub" @click="installPWA">
-              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="rgba(251,246,231,0.65)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12" /><path d="M8 11l4 4 4-4" /><path d="M4 19h16" /></svg>
+              <i class="fi fi-rr-download" aria-hidden="true"></i>
               Instalar o app
             </button>
             <a class="mobile-nav-sub" href="mailto:contato@globalbridge.com">
-              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="rgba(251,246,231,0.65)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v12H4z" /><path d="M4 7l8 6 8-6" /></svg>
+              <i class="fi fi-rr-envelope" aria-hidden="true"></i>
               contato@globalbridge.com
             </a>
 
             <router-link :to="buttonLink" class="mobile-nav-cta" @click="toggleMenu">
               {{ isLoggedIn ? (conta.tipo === 'agencia' ? 'Abrir painel' : 'Ver meu perfil') : 'Entrar na conta' }}
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12L12 4M12 4H5M12 4V11" /></svg>
+              <i class="fi fi-rr-arrow-up-right" aria-hidden="true"></i>
             </router-link>
           </div>
         </div>
@@ -375,6 +375,20 @@ onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
   font-size: 1.55rem;
   letter-spacing: -0.02em;
   color: #fff;
+}
+
+.mobile-nav-arrow {
+  font-size: 18px;
+  color: var(--gb-accent-light);
+}
+
+.mobile-nav-sub .fi {
+  font-size: 18px;
+  color: rgba(251, 246, 231, 0.65);
+}
+
+.mobile-nav-cta .fi {
+  font-size: 15px;
 }
 
 .mobile-nav-bottom {

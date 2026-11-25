@@ -248,7 +248,7 @@ onBeforeUnmount(() => ctx?.revert())
         <span class="eyebrow">04 · Prova de que a agência é real</span>
         <label class="dropzone" :class="{ erro: camposComErro.documento }">
           <input type="file" accept=".pdf,image/png,image/jpeg,image/webp" aria-label="Anexar documento de registro" class="sr-only-input" @change="handleDocumento">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gb-magenta)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/></svg>
+          <i class="fi fi-rr-document dropzone-doc-icon" aria-hidden="true"></i>
           <span>{{ documento ? documento.name : 'Anexar documento de registro (CNPJ ou equivalente — PDF, JPG ou PNG, até 10 MB)' }}</span>
         </label>
       </div>
@@ -454,6 +454,11 @@ onBeforeUnmount(() => ctx?.revert())
 
 .checkbox-confirm.erro {
   color: #dc2626;
+}
+
+.dropzone-doc-icon {
+  font-size: 18px;
+  color: var(--gb-magenta);
 }
 
 .erro-msg {

@@ -30,10 +30,10 @@ const profile = ref({ id: null, name: '', email: '', username: '', avatar_url: '
 
 const section = ref('perfil')
 const sidebarItems = [
-  { key: 'perfil', label: 'Perfil', image: '/images/profile_perfil.png' },
-  { key: 'seguranca', label: 'Segurança', image: '/images/profile_secure.png' },
-  { key: 'favoritos', label: 'Favoritos', image: '/images/profile_favorite.png' },
-  { key: 'avaliacoes', label: 'Avaliações', image: '/images/profile_saved.png' },
+  { key: 'perfil', label: 'Perfil', icon: 'fi-rr-user' },
+  { key: 'seguranca', label: 'Segurança', icon: 'fi-rr-shield-check' },
+  { key: 'favoritos', label: 'Favoritos', icon: 'fi-rr-heart' },
+  { key: 'avaliacoes', label: 'Avaliações', icon: 'fi-rr-star' },
 ]
 
 const reviews = ref([])
@@ -231,7 +231,7 @@ onBeforeUnmount(() => {
                         </div>
                       </div>
                       <div class="review-stars" role="img" :aria-label="`${rev.nota} de 5 estrelas`">
-                        <svg v-for="n in 5" :key="n" viewBox="0 0 24 24" :class="{ empty: n > rev.nota }" aria-hidden="true"><path d="M12 17.3l-5.3 3 1.4-6-4.6-4 6-.5L12 4l2.5 5.8 6 .5-4.6 4 1.4 6z"/></svg>
+                        <i v-for="n in 5" :key="n" class="fi" :class="n > rev.nota ? 'fi-rr-star empty' : 'fi-sr-star'" aria-hidden="true"></i>
                       </div>
                       <p class="review-text">{{ rev.comentario }}</p>
                     </div>
@@ -582,16 +582,13 @@ onBeforeUnmount(() => {
   margin-bottom: 6px;
 }
 
-.review-stars svg {
-  width: 14px;
-  height: 14px;
-  fill: var(--gb-orange);
-  stroke: var(--gb-orange);
+.review-stars .fi {
+  font-size: 13px;
+  color: var(--gb-orange);
 }
 
-.review-stars svg.empty {
-  fill: none;
-  stroke: var(--gb-purple-deep-16);
+.review-stars .fi.empty {
+  color: var(--gb-purple-deep-16);
 }
 
 .review-text {

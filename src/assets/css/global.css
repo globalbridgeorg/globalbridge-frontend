@@ -141,3 +141,17 @@ body {
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.35);
 }
+
+/* Padronização visual dos ícones Flaticon UIcons — evita desalinhamento
+   de baseline dentro de botões, abas e listas flex. */
+i.fi {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+i.fi::before {
+  line-height: 1;
+}

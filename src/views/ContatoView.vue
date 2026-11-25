@@ -200,15 +200,15 @@ onBeforeUnmount(() => ctx?.revert())
           <h3>Fale com a gente sobre</h3>
           <div class="reason-list">
             <div class="reason-item">
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7" /></svg>
+              <i class="fi fi-rr-check" aria-hidden="true"></i>
               <p>Dúvidas sobre um destino, programa ou como comparar países no mapa.</p>
             </div>
             <div class="reason-item">
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7" /></svg>
+              <i class="fi fi-rr-check" aria-hidden="true"></i>
               <p>Problemas com uma agência parceira ou algo que não bateu com o combinado.</p>
             </div>
             <div class="reason-item">
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7" /></svg>
+              <i class="fi fi-rr-check" aria-hidden="true"></i>
               <p>Sugestões de melhoria pra plataforma — a gente lê tudo.</p>
             </div>
           </div>
@@ -219,15 +219,15 @@ onBeforeUnmount(() => ctx?.revert())
           <h3 class="on-dark">Fale com a gente sobre</h3>
           <div class="reason-list">
             <div class="reason-item">
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7" /></svg>
+              <i class="fi fi-rr-check" aria-hidden="true"></i>
               <p>Cadastro de programas e verificação pra aparecer na plataforma.</p>
             </div>
             <div class="reason-item">
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7" /></svg>
+              <i class="fi fi-rr-check" aria-hidden="true"></i>
               <p>Parcerias institucionais e acesso ao login business.</p>
             </div>
             <div class="reason-item">
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7" /></svg>
+              <i class="fi fi-rr-check" aria-hidden="true"></i>
               <p>Suporte técnico ou dúvida sobre uma avaliação recebida.</p>
             </div>
           </div>
@@ -293,21 +293,21 @@ onBeforeUnmount(() => ctx?.revert())
 
     <section class="gb-section canais">
       <div class="canal">
-        <div class="canal-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v12H4z" /><path d="M4 7l8 6 8-6" /></svg></div>
+        <div class="canal-icon"><i class="fi fi-rr-envelope" aria-hidden="true"></i></div>
         <div>
           <h3>E-mail</h3>
           <a href="mailto:contato@globalbridge.com">contato@globalbridge.com</a>
         </div>
       </div>
       <div class="canal">
-        <div class="canal-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="4" /><circle cx="12" cy="12" r="3.2" /><circle cx="16.2" cy="7.8" r="0.6" fill="currentColor" /></svg></div>
+        <div class="canal-icon"><i class="fi fi-brands-instagram" aria-hidden="true"></i></div>
         <div>
           <h3>Instagram</h3>
           <p>@globalbridge <span class="soon">(em breve)</span></p>
         </div>
       </div>
       <div class="canal">
-        <div class="canal-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3" /><path d="M8 11v5M8 8.2v.1M12 16v-3.2c0-1.2 1-2 2-2s2 .8 2 2V16" /></svg></div>
+        <div class="canal-icon"><i class="fi fi-brands-linkedin" aria-hidden="true"></i></div>
         <div>
           <h3>LinkedIn</h3>
           <p>GlobalBridge <span class="soon">(em breve)</span></p>
@@ -527,16 +527,14 @@ onBeforeUnmount(() => ctx?.revert())
   align-items: flex-start;
 }
 
-.reason-item svg {
-  width: 17px;
-  height: 17px;
-  stroke: var(--gb-magenta);
-  flex-shrink: 0;
-  margin-top: 2px;
+.reason-item .fi {
+  font-size: 15px;
+  color: var(--gb-magenta);
+  margin-top: 3px;
 }
 
-.fork-panel.dark .reason-item svg {
-  stroke: var(--gb-pink);
+.fork-panel.dark .reason-item .fi {
+  color: var(--gb-pink);
 }
 
 .reason-item p {
@@ -747,10 +745,9 @@ onBeforeUnmount(() => ctx?.revert())
   flex-shrink: 0;
 }
 
-.canal-icon svg {
-  width: 19px;
-  height: 19px;
-  stroke: var(--gb-magenta-strong);
+.canal-icon .fi {
+  font-size: 18px;
+  color: var(--gb-magenta-strong);
 }
 
 .canal h3 {

@@ -96,9 +96,9 @@ onBeforeUnmount(() => ctx?.revert())
 
     <template v-else-if="solicitacao">
       <div class="icone-status" :class="solicitacao.status">
-        <svg v-if="solicitacao.status === 'pendente'" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
-        <svg v-else-if="solicitacao.status === 'aprovado'" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.5 2.5 5-5"/></svg>
-        <svg v-else width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+        <i v-if="solicitacao.status === 'pendente'" class="fi fi-rr-clock" aria-hidden="true"></i>
+        <i v-else-if="solicitacao.status === 'aprovado'" class="fi fi-rr-check-circle" aria-hidden="true"></i>
+        <i v-else class="fi fi-rr-cross-circle" aria-hidden="true"></i>
       </div>
 
       <span class="eyebrow">{{ solicitacao.nome }}</span>
@@ -174,6 +174,7 @@ onBeforeUnmount(() => ctx?.revert())
   margin: 0 auto 24px;
   background: rgba(176, 31, 176, 0.1);
   color: var(--gb-magenta-strong);
+  font-size: 34px;
 }
 
 .icone-status.aprovado {

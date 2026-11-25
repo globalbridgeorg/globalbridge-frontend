@@ -27,7 +27,7 @@ const { favoritos, toggleFavorito } = useFavoritos()
             </td>
             <td>{{ fav.subtitulo || '—' }}</td>
             <td>{{ new Date(fav.criado_em).toLocaleDateString('pt-BR') }}</td>
-            <td><button type="button" class="fav-remove" :aria-label="`Remover ${fav.nome} dos favoritos`" @click="toggleFavorito(fav.tipo, fav.objeto_id)"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke-width="1.8" stroke-linecap="round"/></svg></button></td>
+            <td><button type="button" class="fav-remove" :aria-label="`Remover ${fav.nome} dos favoritos`" @click="toggleFavorito(fav.tipo, fav.objeto_id)"><i class="fi fi-rr-cross-small" aria-hidden="true"></i></button></td>
           </tr>
         </tbody>
       </table>
@@ -99,9 +99,8 @@ const { favoritos, toggleFavorito } = useFavoritos()
   padding: 4px;
 }
 
-.fav-remove svg {
-  width: 16px;
-  height: 16px;
-  stroke: var(--gb-ink-faint);
+.fav-remove .fi {
+  font-size: 16px;
+  color: var(--gb-ink-faint);
 }
 </style>

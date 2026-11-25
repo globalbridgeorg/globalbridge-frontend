@@ -103,7 +103,10 @@ onBeforeUnmount(() => marqueeTween?.kill())
 
       <div class="footer-bottom">
         <span>© 2026 GlobalBridge®</span>
-        <span class="footer-legal">Termos e privacidade em breve</span>
+        <span class="footer-legal">
+          Termos e privacidade em breve ·
+          <a href="https://www.flaticon.com/uicons" target="_blank" rel="noopener noreferrer" class="footer-credit">Ícones por Flaticon</a>
+        </span>
       </div>
     </div>
 
@@ -258,6 +261,12 @@ onBeforeUnmount(() => marqueeTween?.kill())
   border-top: 1px solid rgba(23, 17, 26, 0.15);
   font-size: 0.8rem;
   color: var(--gb-mauve-muted);
+}
+
+.footer-credit {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 /* --- Marquee infinito --- */

@@ -2,6 +2,9 @@ import { createApp } from 'vue'
 
 import App from './App.vue'
 import router from './router'
+import '@flaticon/flaticon-uicons/css/regular/rounded.css'
+import '@flaticon/flaticon-uicons/css/solid/rounded.css'
+import '@flaticon/flaticon-uicons/css/brands/all.css'
 import './assets/css/global.css'
 
 const app = createApp(App)

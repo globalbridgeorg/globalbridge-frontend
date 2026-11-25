@@ -48,7 +48,7 @@ async function enviarPedidoPais() {
     <div class="card-head">
       <h2 class="card-titulo">Países atendidos</h2>
       <button type="button" class="btn-adicionar" :aria-expanded="formularioAberto" aria-controls="form-pais-solicitar" @click="formularioAberto = !formularioAberto">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        <i class="fi fi-rr-plus-small" aria-hidden="true"></i>
         Solicitar novo país
       </button>
     </div>
@@ -61,7 +61,7 @@ async function enviarPedidoPais() {
       <span v-for="pais in painel.paises_pendentes" :key="'p' + pais.id" class="chip-pais pendente">
         <span class="chip-sigla pendente">{{ pais.sigla }}</span>{{ pais.nome }}
         <span class="chip-pendente-tag">
-          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
+          <i class="fi fi-rr-clock" aria-hidden="true"></i>
           Pendente
         </span>
       </span>

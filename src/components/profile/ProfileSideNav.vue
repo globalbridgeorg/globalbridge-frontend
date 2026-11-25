@@ -18,8 +18,9 @@ const emit = defineEmits(['select', 'logout'])
       :aria-current="section === item.key ? 'true' : undefined"
       @click="emit('select', item.key)"
     >
-      <div class="side-thumb">
-        <img :src="item.image" alt="" />
+      <div class="side-thumb" aria-hidden="true">
+        <i v-if="item.icon" class="fi" :class="item.icon"></i>
+        <img v-else-if="item.image" :src="item.image" alt="" />
       </div>
       <div class="side-text">
         <span class="side-label">{{ item.label }}</span>
@@ -28,7 +29,7 @@ const emit = defineEmits(['select', 'logout'])
     </button>
 
     <button type="button" class="side-logout" @click="emit('logout')">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      <i class="fi fi-rr-sign-out-alt" aria-hidden="true"></i>
       Sair da conta
     </button>
   </div>
@@ -98,6 +99,15 @@ const emit = defineEmits(['select', 'logout'])
   overflow: hidden;
   flex-shrink: 0;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gb-dark);
+  font-size: 17px;
+}
+
+.side-item.active .side-thumb {
+  color: #fff;
 }
 
 .side-thumb img {

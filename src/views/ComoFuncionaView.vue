@@ -168,7 +168,7 @@ const paraAgencias = [
           <h2>O que você encontra por aqui</h2>
           <div class="feature-list">
             <div v-for="f in features" :key="f.titulo" class="feature-item">
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7" /></svg>
+              <i class="fi fi-rr-check" aria-hidden="true"></i>
               <div><h3>{{ f.titulo }}</h3><p>{{ f.texto }}</p></div>
             </div>
           </div>
@@ -182,7 +182,7 @@ const paraAgencias = [
           <h2 class="on-dark">Receba estudantes verificados</h2>
           <div class="biz-list">
             <div v-for="b in paraAgencias" :key="b.titulo" class="biz-item">
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7" /></svg>
+              <i class="fi fi-rr-check" aria-hidden="true"></i>
               <div><h3>{{ b.titulo }}</h3><p>{{ b.texto }}</p></div>
             </div>
           </div>
@@ -494,20 +494,16 @@ const paraAgencias = [
   align-items: flex-start;
 }
 
-.feature-item svg {
-  width: 18px;
-  height: 18px;
-  stroke: var(--gb-magenta);
-  flex-shrink: 0;
-  margin-top: 2px;
+.feature-item .fi {
+  font-size: 16px;
+  color: var(--gb-magenta);
+  margin-top: 3px;
 }
 
-.biz-item svg {
-  width: 18px;
-  height: 18px;
-  stroke: var(--gb-pink);
-  flex-shrink: 0;
-  margin-top: 2px;
+.biz-item .fi {
+  font-size: 16px;
+  color: var(--gb-pink);
+  margin-top: 3px;
 }
 
 .feature-item h3,
