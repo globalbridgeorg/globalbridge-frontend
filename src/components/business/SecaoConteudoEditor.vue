@@ -62,14 +62,17 @@ function removerItem(tipoBloco, campo, index) {
 
   <!-- Equipe -->
   <div v-else-if="tipo === 'equipe'" class="bloco-conteudo">
-    <div v-for="(membro, i) in conteudo.equipe.membros" :key="i" class="item-lista">
-      <input type="text" v-model="membro.nome" placeholder="Nome" class="campo-input" :aria-label="`Nome da pessoa ${i + 1} da equipe`">
-      <input type="text" v-model="membro.cargo" placeholder="Cargo" class="campo-input" :aria-label="`Cargo da pessoa ${i + 1} da equipe`">
-      <button class="btn-remover-item" @click="removerItem('equipe', 'membros', i)" :aria-label="`Remover ${membro.nome || 'esta pessoa'} da equipe`">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M6 18L18 6"/></svg>
-      </button>
+    <div v-for="(membro, i) in conteudo.equipe.membros" :key="i" class="item-lista item-lista-coluna">
+      <div class="item-lista">
+        <input type="text" v-model="membro.nome" placeholder="Nome" class="campo-input" :aria-label="`Nome da pessoa ${i + 1} da equipe`">
+        <input type="text" v-model="membro.cargo" placeholder="Cargo" class="campo-input" :aria-label="`Cargo da pessoa ${i + 1} da equipe`">
+        <button class="btn-remover-item" @click="removerItem('equipe', 'membros', i)" :aria-label="`Remover ${membro.nome || 'esta pessoa'} da equipe`">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M6 18L18 6"/></svg>
+        </button>
+      </div>
+      <input type="url" v-model="membro.foto" placeholder="URL da foto (opcional, https://...)" class="campo-input" :aria-label="`Foto da pessoa ${i + 1} da equipe`">
     </div>
-    <button class="btn-add-item" @click="adicionarItem('equipe', 'membros', { nome: '', cargo: '' })">+ Adicionar pessoa</button>
+    <button class="btn-add-item" @click="adicionarItem('equipe', 'membros', { nome: '', cargo: '', foto: '' })">+ Adicionar pessoa</button>
   </div>
 
   <!-- Certificações e parcerias -->
@@ -154,7 +157,7 @@ function removerItem(tipoBloco, campo, index) {
   justify-content: center;
   cursor: pointer;
 }
-.item-lista-coluna .btn-remover-item { width: auto; align-self: flex-end; padding: 4px 10px; font-size: 0.72rem; }
+.item-lista-coluna > .btn-remover-item { width: auto; align-self: flex-end; padding: 4px 10px; font-size: 0.72rem; }
 .btn-remover-item:hover { border-color: #dc2626; color: #dc2626; }
 
 .btn-add-item {

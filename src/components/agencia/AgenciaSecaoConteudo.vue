@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch, onBeforeUnmount } from 'vue'
+import { computed, reactive, ref, watch, onBeforeUnmount } from 'vue'
 import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
 import FaqComponent from '@/components/home/FaqComponent.vue'
 import { iniciaisDe } from '@/utils/iniciais'
@@ -26,6 +26,7 @@ const faqsFormatados = computed(() =>
 
 // Lightbox da galeria para ver cada foto inteira (sem o recorte quadrado 1:1)
 const indiceLightbox = ref(null)
+const fotosEquipeErro = reactive({})
 const galeriaLista = computed(() => props.agencia.galeria || [])
 const fotoLightbox = computed(() =>
   indiceLightbox.value !== null ? galeriaLista.value[indiceLightbox.value] ?? null : null
@@ -158,7 +159,16 @@ function videoEmbedUrl(url) {
     <h2 class="gb-heading">Quem cuida do<br />seu intercâmbio</h2>
     <div class="equipe-grid reveal-grid">
       <div v-for="(membro, i) in conteudo.equipe.membros" :key="i" class="equipe-card">
-        <div class="equipe-avatar" aria-hidden="true">{{ iniciaisDe(membro.nome) }}</div>
+        <div class="equipe-avatar">
+          <img
+            v-if="sanitizarUrl(membro.foto) && !fotosEquipeErro[i]"
+            :src="sanitizarUrl(membro.foto)"
+            :alt="membro.nome"
+            loading="lazy"
+            @error="fotosEquipeErro[i] = true"
+          />
+          <span v-else aria-hidden="true">{{ iniciaisDe(membro.nome) }}</span>
+        </div>
         <strong>{{ membro.nome }}</strong>
         <span>{{ membro.cargo }}</span>
       </div>
@@ -420,9 +430,10 @@ function videoEmbedUrl(url) {
   gap: 6px;
 }
 .equipe-avatar {
-  width: 56px;
-  height: 56px;
+  width: 68px;
+  height: 68px;
   border-radius: 50%;
+  overflow: hidden;
   background: linear-gradient(135deg, var(--gb-magenta), var(--gb-purple-deep));
   color: #fff;
   display: flex;
@@ -432,6 +443,12 @@ function videoEmbedUrl(url) {
   font-weight: 800;
   font-size: 18px;
   margin-bottom: 6px;
+}
+.equipe-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 .equipe-card strong { font-size: 0.92rem; color: var(--gb-dark); }
 .equipe-card span { font-size: 0.8rem; color: var(--gb-ink-faint); }
