@@ -1,5 +1,5 @@
 import { reactive } from 'vue'
-import { supabase } from '@/services/supabase'
+import { onAuthChange } from '@/services/http'
 import { getContaAtual } from '@/services/api'
 
 const estado = reactive({
@@ -75,12 +75,11 @@ export function resetarConta() {
   estado.carregado = false
 }
 
-// Mantém o estado sincronizado com qualquer login/logout/refresh do Supabase Auth
-supabase.auth.onAuthStateChange((event) => {
+onAuthChange((event) => {
   if (event === 'SIGNED_OUT') {
     limparDados()
     estado.carregado = true
-  } else if (event === 'SIGNED_IN' || event === 'USER_UPDATED' || event === 'TOKEN_REFRESHED') {
+  } else if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
     carregarConta(true)
   }
 })

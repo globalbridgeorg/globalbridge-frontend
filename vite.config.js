@@ -89,6 +89,16 @@ export default defineConfig(() => {
 
     server: {
       port: 5173,
+      proxy: {
+        '/api': {
+          target: 'http://127.0.0.1:8000',
+          changeOrigin: true,
+        },
+        '/media': {
+          target: 'http://127.0.0.1:8000',
+          changeOrigin: true,
+        },
+      },
     },
 
     preview: {
@@ -105,7 +115,6 @@ export default defineConfig(() => {
         output: {
           manualChunks: {
             'globe': ['globe.gl', 'd3', 'topojson-client'],
-            'supabase': ['@supabase/supabase-js'],
             'vendor': ['vue', 'vue-router'],
           },
         },

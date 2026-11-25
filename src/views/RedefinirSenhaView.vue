@@ -1,15 +1,17 @@
 <script setup>
 import { ref, watch, nextTick, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import gsap from 'gsap'
-import { supabase } from '@/services/supabase'
-import { atualizarSenha } from '@/services/api'
+import { redefinirSenhaComToken } from '@/services/api'
 import { prefersReducedMotion } from '@/composables/usePageTransition'
 
+const route = useRoute()
 const router = useRouter()
 const viewRef = ref(null)
 let ctx
 
+const uid = ref('')
+const token = ref('')
 const verificando = ref(true)
 const linkValido = ref(false)
 const novaSenha = ref('')
@@ -17,8 +19,6 @@ const confirmarSenha = ref('')
 const loading = ref(false)
 const erro = ref('')
 const sucesso = ref(false)
-
-let subscription = null
 
 function animar() {
   if (prefersReducedMotion() || !viewRef.value) return
@@ -41,25 +41,15 @@ watch([verificando, sucesso], async () => {
 })
 
 onMounted(async () => {
-  const { data } = supabase.auth.onAuthStateChange((event, session) => {
-    if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session)) {
-      linkValido.value = true
-      verificando.value = false
-    }
-  })
-  subscription = data.subscription
-
-  const { data: { session } } = await supabase.auth.getSession()
-  if (session) {
-    linkValido.value = true
-  }
+  uid.value = String(route.query.uid || '').trim()
+  token.value = String(route.query.token || '').trim()
+  linkValido.value = Boolean(uid.value && token.value)
   verificando.value = false
   await nextTick()
   animar()
 })
 
 onUnmounted(() => {
-  subscription?.unsubscribe()
   ctx?.revert()
 })
 
@@ -70,11 +60,11 @@ async function redefinir() {
 
   loading.value = true
   try {
-    await atualizarSenha(novaSenha.value)
+    await redefinirSenhaComToken({ uid: uid.value, token: token.value, novaSenha: novaSenha.value })
     sucesso.value = true
     setTimeout(() => router.push({ name: 'login' }), 2500)
-  } catch {
-    erro.value = 'Não foi possível redefinir a senha. Peça um novo link se este tiver expirado.'
+  } catch (e) {
+    erro.value = e?.message || 'Não foi possível redefinir a senha. Peça um novo link se este tiver expirado.'
   } finally {
     loading.value = false
   }

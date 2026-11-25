@@ -106,7 +106,7 @@ async function enviar() {
   } catch (e) {
     console.error('Erro ao enviar solicitação:', e)
     const msg = String(e?.message || '').toLowerCase()
-    if (msg.includes('already registered') || msg.includes('already exists')) {
+    if (msg.includes('already registered') || msg.includes('already exists') || msg.includes('já está em uso')) {
       erro.value = 'Esse e-mail já está cadastrado. Use outro e-mail institucional ou faça login.'
     } else {
       erro.value = traduzirErroAuth(e, 'Não conseguimos enviar seu pedido agora. Tente novamente em instantes.')
