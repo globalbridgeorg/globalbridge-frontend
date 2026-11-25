@@ -90,7 +90,7 @@ async function handleRegister() {
     successMessage.value = `Enviamos um código de confirmação para ${registerData.email.trim().toLowerCase()}.`
   } catch (err) {
     const msg = String(err?.message || '').toLowerCase()
-    if (msg.includes('already registered') || msg.includes('already exists')) {
+    if (msg.includes('already registered') || msg.includes('already exists') || msg.includes('já está em uso')) {
       step.value = 1
       setError('register.email', 'Este e-mail já está em uso.')
     } else if (ehRateLimitAuth(err)) {
