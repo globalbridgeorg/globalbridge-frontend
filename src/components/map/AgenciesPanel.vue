@@ -97,6 +97,7 @@ const brokenCovers = reactive({})
   padding: 16px;
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
   gap: 6px;
   overflow: hidden;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
