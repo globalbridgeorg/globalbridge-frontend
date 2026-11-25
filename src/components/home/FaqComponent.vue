@@ -3,6 +3,7 @@ import SectionEyebrow from '@/components/common/SectionEyebrow.vue'
 import { ref, onMounted, onBeforeUnmount } from "vue"
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { prefersReducedMotion } from '@/composables/usePageTransition'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -57,6 +58,7 @@ const listRef = ref(null)
 let ctx
 
 onMounted(() => {
+  if (prefersReducedMotion() || !listRef.value) return
   ctx = gsap.context(() => {
     gsap.from('.faq-item', {
       opacity: 0,
