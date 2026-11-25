@@ -96,7 +96,7 @@ async function confirmarCodigo() {
       <div class="mode-toggle-thumb" :class="{ right: loginMode === 'agencia' }"></div>
       <button type="button" class="mode-opt" :class="{ active: loginMode === 'estudante' }" @click="loginMode = 'estudante'">Sou estudante</button>
       <button type="button" class="mode-opt" :class="{ active: loginMode === 'agencia' }" @click="loginMode = 'agencia'">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V8l6-4v16"/><path d="M10 20V10l8 3v7"/><path d="M3 20h18"/></svg>
+        <i class="fi fi-rr-building" aria-hidden="true"></i>
         Sou agência
       </button>
     </div>

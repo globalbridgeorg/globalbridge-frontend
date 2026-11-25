@@ -46,14 +46,14 @@ export const TAGS = {
 // normalizarConteudo), exceto "galeria" — essa usa upload de arquivo de
 // verdade (agencia.galeria), não texto.
 export const SECOES_ADICIONAIS = [
-  { tipo: 'galeria', icone: 'M4 5h16v14H4z M4 15l4-4 3 3 5-6 4 5' },
-  { tipo: 'video', icone: 'M8 5v14l11-7z' },
-  { tipo: 'equipe', icone: 'M9 7a3 3 0 100 6 3 3 0 000-6z M2 21a7 7 0 0114 0 M17 7a3 3 0 100 6 3 3 0 000-6z M16 21a7 7 0 00-4.3-13.6' },
-  { tipo: 'certificacoes', icone: 'M12 3l2.9 6.3 6.9.9-5 4.9 1.2 6.9L12 17.8l-6 3.2 1.2-6.9-5-4.9 6.9-.9z' },
-  { tipo: 'faq', icone: 'M12 21a9 9 0 100-18 9 9 0 000 18z M9.5 9a2.5 2.5 0 015 0c0 1.5-2.5 2-2.5 3.5 M12 17h.01' },
-  { tipo: 'localizacao', icone: 'M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z' },
-  { tipo: 'redes_sociais', icone: 'M3 3h18v18H3z M12 12a4 4 0 100 8 4 4 0 000-8z M17.2 6.8h.01' },
-  { tipo: 'contato_whatsapp', icone: 'M3 5a2 2 0 012-2h2l2 5-2.5 1.5a11 11 0 005 5L13 12l5 2v2a2 2 0 01-2 2A15 15 0 013 5z' },
+  { tipo: 'galeria', icone: 'fi-rr-picture' },
+  { tipo: 'video', icone: 'fi-rr-play-circle' },
+  { tipo: 'equipe', icone: 'fi-rr-users-alt' },
+  { tipo: 'certificacoes', icone: 'fi-rr-badge-check' },
+  { tipo: 'faq', icone: 'fi-rr-interrogation' },
+  { tipo: 'localizacao', icone: 'fi-rr-marker' },
+  { tipo: 'redes_sociais', icone: 'fi-rr-share' },
+  { tipo: 'contato_whatsapp', icone: 'fi-brands-whatsapp' },
 ]
 
 export function normalizarConteudo(raw) {

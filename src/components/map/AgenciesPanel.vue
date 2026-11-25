@@ -55,10 +55,7 @@ const brokenCovers = reactive({})
         <p class="agency-desc">{{ agency.description }}</p>
         <div class="agency-footer">
           <span class="agency-location">
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
-              <path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6C3.5 9.5 8 14.5 8 14.5C8 14.5 12.5 9.5 12.5 6C12.5 3.5 10.5 1.5 8 1.5Z" stroke="#757067" stroke-width="1.3" />
-              <circle cx="8" cy="6" r="1.6" stroke="#757067" stroke-width="1.3" />
-            </svg>
+            <i class="fi fi-rr-marker" aria-hidden="true"></i>
             {{ agency.location }}
           </span>
           <router-link :to="{ name: 'agencia', params: { id: agency.id } }" class="agency-btn">Acessar</router-link>

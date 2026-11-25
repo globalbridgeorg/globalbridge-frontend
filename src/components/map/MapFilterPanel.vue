@@ -29,7 +29,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
        (ver media query no <style>), onde o painel vira um overlay que desliza
        por cima do globo em vez de uma coluna fixa ao lado. -->
   <button :aria-expanded="!panelCollapsed" class="mobile-filter-toggle" @click="panelCollapsed = !panelCollapsed" :aria-label="panelCollapsed ? 'Abrir filtros' : 'Fechar filtros'">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#17111A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16" /><path d="M7 12h10" /><path d="M10 18h4" /></svg>
+    <i class="fi fi-rr-bars-filter" aria-hidden="true"></i>
     <span>Filtros</span>
     <span v-if="totalActiveFilters > 0" class="badge">{{ totalActiveFilters }}</span>
   </button>
@@ -37,9 +37,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
 
   <aside class="filter-panel" :class="{ collapsed: panelCollapsed }">
     <button class="collapse-btn" :aria-expanded="!panelCollapsed" @click="panelCollapsed = !panelCollapsed" :aria-label="panelCollapsed ? 'Expandir filtros' : 'Recolher filtros'">
-      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" :style="{ transform: panelCollapsed ? 'rotate(180deg)' : 'none' }">
-        <path d="M10 3L5 8L10 13" stroke="#17111A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-      </svg>
+      <i class="fi fi-rr-angle-small-left" :style="{ transform: panelCollapsed ? 'rotate(180deg)' : 'none' }" aria-hidden="true"></i>
     </button>
     <div class="panel-inner" data-lenis-prevent :inert="panelCollapsed">
       <div class="panel-heading">
@@ -57,9 +55,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
         >
           <span class="section-label">{{ section.label }}</span>
           <span class="section-count" v-if="activeFilters[section.id]?.length">{{ activeFilters[section.id].length }}</span>
-          <svg class="section-arrow" :class="{ open: openSections[section.id] }" width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path d="M4 6L8 10L12 6" stroke="#757067" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
+          <i class="fi fi-rr-angle-small-down section-arrow" :class="{ open: openSections[section.id] }" aria-hidden="true"></i>
         </button>
         <div :id="`filtro-opcoes-${section.id}`" class="section-options" :class="{ open: openSections[section.id] }">
           <button
@@ -72,9 +68,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
             @click="emit('toggle-filter', section.id, opt.value)"
           >
             <span class="option-check" aria-hidden="true">
-              <svg v-if="activeFilters[section.id]?.includes(opt.value)" width="10" height="10" viewBox="0 0 12 12" fill="none">
-                <path d="M2 6L4.8 8.8L10 3" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
+              <i v-if="activeFilters[section.id]?.includes(opt.value)" class="fi fi-rr-check option-check-icon"></i>
             </span>
             <span class="option-text">{{ opt.label }}</span>
             <span class="option-count" v-if="opt.count">{{ opt.count }}</span>
@@ -120,7 +114,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
   z-index: 101;
 }
 .collapse-btn:hover { background: var(--gb-cream); }
-.collapse-btn svg { transition: transform 0.25s ease; }
+.collapse-btn .fi { font-size: 16px; color: var(--gb-dark); transition: transform 0.25s ease; }
 .panel-inner {
   padding: 8px 16px 16px;
   overflow-y: auto;
@@ -163,6 +157,8 @@ onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
 }
 .section-arrow {
   flex-shrink: 0;
+  font-size: 14px;
+  color: var(--gb-ink-faint);
   transition: transform 0.25s;
 }
 .section-arrow.open { transform: rotate(180deg); }
@@ -201,6 +197,10 @@ onBeforeUnmount(() => window.removeEventListener('keydown', fecharComEsc))
 .option-item.active .option-check {
   background: var(--gb-magenta);
   border-color: transparent;
+}
+.option-check-icon {
+  font-size: 9px;
+  color: #fff;
 }
 .option-text {
   flex: 1;

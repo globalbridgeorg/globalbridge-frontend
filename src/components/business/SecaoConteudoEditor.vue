@@ -67,7 +67,7 @@ function removerItem(tipoBloco, campo, index) {
         <input type="text" v-model="membro.nome" placeholder="Nome" class="campo-input" :aria-label="`Nome da pessoa ${i + 1} da equipe`">
         <input type="text" v-model="membro.cargo" placeholder="Cargo" class="campo-input" :aria-label="`Cargo da pessoa ${i + 1} da equipe`">
         <button class="btn-remover-item" @click="removerItem('equipe', 'membros', i)" :aria-label="`Remover ${membro.nome || 'esta pessoa'} da equipe`">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M6 18L18 6"/></svg>
+          <i class="fi fi-rr-cross-small" aria-hidden="true"></i>
         </button>
       </div>
       <input type="url" v-model="membro.foto" placeholder="URL da foto (opcional, https://...)" class="campo-input" :aria-label="`Foto da pessoa ${i + 1} da equipe`">
@@ -81,7 +81,7 @@ function removerItem(tipoBloco, campo, index) {
       <input type="text" v-model="item.nome" placeholder="Nome (ex: British Council)" class="campo-input" :aria-label="`Nome da certificação ${i + 1}`">
       <input type="text" v-model="item.descricao" placeholder="Descrição curta" class="campo-input" :aria-label="`Descrição da certificação ${i + 1}`">
       <button class="btn-remover-item" @click="removerItem('certificacoes', 'itens', i)" :aria-label="`Remover ${item.nome || 'esta certificação'}`">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M6 18L18 6"/></svg>
+        <i class="fi fi-rr-cross-small" aria-hidden="true"></i>
       </button>
     </div>
     <button class="btn-add-item" @click="adicionarItem('certificacoes', 'itens', { nome: '', descricao: '' })">+ Adicionar certificação</button>

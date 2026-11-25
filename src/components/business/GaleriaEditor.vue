@@ -51,12 +51,12 @@ async function removerFotoGaleria(img) {
     <div class="galeria-grid">
       <div v-for="img in galeria" :key="img.id" class="galeria-slot filled" :style="{ backgroundImage: `url(${img.url})` }">
         <button type="button" class="galeria-remover" @click="removerFotoGaleria(img)" aria-label="Remover esta foto da galeria">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M6 18L18 6"/></svg>
+          <i class="fi fi-rr-cross-small" aria-hidden="true"></i>
         </button>
       </div>
       <label class="galeria-slot vazio">
         <input type="file" accept="image/*" @change="adicionarFotoGaleria" :disabled="enviandoGaleria" class="sr-only-input" aria-label="Adicionar foto à galeria">
-        <svg v-if="!enviandoGaleria" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        <i v-if="!enviandoGaleria" class="fi fi-rr-plus" aria-hidden="true"></i>
         <span v-else style="font-size: 0.7rem;">Enviando...</span>
       </label>
     </div>

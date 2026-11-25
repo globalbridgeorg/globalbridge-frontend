@@ -83,10 +83,7 @@ watch(() => props.initialPreview, (value) => {
       />
 
       <div v-else class="foto-placeholder">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M4 8.5C4 7.67 4.67 7 5.5 7h2.4l1-1.6c.3-.5.85-.8 1.44-.8h3.32c.59 0 1.14.3 1.44.8l1 1.6h2.4c.83 0 1.5.67 1.5 1.5v9c0 .83-.67 1.5-1.5 1.5h-13C4.67 19 4 18.33 4 17.5v-9Z" />
-          <circle cx="12" cy="13" r="3.2" />
-        </svg>
+        <i class="fi fi-rr-camera" aria-hidden="true"></i>
         <span>Adicionar foto</span>
       </div>
 
@@ -194,10 +191,9 @@ watch(() => props.initialPreview, (value) => {
   color: var(--gb-magenta);
 }
 
-.foto-placeholder svg {
-  width: 26px;
-  height: 26px;
-  stroke: currentColor;
+.foto-placeholder .fi {
+  font-size: 24px;
+  color: currentColor;
 }
 
 .foto-placeholder span {

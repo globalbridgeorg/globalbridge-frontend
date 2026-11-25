@@ -85,9 +85,7 @@ onBeforeUnmount(() => {
 
     <div class="cards-row">
       <div class="card card-pink" ref="cardPinkRef">
-        <svg class="quote-icon" viewBox="0 0 32 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M0 24V14.4C0 9.87 1.28 6.24 3.84 3.5C6.4 0.9 9.6 0 13.44 0V4.8C10.88 4.8 8.96 5.6 7.68 7.2C6.4 8.66 5.76 10.75 5.76 13.44H13.44V24H0ZM18.56 24V14.4C18.56 9.87 19.84 6.24 22.4 3.5C24.96 0.9 28.16 0 32 0V4.8C29.44 4.8 27.52 5.6 26.24 7.2C24.96 8.66 24.32 10.75 24.32 13.44H32V24H18.56Z" fill="#42023C"/>
-        </svg>
+        <i class="fi fi-sr-quote-right quote-icon" aria-hidden="true"></i>
         <p class="quote-text">
           Planos de intercâmbio intensivo com ensino universitário
           <em>“Study &amp; Work”</em>, <em>“Au Pair”</em> e residência garantida.
@@ -128,9 +126,7 @@ onBeforeUnmount(() => {
         <ul class="opcoes-list">
           <li v-for="(opcao, i) in opcoes" :key="opcao" :ref="el => (listItemRefs[i] = el)">
             <span>{{ opcao }}</span>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M4 12L12 4M12 4H5M12 4V11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <i class="fi fi-rr-arrow-up-right" aria-hidden="true"></i>
           </li>
         </ul>
 
@@ -177,8 +173,8 @@ onBeforeUnmount(() => {
 }
 
 .quote-icon {
-  width: 32px;
-  height: 24px;
+  font-size: 26px;
+  color: #42023C;
   margin-bottom: 20px;
 }
 
@@ -313,8 +309,9 @@ onBeforeUnmount(() => {
   border-bottom: 1px solid var(--gb-purple-deep-18);
 }
 
-.opcoes-list li svg {
+.opcoes-list li .fi {
   color: var(--gb-magenta);
+  font-size: 15px;
   flex-shrink: 0;
 }
 

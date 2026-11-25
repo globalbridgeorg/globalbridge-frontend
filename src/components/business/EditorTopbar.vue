@@ -26,7 +26,7 @@ const { logout } = useAuth()
       <span aria-live="polite">
         <Transition name="toast">
           <span v-if="salvo" class="msg-salvo">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+            <i class="fi fi-rr-check" aria-hidden="true"></i>
             Publicado!
           </span>
         </Transition>

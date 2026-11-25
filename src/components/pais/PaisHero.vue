@@ -39,9 +39,7 @@ function handleFavoritar() {
           :aria-label="favoritado ? 'Remover dos favoritos' : 'Salvar nos favoritos'"
           @click="handleFavoritar"
         >
-          <svg ref="favIcon" width="18" height="18" viewBox="0 0 24 24" :fill="favoritado ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="fav-icon">
-            <path d="M12 21s-7.5-4.6-10-9.1C.5 8.2 2.3 4.5 6 4c2.1-.3 3.9.9 6 3 2.1-2.1 3.9-3.3 6-3 3.7.5 5.5 4.2 4 7.9-2.5 4.5-10 9.1-10 9.1z" />
-          </svg>
+          <i ref="favIcon" class="fi fav-icon" :class="favoritado ? 'fi-sr-heart' : 'fi-rr-heart'" aria-hidden="true"></i>
         </button>
       </div>
     </div>
@@ -120,7 +118,7 @@ function handleFavoritar() {
 }
 
 .fav-icon {
-  display: block;
+  font-size: 16px;
 }
 
 .fav-icon.pulso {

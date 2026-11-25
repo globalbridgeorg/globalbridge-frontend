@@ -259,7 +259,7 @@ onBeforeUnmount(() => {
               <div class="agency-title-row">
                 <h1>{{ agencia.nome }}</h1>
                 <span class="badge-verificada">
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+                  <i class="fi fi-rr-check" aria-hidden="true"></i>
                   Verificada
                 </span>
                 <span v-if="painel.ranking" class="badge-ranking">
@@ -307,11 +307,11 @@ onBeforeUnmount(() => {
               @click="selecionarSecao(aba.key)"
             >
               <div class="side-icon" aria-hidden="true">
-                <svg v-if="aba.key === 'resumo'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
-                <svg v-else-if="aba.key === 'dados'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V8l6-4v16"/><path d="M10 20V10l8 3v7"/><path d="M3 20h18"/></svg>
-                <svg v-else-if="aba.key === 'programas'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
-                <svg v-else-if="aba.key === 'paises'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
-                <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 4v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V7l7-4z"/></svg>
+                <i v-if="aba.key === 'resumo'" class="fi fi-rr-apps"></i>
+                <i v-else-if="aba.key === 'dados'" class="fi fi-rr-building"></i>
+                <i v-else-if="aba.key === 'programas'" class="fi fi-rr-list"></i>
+                <i v-else-if="aba.key === 'paises'" class="fi fi-rr-globe"></i>
+                <i v-else class="fi fi-rr-shield-check"></i>
               </div>
               <div class="side-text">
                 <span class="side-label">{{ aba.label }}</span>
@@ -320,7 +320,7 @@ onBeforeUnmount(() => {
             </button>
 
             <button type="button" class="side-logout" @click="logout">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+              <i class="fi fi-rr-sign-out-alt" aria-hidden="true"></i>
               Sair da conta
             </button>
           </nav>
@@ -347,7 +347,7 @@ onBeforeUnmount(() => {
                 <h2 class="card-titulo" style="margin-bottom: 10px;">Atividade de favoritos</h2>
                 <div v-if="!painel.favoritos_recentes.length" class="vazio-pequeno">Ainda sem favoritos.</div>
                 <div v-for="(fav, i) in painel.favoritos_recentes" :key="i" class="linha-favorito">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="var(--gb-magenta)" stroke="var(--gb-magenta)" stroke-width="1" aria-hidden="true"><path d="M12 21s-7.5-4.6-10-9.3C.4 8.1 2.3 4.5 6 4c2-.3 3.7.7 6 3 2.3-2.3 4-3.3 6-3 3.7.5 5.6 4.1 4 7.7C19.5 16.4 12 21 12 21z"/></svg>
+                  <i class="fi fi-sr-heart fav-heart-icon" aria-hidden="true"></i>
                   <span class="favorito-texto">{{ fav.nome }} favoritou sua agência</span>
                   <span class="favorito-quando">{{ tempoRelativo(fav.quando) }}</span>
                 </div>
@@ -638,9 +638,13 @@ onBeforeUnmount(() => {
   flex-shrink: 0;
 }
 
-.side-icon svg {
-  width: 18px;
-  height: 18px;
+.side-icon .fi {
+  font-size: 17px;
+}
+
+.fav-heart-icon {
+  font-size: 14px;
+  color: var(--gb-magenta);
 }
 
 .side-item.active .side-icon {

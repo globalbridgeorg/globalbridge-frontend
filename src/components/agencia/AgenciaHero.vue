@@ -61,7 +61,7 @@ const estrelas = computed(() => {
           <span class="rating-num on-banner">{{ agencia.nota_media.toFixed(1) }} · {{ agencia.total_avaliacoes }} avaliaç{{ agencia.total_avaliacoes === 1 ? 'ão' : 'ões' }}</span>
         </span>
         <span v-if="agencia.cidade" class="location-row on-banner">
-          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6C3.5 9.5 8 14.5 8 14.5C8 14.5 12.5 9.5 12.5 6C12.5 3.5 10.5 1.5 8 1.5Z" stroke="#fff" stroke-width="1.3"/><circle cx="8" cy="6" r="1.6" stroke="#fff" stroke-width="1.3"/></svg>
+          <i class="fi fi-rr-marker location-icon" aria-hidden="true"></i>
           {{ agencia.cidade }}<template v-if="agencia.pais">, {{ agencia.pais }}</template>
         </span>
       </div>
@@ -70,7 +70,7 @@ const estrelas = computed(() => {
         <a v-if="agencia.contato" :href="`mailto:${agencia.contato}`" class="btn-primary-lg">Falar com a agência</a>
         <a v-if="siteSeguro" :href="siteSeguro" target="_blank" rel="noopener noreferrer" class="btn-outline-lg btn-outline-on-banner">Visitar site</a>
         <button type="button" class="fav-btn fav-btn-on-banner" :class="{ active: favoritado }" :aria-pressed="estaLogado ? favoritado : undefined" :aria-label="!estaLogado ? 'Faça login para salvar nos favoritos' : (favoritado ? 'Remover dos favoritos' : 'Salvar nos favoritos')" @click="handleFavoritar">
-          <svg width="18" height="18" viewBox="0 0 24 24" :fill="favoritado ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="fav-icon"><path d="M12 21s-7.5-4.6-10-9.1C.5 8.2 2.3 4.5 6 4c2.1-.3 3.9.9 6 3 2.1-2.1 3.9-3.3 6-3 3.7.5 5.5 4.2 4 7.9-2.5 4.5-10 9.1-10 9.1z" /></svg>
+          <i class="fi fav-icon" :class="favoritado ? 'fi-sr-heart' : 'fi-rr-heart'" aria-hidden="true"></i>
         </button>
       </div>
     </div>
@@ -96,7 +96,7 @@ const estrelas = computed(() => {
           <span class="rating-num">{{ agencia.nota_media.toFixed(1) }} · {{ agencia.total_avaliacoes }} avaliaç{{ agencia.total_avaliacoes === 1 ? 'ão' : 'ões' }}</span>
         </span>
         <span v-if="agencia.cidade" class="location-row">
-          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6C3.5 9.5 8 14.5 8 14.5C8 14.5 12.5 9.5 12.5 6C12.5 3.5 10.5 1.5 8 1.5Z" stroke="#757067" stroke-width="1.3"/><circle cx="8" cy="6" r="1.6" stroke="#757067" stroke-width="1.3"/></svg>
+          <i class="fi fi-rr-marker location-icon" aria-hidden="true"></i>
           {{ agencia.cidade }}<template v-if="agencia.pais">, {{ agencia.pais }}</template>
         </span>
       </div>
@@ -114,9 +114,7 @@ const estrelas = computed(() => {
         :aria-label="!estaLogado ? 'Faça login para salvar nos favoritos' : (favoritado ? 'Remover dos favoritos' : 'Salvar nos favoritos')"
         @click="handleFavoritar"
       >
-        <svg width="18" height="18" viewBox="0 0 24 24" :fill="favoritado ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="fav-icon">
-          <path d="M12 21s-7.5-4.6-10-9.1C.5 8.2 2.3 4.5 6 4c2.1-.3 3.9.9 6 3 2.1-2.1 3.9-3.3 6-3 3.7.5 5.5 4.2 4 7.9-2.5 4.5-10 9.1-10 9.1z" />
-        </svg>
+        <i class="fi fav-icon" :class="favoritado ? 'fi-sr-heart' : 'fi-rr-heart'" aria-hidden="true"></i>
       </button>
     </div>
   </section>
@@ -322,7 +320,11 @@ const estrelas = computed(() => {
 }
 
 .fav-icon {
-  display: block;
+  font-size: 16px;
+}
+
+.location-icon {
+  font-size: 13px;
 }
 
 .fav-icon.pulso {

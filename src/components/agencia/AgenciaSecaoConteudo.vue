@@ -113,7 +113,7 @@ function videoEmbedUrl(url) {
           @click.self="fecharLightbox"
         >
           <button type="button" class="lightbox-btn lightbox-close" aria-label="Fechar foto" @click="fecharLightbox">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            <i class="fi fi-rr-cross-small" aria-hidden="true"></i>
           </button>
 
           <button
@@ -123,7 +123,7 @@ function videoEmbedUrl(url) {
             aria-label="Foto anterior"
             @click="navegarLightbox(-1)"
           >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            <i class="fi fi-rr-angle-left" aria-hidden="true"></i>
           </button>
 
           <div class="lightbox-stage" @click.self="fecharLightbox">
@@ -138,7 +138,7 @@ function videoEmbedUrl(url) {
             aria-label="Próxima foto"
             @click="navegarLightbox(1)"
           >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+            <i class="fi fi-rr-angle-right" aria-hidden="true"></i>
           </button>
         </div>
       </Transition>
@@ -180,7 +180,7 @@ function videoEmbedUrl(url) {
     <h2 class="gb-heading">Reconhecimento<br />no setor</h2>
     <div class="certificacoes-grid reveal-grid">
       <div v-for="(item, i) in conteudo.certificacoes.itens" :key="i" class="certificacao-card">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 3l2.9 6.3 6.9.9-5 4.9 1.2 6.9L12 17.8l-6 3.2 1.2-6.9-5-4.9 6.9-.9z"/></svg>
+        <i class="fi fi-rr-badge-check cert-icon" aria-hidden="true"></i>
         <strong>{{ item.nome }}</strong>
         <span v-if="item.descricao">{{ item.descricao }}</span>
       </div>
@@ -205,11 +205,11 @@ function videoEmbedUrl(url) {
     <SectionEyebrow label="Redes sociais" />
     <h2 class="gb-heading">Acompanhe<br />de perto</h2>
     <div class="redes-links">
-      <a v-if="sanitizarUrl(conteudo.redes_sociais.instagram)" :href="sanitizarUrl(conteudo.redes_sociais.instagram)" target="_blank" rel="noopener noreferrer">Instagram</a>
-      <a v-if="sanitizarUrl(conteudo.redes_sociais.facebook)" :href="sanitizarUrl(conteudo.redes_sociais.facebook)" target="_blank" rel="noopener noreferrer">Facebook</a>
-      <a v-if="sanitizarUrl(conteudo.redes_sociais.tiktok)" :href="sanitizarUrl(conteudo.redes_sociais.tiktok)" target="_blank" rel="noopener noreferrer">TikTok</a>
-      <a v-if="sanitizarUrl(conteudo.redes_sociais.linkedin)" :href="sanitizarUrl(conteudo.redes_sociais.linkedin)" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-      <a v-if="sanitizarUrl(conteudo.redes_sociais.youtube)" :href="sanitizarUrl(conteudo.redes_sociais.youtube)" target="_blank" rel="noopener noreferrer">YouTube</a>
+      <a v-if="sanitizarUrl(conteudo.redes_sociais.instagram)" :href="sanitizarUrl(conteudo.redes_sociais.instagram)" target="_blank" rel="noopener noreferrer"><i class="fi fi-brands-instagram" aria-hidden="true"></i> Instagram</a>
+      <a v-if="sanitizarUrl(conteudo.redes_sociais.facebook)" :href="sanitizarUrl(conteudo.redes_sociais.facebook)" target="_blank" rel="noopener noreferrer"><i class="fi fi-brands-facebook" aria-hidden="true"></i> Facebook</a>
+      <a v-if="sanitizarUrl(conteudo.redes_sociais.tiktok)" :href="sanitizarUrl(conteudo.redes_sociais.tiktok)" target="_blank" rel="noopener noreferrer"><i class="fi fi-brands-tik-tok" aria-hidden="true"></i> TikTok</a>
+      <a v-if="sanitizarUrl(conteudo.redes_sociais.linkedin)" :href="sanitizarUrl(conteudo.redes_sociais.linkedin)" target="_blank" rel="noopener noreferrer"><i class="fi fi-brands-linkedin" aria-hidden="true"></i> LinkedIn</a>
+      <a v-if="sanitizarUrl(conteudo.redes_sociais.youtube)" :href="sanitizarUrl(conteudo.redes_sociais.youtube)" target="_blank" rel="noopener noreferrer"><i class="fi fi-brands-youtube" aria-hidden="true"></i> YouTube</a>
     </div>
   </section>
 
@@ -217,7 +217,7 @@ function videoEmbedUrl(url) {
     <SectionEyebrow label="Fale conosco" />
     <h2 class="gb-heading">Tire suas dúvidas<br />na hora</h2>
     <a :href="linkWhatsapp(conteudo.contato_whatsapp.numero, conteudo.contato_whatsapp.mensagem)" target="_blank" rel="noopener" class="btn-whatsapp">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.39 1.26 4.81L2 22l5.42-1.36a9.86 9.86 0 004.62 1.14h.01c5.46 0 9.9-4.45 9.9-9.91C21.96 6.45 17.5 2 12.04 2zm0 17.9a8.06 8.06 0 01-4.1-1.12l-.29-.17-3.05.78.81-2.97-.19-.3a7.94 7.94 0 01-1.22-4.21c0-4.4 3.58-7.98 7.99-7.98a7.94 7.94 0 015.65 2.34 7.9 7.9 0 012.34 5.64c0 4.41-3.58 7.99-7.94 7.99zm4.38-5.98c-.24-.12-1.43-.7-1.65-.79-.22-.08-.38-.12-.54.12-.16.24-.62.79-.76.95-.14.16-.28.18-.52.06-.24-.12-1.01-.37-1.92-1.18-.71-.63-1.19-1.41-1.33-1.65-.14-.24-.01-.37.1-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.31-.74-1.79-.19-.47-.39-.4-.54-.41-.14-.01-.3-.01-.46-.01-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.69 2.58 4.09 3.62.57.25 1.02.4 1.37.51.58.18 1.1.16 1.52.1.46-.07 1.43-.58 1.63-1.15.2-.57.2-1.05.14-1.15-.06-.1-.22-.16-.46-.28z"/></svg>
+      <i class="fi fi-brands-whatsapp" aria-hidden="true"></i>
       Conversar no WhatsApp
     </a>
   </section>
@@ -468,6 +468,9 @@ function videoEmbedUrl(url) {
   gap: 6px;
   color: var(--gb-magenta);
 }
+.cert-icon {
+  font-size: 20px;
+}
 .certificacao-card strong { color: var(--gb-dark); font-size: 0.92rem; }
 .certificacao-card span { color: var(--gb-ink-faint); font-size: 0.82rem; }
 
@@ -487,14 +490,22 @@ function videoEmbedUrl(url) {
   flex-wrap: wrap;
 }
 .redes-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   border: 1px solid var(--gb-purple-deep-16);
   border-radius: 20px;
   padding: 10px 18px;
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--gb-dark);
+  text-decoration: none;
 }
 .redes-links a:hover { border-color: var(--gb-magenta); color: var(--gb-magenta); }
+
+.btn-whatsapp .fi {
+  font-size: 18px;
+}
 
 .btn-whatsapp {
   display: inline-flex;

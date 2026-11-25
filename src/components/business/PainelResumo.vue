@@ -53,8 +53,8 @@ function destinoDoItem(texto) {
       </div>
       <div class="completude-barra"><div class="completude-preenchido" :style="{ width: painel.completude.percentual + '%' }"></div></div>
       <div v-for="item in painel.completude.itens" :key="item.texto" class="completude-item">
-        <svg v-if="item.feito" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--gb-green)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
-        <svg v-else width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--gb-purple-deep-16)" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="9"/></svg>
+        <i v-if="item.feito" class="fi fi-sr-check-circle completude-ok" aria-hidden="true"></i>
+        <i v-else class="fi fi-rr-circle completude-pendente" aria-hidden="true"></i>
         <span v-if="item.feito">{{ item.texto }}</span>
         <button v-else type="button" class="completude-link" @click="emit('ir-para', destinoDoItem(item.texto))">
           {{ item.texto }} →
@@ -85,6 +85,8 @@ function destinoDoItem(texto) {
 .completude-barra { height: 8px; background: var(--gb-cream); border-radius: 6px; overflow: hidden; margin-bottom: 14px; }
 .completude-preenchido { height: 100%; background: var(--gb-magenta); border-radius: 6px; }
 .completude-item { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 0.83rem; color: var(--gb-dark); }
+.completude-ok { color: var(--gb-green); font-size: 15px; }
+.completude-pendente { color: var(--gb-purple-deep-16); font-size: 15px; }
 .completude-link {
   background: none;
   border: none;

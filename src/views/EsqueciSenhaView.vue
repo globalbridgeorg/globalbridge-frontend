@@ -70,7 +70,7 @@ onBeforeUnmount(() => ctx?.revert())
 
     <template v-else>
       <div class="icone-ok">
-        <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.5 2.5 5-5"/></svg>
+        <i class="fi fi-rr-check-circle" aria-hidden="true"></i>
       </div>
       <h1 class="gb-heading">Confere<br />seu e-mail</h1>
       <p class="desc">Se {{ email }} tiver uma conta na GlobalBridge, você vai receber um link pra redefinir a senha em instantes.</p>
@@ -118,6 +118,7 @@ onBeforeUnmount(() => ctx?.revert())
   margin: 8px auto 20px;
   background: rgba(61, 154, 75, 0.12);
   color: var(--gb-green);
+  font-size: 34px;
 }
 
 .form-group { text-align: left; margin-bottom: 20px; }

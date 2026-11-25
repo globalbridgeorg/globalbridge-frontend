@@ -70,9 +70,7 @@ onBeforeUnmount(() => {
           <header class="help-modal-header">
             <h2 class="help-modal-title">{{ title }}</h2>
             <button type="button" class="help-modal-close" aria-label="Fechar" @click="fechar">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M3 3L13 13M13 3L3 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
-              </svg>
+              <i class="fi fi-rr-cross-small" aria-hidden="true"></i>
             </button>
           </header>
 

@@ -103,9 +103,7 @@ onBeforeUnmount(() => {
         <span class="checklist-label">Documentos</span>
         <ul>
           <li v-for="doc in documentos" :key="doc" class="doc-item">
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M3 8.5L6.2 11.5L13 4.5" stroke="var(--gb-accent-light)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <i class="fi fi-rr-check doc-check" aria-hidden="true"></i>
             <span>{{ doc }}</span>
           </li>
         </ul>
@@ -225,8 +223,9 @@ onBeforeUnmount(() => {
   color: rgba(255, 255, 255, 0.9);
 }
 
-.checklist li svg {
-  flex-shrink: 0;
+.checklist li .doc-check {
+  color: var(--gb-accent-light);
+  font-size: 13px;
   margin-top: 3px;
 }
 

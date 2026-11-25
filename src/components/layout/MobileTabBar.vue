@@ -52,10 +52,10 @@ const ativa = (aba) => {
       :aria-current="ativa(aba) ? 'page' : undefined"
     >
       <span class="icon" aria-hidden="true">
-        <svg v-if="aba.label === 'Início'" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5" /><path d="M5.5 9.5V20h13V9.5" /></svg>
-        <svg v-else-if="aba.label === 'Destinos'" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M3 9h18" /><path d="M9 9v11" /></svg>
-        <svg v-else-if="aba.label === 'Meu destino'" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" /><path d="M3 12h18" /><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18" /></svg>
-        <svg v-else width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6" /><path d="M4.5 20a7.5 7.5 0 0 1 15 0" /></svg>
+        <i v-if="aba.label === 'Início'" class="fi fi-rr-home"></i>
+        <i v-else-if="aba.label === 'Destinos'" class="fi fi-rr-map"></i>
+        <i v-else-if="aba.label === 'Meu destino'" class="fi fi-rr-globe"></i>
+        <i v-else class="fi fi-rr-user"></i>
       </span>
       <span class="label">{{ aba.label }}</span>
     </router-link>
@@ -97,6 +97,7 @@ const ativa = (aba) => {
 
   .icon {
     display: flex;
+    font-size: 20px;
   }
 
   .label {

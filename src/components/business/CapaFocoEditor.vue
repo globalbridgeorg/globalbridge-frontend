@@ -87,7 +87,7 @@ async function trocarCapa(event) {
     <p v-if="agencia.imagem_capa_url" class="foco-dica">Arraste o ponto (ou use as setas do teclado, com o quadro focado) pra escolher o que fica visível quando a tela cortar a imagem.</p>
     <label class="dropzone">
       <input type="file" accept="image/*" @change="trocarCapa" :disabled="enviandoCapa" class="sr-only-input" aria-label="Enviar imagem de capa">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gb-magenta)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/><path d="M4 19h16"/></svg>
+      <i class="fi fi-rr-cloud-upload dropzone-icon" aria-hidden="true"></i>
       <span>{{ enviandoCapa ? 'Enviando...' : (agencia.imagem_capa_url ? 'Trocar imagem' : 'Enviar imagem') }} — JPG ou PNG, até 5MB</span>
     </label>
   </div>
@@ -98,6 +98,11 @@ async function trocarCapa(event) {
 .dropzone:focus-within {
   outline: 2px solid var(--gb-magenta);
   outline-offset: 2px;
+}
+
+.dropzone-icon {
+  font-size: 18px;
+  color: var(--gb-magenta);
 }
 
 .foco-preview:focus-visible {
